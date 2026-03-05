@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Backtest</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Portfolio Backtest</h1>
+        <button class="btn btn-primary" onclick="openModal()">+ 新建回测</button>
+    </header>
+
+    <div id="list"></div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal">
+        <h2>新建回测</h2>
+        <form id="createForm" onsubmit="return handleCreate(event)">
+            <div class="form-group">
+                <label>名称</label>
+                <input name="name" required placeholder="2024Q1 多策略组合">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>初始资金</label>
+                    <input name="initial_cash" type="number" value="100000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>基准标的</label>
+                    <input name="benchmark_ticker" placeholder="SPY (可选)">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>滑点 %</label>
+                    <input name="slippage_pct" type="number" value="0" step="0.001">
+                </div>
+                <div class="form-group">
+                    <label>手续费 %</label>
+                    <input name="commission_pct" type="number" value="0" step="0.001">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>最低手续费 ($)</label>
+                    <input name="commission_min" type="number" value="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>每股手续费 ($)</label>
+                    <input name="commission_per_share" type="number" value="0" step="0.001">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>做空保证金比例</label>
+                    <input name="short_margin_rate" type="number" value="1.5" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>借券年费率 %</label>
+                    <input name="short_borrow_rate_annual" type="number" value="0" step="0.01">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>单标的最大仓位 %</label>
+                    <input name="max_position_pct" type="number" value="100" step="1">
+                </div>
+                <div class="form-group checkbox-group" style="align-self: end; padding-bottom: 8px;">
+                    <input type="checkbox" name="short_enabled" checked>
+                    <label style="margin: 0;">允许做空</label>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn btn-primary">创建</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+function openModal() { $('#createModal').classList.add('active'); }
+function closeModal() { $('#createModal').classList.remove('active'); }
+
+async function handleCreate(e) {
+    e.preventDefault();
+    const f = e.target;
+    const data = {
+        name: f.name.value,
+        initial_cash: +f.initial_cash.value,
+        slippage_pct: +f.slippage_pct.value,
+        commission_pct: +f.commission_pct.value,
+        commission_min: +f.commission_min.value,
+        commission_per_share: +f.commission_per_share.value,
+        short_enabled: f.short_enabled.checked,
+        short_margin_rate: +f.short_margin_rate.value,
+        short_borrow_rate_annual: +f.short_borrow_rate_annual.value,
+        max_position_pct: +f.max_position_pct.value / 100,
+        benchmark_ticker: f.benchmark_ticker.value || null,
+    };
+    try {
+        const bt = await api('/backtest', { method: 'POST', body: JSON.stringify(data) });
+        closeModal();
+        toast('回测已创建');
+        loadList();
+    } catch (err) {
+        toast(err.message);
+    }
+}
+
+async function finishBacktest(id) {
+    if (!confirm('确定结束此回测？未平仓持仓将被强制平仓。')) return;
+    try {
+        await api(`/backtest/${id}/finish`, { method: 'POST', body: '{}' });
+        toast('回测已结束');
+        loadList();
+    } catch (err) { toast(err.message); }
+}
+
+async function deleteBacktest(id) {
+    if (!confirm('确定删除此回测？所有数据将被清除。')) return;
+    try {
+        await api(`/backtest/${id}`, { method: 'DELETE' });
+        toast('已删除');
+        loadList();
+    } catch (err) { toast(err.message); }
+}
+
+async function loadList() {
+    const list = await api('/backtest');
+    const el = $('#list');
+    if (!list.length) {
+        el.innerHTML = '<div class="empty">暂无回测记录，点击右上角创建</div>';
+        return;
+    }
+    el.innerHTML = `<table>
+        <thead><tr>
+            <th>名称</th><th>状态</th><th>Bar 数</th><th>订单数</th><th>标的</th><th>创建时间</th><th>操作</th>
+        </tr></thead>
+        <tbody>${list.map(bt => `<tr>
+            <td><a href="/backtest/${esc(bt.id)}/view">${esc(bt.name)}</a></td>
+            <td><span class="badge badge-${esc(bt.status)}">${esc(bt.status)}</span></td>
+            <td>${esc(bt.bar_count)}</td>
+            <td>${esc(bt.trade_count)}</td>
+            <td>${esc(bt.tickers.join(', ')) || '-'}</td>
+            <td>${formatDate(bt.created_at)}</td>
+            <td>
+                ${bt.status === 'running'
+                    ? `<button class="btn btn-sm btn-ghost" onclick="finishBacktest('${esc(bt.id)}')">结束</button>`
+                    : `<a class="btn btn-sm btn-ghost" href="/backtest/${esc(bt.id)}/report/view">报告</a>`}
+                <button class="btn btn-sm btn-danger" onclick="deleteBacktest('${esc(bt.id)}')">删除</button>
+            </td>
+        </tr>`).join('')}</tbody></table>`;
+}
+
+loadList();
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回测详情</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-link">&larr; 返回列表</a>
+    <div id="detail"></div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+const btId = getBacktestId();
+
+async function finishBacktest() {
+    if (!confirm('确定结束此回测？未平仓持仓将被强制平仓。')) return;
+    try {
+        await api(`/backtest/${btId}/finish`, { method: 'POST', body: '{}' });
+        toast('回测已结束');
+        loadDetail();
+    } catch (err) { toast(err.message); }
+}
+
+async function loadDetail() {
+    const [bt, trades] = await Promise.all([
+        api(`/backtest/${btId}`),
+        api(`/backtest/${btId}/trades`),
+    ]);
+
+    const el = $('#detail');
+    el.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h2>${esc(bt.name)}</h2>
+                <span class="badge badge-${esc(bt.status)}">${esc(bt.status)}</span>
+            </div>
+
+            <div class="webhook-url">
+                <span>Webhook URL:</span>
+                <code id="webhookUrl">${webhookUrl(bt.id)}</code>
+                <button class="btn btn-sm btn-ghost" onclick="copyUrl()">复制</button>
+            </div>
+
+            <div class="info-row">
+                <span>初始资金: <strong>$${esc(bt.initial_cash.toLocaleString())}</strong></span>
+                <span>滑点: <strong>${esc(bt.slippage_pct)}%</strong></span>
+                <span>手续费: <strong>${esc(bt.commission_pct)}%</strong></span>
+                <span>做空: <strong>${bt.short_enabled ? '允许' : '禁止'}</strong></span>
+                ${bt.benchmark_ticker ? `<span>基准: <strong>${esc(bt.benchmark_ticker)}</strong></span>` : ''}
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Bar 数</div>
+                    <div class="stat-value">${esc(bt.bar_count)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">订单数</div>
+                    <div class="stat-value">${esc(bt.trade_count)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">标的</div>
+                    <div class="stat-value" style="font-size:14px">${esc(bt.tickers.join(', ')) || '-'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">策略</div>
+                    <div class="stat-value" style="font-size:14px">${esc(bt.strategies.join(', ')) || '-'}</div>
+                </div>
+            </div>
+
+            ${bt.status === 'running' ? `
+                <div style="text-align:right">
+                    <button class="btn btn-primary" onclick="finishBacktest()">结束回测</button>
+                </div>
+            ` : `
+                <div style="text-align:right">
+                    <a class="btn btn-primary" href="/backtest/${esc(bt.id)}/report/view">查看报告</a>
+                </div>
+            `}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>最近订单</h2>
+            </div>
+            <div class="trade-list">
+                ${trades.length === 0 ? '<div class="empty">暂无订单</div>' :
+                    trades.slice(0, 50).map(t => `
+                        <div class="trade-item">
+                            <span class="trade-time">${esc(new Date(t.timestamp).toLocaleTimeString())}</span>
+                            <span class="trade-strategy">${esc(t.strategy)}</span>
+                            <span class="trade-action ${esc(t.action)}">${esc(t.action.toUpperCase())}</span>
+                            <span>${esc(t.ticker)}</span>
+                            <span>${esc(t.quantity)}股</span>
+                            <span>@${esc(t.price)}</span>
+                        </div>
+                    `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function copyUrl() {
+    navigator.clipboard.writeText($('#webhookUrl').textContent);
+    toast('已复制');
+}
+
+loadDetail();
+</script>
+</body>
+</html>

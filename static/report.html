@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回测报告</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-link">&larr; 返回列表</a>
+
+    <div id="metrics"></div>
+
+    <div class="card" style="margin-top: 16px;">
+        <div class="card-header">
+            <h2>详细报告</h2>
+            <a id="fullReportLink" class="btn btn-sm btn-ghost" target="_blank">在新窗口打开完整报告</a>
+        </div>
+        <iframe id="reportFrame" style="width:100%; height:800px; border:none; background:#fff; border-radius:6px;"></iframe>
+    </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+const btId = getBacktestId();
+
+function fmtVal(v, suffix = '') {
+    if (v === null || v === undefined) return '-';
+    return v + suffix;
+}
+
+function valClass(v) {
+    if (v === null || v === undefined) return '';
+    return v > 0 ? 'positive' : v < 0 ? 'negative' : '';
+}
+
+async function loadReport() {
+    const [bt, metrics] = await Promise.all([
+        api(`/backtest/${btId}`),
+        api(`/backtest/${btId}/metrics`),
+    ]);
+
+    $('#metrics').innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h2>${esc(bt.name)} — 回测报告</h2>
+                <span class="badge badge-${esc(bt.status)}">${esc(bt.status)}</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">总收益</div>
+                    <div class="stat-value ${valClass(metrics.total_return)}">
+                        $${metrics.total_return.toLocaleString()}
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">总收益率</div>
+                    <div class="stat-value ${valClass(metrics.total_return_pct)}">
+                        ${fmtVal(metrics.total_return_pct, '%')}
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">年化收益</div>
+                    <div class="stat-value ${valClass(metrics.annualized_return_pct)}">
+                        ${fmtVal(metrics.annualized_return_pct, '%')}
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">夏普率</div>
+                    <div class="stat-value">${fmtVal(metrics.sharpe_ratio)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Sortino</div>
+                    <div class="stat-value">${fmtVal(metrics.sortino_ratio)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">最大回撤</div>
+                    <div class="stat-value negative">${fmtVal(metrics.max_drawdown_pct, '%')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">胜率</div>
+                    <div class="stat-value">${fmtVal(metrics.win_rate, '%')}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">盈亏比</div>
+                    <div class="stat-value">${fmtVal(metrics.profit_factor)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">总交易数</div>
+                    <div class="stat-value">${metrics.total_trades}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">盈利 / 亏损</div>
+                    <div class="stat-value">
+                        <span class="positive">${metrics.winning_trades}</span> /
+                        <span class="negative">${metrics.losing_trades}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Load quantstats report in iframe
+    const reportUrl = `/api/backtest/${btId}/report`;
+    $('#reportFrame').src = reportUrl;
+    $('#fullReportLink').href = reportUrl;
+}
+
+loadReport();
+</script>
+</body>
+</html>
