@@ -1,0 +1,269 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{日内黄金分割反转(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{Ret}_{10:00\text{-to-close}} = \sum_{t=1}^{20} \ln \left( \frac{\mathrm{Close}_t}{\mathrm{Price}_t^{10:00}} \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Close}_t \) 和 \( \mathrm{Price}_t^{10:00} \) 分别为 \( t \) 交易日的收盘价和早盘 10 点的价格。
+\end{itemize}
+
+\subsection{说明}
+10:00 的成交价更能反映出当日开盘时投资者的心理预期和价格水平，是理想的黄金分割时点，由此计算的反转因子表现要优于日内收益和日度收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱定豪. 2020. 昼夜分离：隔夜跳空与日内反转选股因子. 华安证券.
+\end{enumerate}
+
+\section{时间网络相对中心度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+
+
+计算股票 \( i \) 在 \( t \) 时刻截面上相对于样本股票池的平均收益的偏离程度：
+\begin{equation}
+    z_{i,t} = \frac{r_{i,t} - \hat{r}_{m,t}}{\sigma_{m,t}}
+\end{equation}
+
+计算过去 20 个交易日股票 \( i \) 对其他股票收益的偏离程度的平均值：
+\begin{equation}
+    \bar{z}_{i,t} = \sqrt{\frac{1}{\Delta t} \sum_{\tau=1}^{\Delta t} z_{i,t-\tau}^2}
+\end{equation}
+
+计算时间维度的网络相对中心度：
+\begin{equation}
+    \mathrm{TCC}_{i,t} = \frac{1}{\bar{z}_{i,t}^2}
+\end{equation}
+
+\subsection{说明}
+TCC 因子衡量了股票的网络位置随着时间推移的稳定性，因子值越高，说明过去时间段内股票 \( i \) 对网络中其它股票的收益偏离程度越小，股票在网络中的位置越稳定。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张自力, 闫红蕾, 张楠. 2020. 股票网络、系统性风险与股票定价. 经济学, 1, 329-350.
+    \item 曹春晓, 杨国平. 2021. 股票网络与网络中心度因子研究. 华西证券.
+\end{enumerate}
+
+\section{“孤雁出群”因子（高频因子-量价相关性类）}
+
+\subsection{因子定义}
+
+
+1. 对于交易日 \( t \)，计算每只股票的分钟收益率：\( t \) 分钟收盘价 / \( t-1 \) 分钟收盘价 - 1；
+
+2. 计算“分钟市场分化度”，即每一分钟所有股票的分钟收益率的标准差；
+
+3. 计算这一天所有“分钟市场分化度”的均值，找到那些“分钟市场分化度”小于均值的时刻，记为 \( t \) 日的“不分化时刻”；
+
+4. 取市场上所有股票在当日“不分化时刻”的成交额序列，然后分别计算每只股票的分钟成交额序列与其余股票分钟成交额序列的 Pearson 相关系数；
+
+5. 对上述的相关系数取绝对值，然后分别计算每只股票与其余股票的相关系数绝对值的均值，即为“日孤雁出群”因子；
+
+6. 每月末，分别计算过去 20 个交易日“日孤雁出群”因子的均值和标准差，并将二者等权合成，即为“孤雁出群”因子。
+
+\subsection{说明}
+“孤雁出群”因子衡量了个股在市场分化不明显时，其成交额与市场趋势的关联性，与未来收益负相关；当市场分化不明显缺乏热点时，相关系数越小的股票，其成交额走出了独立趋势，更有可能在酝酿新的热点。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 个股成交额的市场跟随性与“水中行舟”因子, 2023, 方正证券.
+\end{enumerate}
+
+\section{卖盘深度（高频因子-流动性类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ask\_depth} = \sum \left| \frac{\mathrm{av}_i \times \mathrm{mid_{price}}}{\mathrm{a}_i - \mathrm{last_{mid}}+ \epsilon} \right| 
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 使用五档卖单与当下时刻中间价的价差的倒数对卖单的数量进行加权得到卖盘深度；
+    \item ② 当单边所有卖单档位为空时，令市场深度为0；
+    \item ③ 可对上述因子日内序列求均值得到日度因子值，再进行20个交易日指数移动平均得到月度因子值。
+\end{itemize}
+
+\subsection{说明}
+卖盘深度统计了卖单的挂单量情况，反映了卖单盘口深度，五档卖单中，对报价离中间价越远的卖单的卖量给予越小的权重；与未来收益负相关，因子取值越大，挂单量越多，盘口深度越大，流动性越高。也可对日内该因子序列求标准差，衡量其在当日均匀程度，与流动性负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 胡骏等. 2021. 高频视角下的微观流动性与波动性. 中金公司.
+\end{enumerate}
+
+\section{CSSD 模型(行为金融因子-羊群效应)}
+
+\subsection{因子定义}
+利用个股收益 \( r_i \) 和市场收益 \( r_m \)，计算股票收益的横截面标准差：
+\begin{equation}
+    \mathrm{CSSD} = \sqrt{\frac{\sum_{i=1}^N (r_i - r_m)^2}{N-1}}
+\end{equation}
+
+以 \(\mathrm{CSSD}\) 为 \( y \)，以 \( D_t^u \)（市场收益高于计算收益阈值时取值为 1，否则取值为 0）和 \( D_t^d \)（市场收益低于计算收益阈值时取值为 1，否则取值为 0）为 \( x \)，进行如下时序回归：
+\begin{equation}
+    \mathrm{CSSD} = \alpha + \beta_1 D_t^u + \beta_2 D_t^d + \varepsilon
+\end{equation}
+
+\subsection{说明}
+CSSD 模型对羊群效应的检验主要基于时序回归上市场极端收益项前回归系数正负及显著性；当 \( \beta_1 \) 或 \( \beta_2 \) 显著小于 0 时，说明市场极端上涨或下跌时，CSSD 取值明显下降，投资者的投资行为越来越一致，市场上羊群效应越明显。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Christie, W. G., and Huang, R. D. (1995). \textit{Following the Pied Piper: Do Individual Returns Herd around the Market?}. Financial Analysts Journal, 51(4), 31–37.
+\end{enumerate}
+
+\section{修正的振幅（高频因子-波动跳跃类）}
+
+\subsection{因子定义}
+
+
+对股票 \( i \)，计算 \( n \) 日的日跳跌度和日度振幅：
+\begin{equation}
+    t \text{ 分钟跳跌度} = (t \text{ 分钟单复利差}) \times 2 - (t \text{ 分钟连续复利收益率})^2
+\end{equation}
+\begin{equation}
+    \text{日度振幅} = \frac{\text{当日最高价} - \text{当日最低价}}{\text{上一日收盘价}}
+\end{equation}
+
+每日计算日跳跌度因子的横截面均值，将日跳跌度小于横截面均值的股票的振幅做修正：即将其这一天的振幅取相反数，其余股票振幅取值不变，由此得到“翻转振幅”因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 日跳跌度因子为日内所有分钟跳跌度序列的均值，具体计算逻辑见相关日历页；
+    \item ② 每月末对过去 20 天的“翻转振幅”求均值，即得到“修正振幅因子”；
+    \item ③ 也可用日频量价数据计算日间跳跌度，利用日间跳跌度对振幅做相同逻辑的修正。
+\end{itemize}
+
+\subsection{说明}
+修正振幅因子利用股票日跳跌度对传统振幅的变化过程做了区分：那些未发生跳跃或跳跌程度较小的股票，可能并未吸引到博彩偏好型投资者，股价也未过度反应，可对这些时刻的振幅做反向修正，增强其低波动异象的属性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 个股股价跳跃及其对振幅因子的改进, 2022, 方正证券.
+    \item Jiang, G. J., \& Oomen, R. C. A. (2008). \textit{Testing for jumps when asset prices are observed with noise - a "swap variance" approach}. Journal of Econometrics, 144(2), 352-370.
+\end{enumerate}
+
+\section{高频已实现峰度（高频因子-收益分布类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{Rkurt}_i = \frac{N \sum_{j=1}^N (r_{ij} - \bar{r}_i)^4}{\mathrm{RVar}_i^2}
+\end{equation}
+\begin{equation}
+    \mathrm{RVar}_i = \sum_{j=1}^N (r_{ij} - \bar{r}_i)^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{ij} \) 为股票 \( i \) 的 1 分钟对数收益率序列或 5 分钟对数收益率序列；
+    \item ② \( N \) 表示个股在交易日 \( t \) 中特定频率的分钟级别数据个数；
+    \item ③ 在任意选股时刻，因子值为前几日指标的均值，如月度选股，计算因子值时使用的是股票过去 20 个交易日的均值。
+\end{itemize}
+
+\subsection{说明}
+股票日内的价格形态分布特征对于股票未来收益具有一定预测作用，高频收益峰度就是刻画日内价格形态的特征之一；高频峰度因子通常与股票未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2017. 高频因子之股票收益分布特征. 海通证券.
+    \item Amaya, D., Christoffersen, P., Jacobs, K., and Vasquez, A. (2016). \textit{Does Realized Skewness Predict the Cross-Section of Equity Returns?}. Journal of Financial Economics, 118, 135-167.
+\end{enumerate}
+
+\section{上游传导动量（图谱网络-动量溢出）}
+
+\subsection{因子定义}
+计算上游公司 B 与下游公司 A 间每一对上下游产品 \( j \to i \) 间的关联度，并取最大值作为两个公司最终的关联度：
+\begin{equation}
+    \mathrm{wgt}_{(B,j),(A,i),t} = \frac{(\mathrm{prdIncome}_{B,j,t} + \mathrm{prdIncome}_{A,i,t}) \times \mathbf{1}\{j \to i\}}{\sum_i \mathrm{prdIncome}_{A,i,t} + \sum_j \mathrm{prdIncome}_{B,j,t}}
+\end{equation}
+
+对下游公司 A，以产业链关联度为权重加权其所有上游公司的月度收益率，即为上游传导动量因子：
+\begin{equation}
+    \mathrm{upstream\_Moment}_{A,t} = \frac{\sum_{A \neq B} \mathrm{wgt}_{A,B,t} \times \mathrm{rtn}_{B,t}}{\sum_{A \neq B} \mathrm{wgt}_{A,B,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{prdIncome}_{A,i,t} \) 为公司 A 在产品 i 上的营业收入；
+    \item ② \( \sum_i \mathrm{prdIncome}_{A,i,t} \) 为公司 A 的当期总营收；
+    \item ③ \( \mathbf{1}\{j \to i\} \) 表示产品 j 为产品 i 的上游；
+    \item ④ \( \mathrm{rtn}_{B,t} \) 为公司 B 在 t 时刻的月度收益率；
+    \item ⑤ 可以将上游传导动量因子对月度收益率做正交化，剥离月度反转效应。
+\end{itemize}
+
+\subsection{说明}
+上游传导动量因子值越大，表示公司 A 作为下游企业时，位于其产业链上游的高关联度高集群公司在考察月份涨幅相对较高，公司 A 接下来也会有上涨的可能。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑兆磊.2023.产业链视角下的Alpha传导研究.兴业证券
+\end{enumerate}
+
+\section{知情主买占比（高级因子-资金流类）}
+
+\subsection{因子定义}
+
+
+使用股票过去20个交易日的分钟逐笔成交数据进行如下时序回归，得到回归残差 \( \varepsilon_{i,j} \) 即为股票预期外收益：
+\begin{equation}
+    R_{i,T,j} = \gamma_0 + \sum_{k=1}^4 \gamma_{1,k} D_{T,k,j}^{\mathrm{weekday}} + \sum_{k=1}^3 \gamma_{2,k} D_{T,k,j}^{\mathrm{Period}} + \gamma_{3,1} R_{i,T,j-1} + \varepsilon_{i,j}
+\end{equation}
+
+将预期收益为正的分钟时刻的投资者主动卖出行为定义为知情主卖，对这些分钟时刻的主卖成交额求和得到知情主卖额，计算知情主卖占比：
+\begin{equation}
+    \text{知情主买占比} = \frac{1}{T} \sum_{n=t}^{t-T+1}  \frac{\sum_{j=9:30}^{14:56} \text{知情主买成交额}_{i,j,n} }{ \sum_{j=9:30}^{14:56} \text{成交额}_{i,j,n} }
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( R_{i,T,j} \) 为股票 \( i \) 在 \( T \) 日第 \( j \) 分钟的收益率，\( R_{i,T,j-1} \) 为收益滞后项；
+    \item ② \( D_{T,k,j}^{\mathrm{weekday}}, k=1,2,3,4 \) 为虚拟变量，表示星期一至星期四；
+    \item ③ \( D_{T,k,j}^{\mathrm{Period}}, k=1,2,3 \) 为时间段虚拟变量，表示开盘后 30 分钟、盘中时段、收盘前 30 分钟；
+    \item ④ 基于逐笔成交数据中的 BS 标志将逐笔成交数据合成为分钟级别的主动买卖金额，B 为主动买入，S 为主动卖出。
+\end{itemize}
+
+\subsection{说明}
+可以利用对知情交易的判断，将主买进行过滤，得到知情主买；测试发现，知情主买占比越高，股票未来收益越差，可能是因为知情交易下也存在过度反应的倾向。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林奇. 2020. 知情交易与主买主卖. 海通证券.
+\end{enumerate}
+
+\section{量涌波动率（高级因子-波动跳跌类）}
+
+\subsection{因子定义}
+
+a 采用二分法的思想，循环对每只股票按照成交量峰值时刻对时段进行划分（剔除开盘的10分钟）；若时段内包含至少3分钟，根据1分钟成交量的最大时刻（寻找最大时刻的时候不包括时段内第一分钟和最后一分钟）将时段划分为两个时段（最大时刻归为第一个时段）；若时段包含2分钟，划分为两个长度为1分钟的时段；若时段仅包含1分钟，不再进行划分；
+
+b 对每只股票计算步骤a中划分得到的每个小时段的收益率，并计算这些区间收益率的标准差，作为该股票当日因子值；
+
+c 高频因子低频化：计算步骤b中得到的日频因子标准化后，计算过去20天的标准差，记为“量涌波动率”因子。
+
+\subsection{说明}
+“量涌波动率”刻画不同交易情绪投资者对股票收益率的影响程度，波动率越小，说明不同情绪投资者对股票收益率的影响程度基本一致，更不容易出现过度反应现象，股票的“区段收益稳定性”更强，股票未来收益率更高；反之，股票的“区段收益稳定性”更弱，股票未来收益率更低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 叶尔乐. 2025. 日内“动量脉冲”与股价过度反应的精细刻画. 民生证券.
+\end{enumerate}
+\end{document}

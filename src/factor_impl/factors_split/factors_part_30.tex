@@ -1,0 +1,293 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{中间价变化率(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{MPC}_{t,k} = \frac{M_t - M_{t-k}}{M_{t-k}}, \quad M_t = \frac{P_t^B + P_t^A}{2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{MPC}_{t,k} \) 为从时刻 \( t-k \) 到时刻 \( t \) 中间价 \( M_t \) 的百分比变化率；
+    \item ② 市场中间价 \( M_t \) 为买一价和卖一价的平均值；
+    \item ③ \( M_{t-k} \) 为 \( k \) 分钟前的中间价，其中 \( k = 1, 5 \)；
+    \item ④ \( P_t^B \) 和 \( P_t^A \) 分别为 \( t \) 时刻的买一价和卖一价。
+\end{itemize}
+
+\subsection{说明}
+MPC 因子衡量了市场中间价的短期变动趋势，刻画了市场交易者的最新交易和挂单撤单行为；如当市场中间价上升时，可能出现了大量的主动买入交易，抬高了卖一价，或是有交易者以高于当前买一价的价格下了限价订单，抬高了买一价，这两种情况都反应了市场交易者对未来股价走势的乐观预期；MPC 与股票未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈升锐. 2021. 高频订单失衡及价差因子. 中信建投证券.
+\end{enumerate}
+
+\section{基于跳跃频率关联的点度中心性(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+
+1. 利用股票日内 5 分钟行情数据，计算跳跃统计量 \( \mathrm{JS} \)，识别出股价发生跳跃的分钟时刻，具体计算细节见相关日历页：
+\begin{equation}
+    \mathrm{JS} = N \frac{\hat{V}_{(0,1)}}{\sqrt{\hat{\Omega}_{\mathrm{SWV}}}} \left( 1 - \frac{\mathrm{RV}_N}{\mathrm{SwV}_N} \right) \sim N(0,1)
+\end{equation}
+
+2. 计算关联跳跃次数：如果股票 \( i \) 在 \( t \) 日发生跳跃，股票 \( j \) 在 \( t-1 \) 日至 \( t+1 \) 日内也发生了一次同向跳跃，则记为一次关联跳跃；
+
+3. 计算两只股票间的跳跃关联度，即在股票 \( i \) 所有的股价跳跃 \( \mathrm{jump\_num}_i \) 中关联跳跃 \( \mathrm{cojump\_num}_{i,j} \) 所占的比例：
+\begin{equation}
+    \mathrm{Corr}_{i,j} = \frac{\mathrm{cojump\_num}_{i,j}}{\mathrm{jump\_num}_i}
+\end{equation}
+
+4. 对网络做稀释处理，剔除整个网络中关联度最低的 50\% 的关联关系，统计每只股票与之直接相连的股票数量即为该股票的点度中心性值。
+
+\subsection{说明}
+具有相似属性的公司往往会受到类似的信息冲击，进而导致股价的同步跳跃。公司间股价跳跃的同步程度也可用于识别公司间的潜在关联程度；跳跃关联网络的点度中心性因子衡量了股票在整个网络中的重要性或影响程度，与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任晓, 刘凯, 杨航. 2025. 基于股价跳跃关联性的选股策略. 招商证券.
+    \item 任晓, 杨航. 2024. 如何识别股价跳跃. 招商证券.
+\end{enumerate}
+
+\section{正向日内逆转的异常频率(高频因子-收益分布类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{AB\_PR}_{i,t} = \frac{\mathrm{PR}_{i,t}}{\frac{1}{12} \sum_{k=0}^{11} \mathrm{PR}_{i,t-k}}
+\end{equation}
+\begin{equation}
+    \mathrm{PR}_{i,t} = \frac{\sum_{d=1}^{T} \mathrm{I}\{\mathrm{RET\_CO}_{i,d}<0\} \times \mathrm{I}\{\mathrm{RET\_OC}_{i,d}>0\}}{T}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RET\_CO}_{i,d} \) 和 \( \mathrm{RET\_OC}_{i,d} \) 分别为股票 \( i \) 在交易日 \( d \) 的隔夜收益率和日内收益率；
+    \item ② \( T \) 为股票 \( i \) 在 \( t \) 月内的实际交易天数。
+\end{itemize}
+
+\subsection{说明}
+当负的隔夜收益后伴随正的日内收益，即出现了正向日内逆转，通过统计月内出现正向日内逆转的频率，也可以衡量隔夜交易者和盘中交易者间“拉锯战”的强度；正向日内逆转的异常频率为当月正向日内逆转频率相对过去 12 个月的异常程度，考虑了“拉锯战”的持续性，取值越高，“拉锯战”强度增高，价格修正越过度。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cheema, M. A., Chiah, M., \& Man, Y. (2022). \textit{Overnight returns, daytime reversals, and future stock returns: Is China different?}. Pacific-Basin Finance Journal, 74, 101809.
+\end{enumerate}
+
+\section{一致交易(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+通过定义实体 K 线，将交易日中的每根 5 分钟 K 线划分为集体一致交易与非集体一致交易：
+\begin{equation}
+    |\mathrm{close} - \mathrm{open}| \leq \alpha |\mathrm{high} - \mathrm{low}|
+\end{equation}
+
+利用属于集体一致交易的 K 线成交量，计算一致交易类因子：
+\begin{equation}
+    \mathrm{TCV}_t = \frac{1}{d} \sum_{i=1}^{d} \left( \frac{\mathrm{ConsistentVolume}}{\mathrm{Volume}} \right)_{t-i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \alpha \) 为一致参数，\( \alpha \) 越大，K 线一致性越强（上下引线越短，K 线越实体）；
+    \item ② \( \mathrm{ConsistentVolume} \) 为 5 分钟实体 K 线的总成交量；
+    \item ③ \( \mathrm{Volume} \) 为当日总成交量；
+    \item ④ \( d \) 表示移动平均的周期参数。
+\end{itemize}
+
+\subsection{说明}
+集体一致交易行为预示交易机会，如果一支股票在一段时间内大部分的交易属于集体一致交易行为，趋势性显著，则很可能这支股票在这段时间内有新信息进入，正在经历市场消化过程（price-in），未来股价很可能产生大幅变化，为交易者创造交易机会。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 刘均伟. 2018. 一致交易因子:挖掘集体行为背后的收益. 光大证券.
+\end{enumerate}
+
+\section{已实现亏损比率(行为金融因子-处置效应)}
+
+\subsection{因子定义}
+
+1. 提取股票分钟级前复权收盘价、成交量，以及日频流通换手率数据，计算股票每日分钟级量价分布情况，其中 \( t \) 日股票 \( i \) 在每个价位的筹码峰计算公式如下：
+\begin{equation}
+    \mathrm{Chip}_{i,t,p} = \mathrm{Vol}_{i,t,p} \times T_{i,t} + \mathrm{Chip}_{i,t-1,p} \times (1 - T_{i,t})
+\end{equation}
+
+2. 基于 \( t \) 日换手和 \( t-1 \) 日筹码峰，计算当天换手的筹码的亏损总金额作为已实现亏损：
+\begin{equation}
+    \text{已实现亏损}_{i,t} = \sum_p \mathrm{abs}(\mathrm{Close}_{i,t} - \mathrm{Price}_{i,p}) \times (\mathrm{Chip}_{i,t-1,p} \times T_{i,t}) \times \mathrm{I}_{\mathrm{Close}_{i,t} < \mathrm{Price}_{i,p}}
+\end{equation}
+
+3. 基于 \( t \) 日筹码峰，计算当天收盘时所有亏损筹码的账面亏损金额作为账面亏损总金额：
+\begin{equation}
+    \text{账面亏损}_{i,t} = \sum_p \mathrm{abs}(\mathrm{Close}_{i,t} - \mathrm{Price}_{i,p}) \times \mathrm{Chip}_{i,t,p} \times \mathrm{I}_{\mathrm{Close}_{i,t} < \mathrm{Price}_{i,p}}
+\end{equation}
+
+4. 计算当日兑现的亏损占筹码总亏损的比例，即为已实现亏损比率 \( \mathrm{CPLR} \)：
+\begin{equation}
+    \mathrm{CPLR}_{i,t} = \frac{\text{已实现亏损}_{i,t}}{\text{已实现亏损}_{i,t} + \text{账面亏损}_{i,t}}
+\end{equation}
+
+\subsection{说明}
+已实现亏损比率衡量了投资者亏损时的卖出倾向；因子值越大，投资者越倾向于卖出亏损的股票；因子值越小，投资者越倾向于持有亏损的股票。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 处置效应与 V 型处置效应在量化选股中的应用. 中信建投.
+    \item Odean, T. (1998). \textit{Are investors reluctant to realize their losses?}. Journal of Finance, 53(5), 1775-1798.
+\end{enumerate}
+
+\section{量谷相对加权价格(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+1. 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划分为“喷发成交量”，低于 1 倍标准差划分为“温和成交量”；
+
+2. 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”。将“温和成交量”称为“量谷”。
+
+3. 计算如下因子的 20 日均值即为量谷相对加权价格因子：
+\begin{equation}
+    \text{量谷相对加权价格比} = \frac{\text{每日量谷的成交量加权价格}}{\text{同日总成交量加权价格}}
+\end{equation}
+
+\subsection{说明}
+“量谷”时点的交易情绪较为低迷，其价格过度反应可能性较低，因此其价格相对水平越高，个股未来表现越好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{开盘后净主买占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+
+\begin{equation}
+    \text{开盘后净主买占比} = \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j=1}^{N} \text{净主买成交额}_{i,j,n}}{\sum_{j=1}^{N} \text{成交额}_{i,j,n}}
+\end{equation}
+
+\begin{equation}
+    \text{净主买成交额}_{i,j,n} = \text{主动买入成交额}_{i,j,n} - \text{主动卖出成交额}_{i,j,n}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 基于逐笔成交数据中的 BS 标志将逐笔成交数据合成为分钟级别的主动买卖金额，B 为主动买入（卖出方先挂单，买入方主动触碰卖单并成交）；S 为主动卖出（买入方先挂单，卖出方主动触碰买单并成交）；
+    \item ② 剔除了处于涨跌停分钟上的主动买入金额和主动卖出金额数据；
+    \item ③ \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日内的第 \( j \) 分钟的成交额；
+    \item ④ 开盘后的净主买占比用的是 9:30-10:00 范围内的数据；
+    \item ⑤ 月度选股下，\( T=20 \) 个交易日；周度选股下，\( T=5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+刻画了投资者在开盘后 30 分钟内净买入行为的强度，开盘后净主买占比越高，投资者的主动买入行为越强烈。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2020. 基于主动买入行为的选股因子. 海通证券.
+    \item 冯佳睿等. 2020. 高频因子的现实与幻想. 海通证券.
+\end{enumerate}
+
+\section{筹码分布变异系数(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{coeff\_of\_var}_t = \frac{\mathrm{std}_t}{\mathrm{mean}_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 \( t \) 日的筹码分布共有 \( n \) 个价位（\( i = 1, 2, \ldots, n \)），\( \mathrm{vol}_{i,t} \) 为第 \( t \) 日 \( i \) 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格；
+    \item ② 筹码加权权重为 \( p_{i,t} = \dfrac{\mathrm{vol}_{i,t}}{\sum \mathrm{vol}_{i,t}} \)；
+    \item ③ \( \mathrm{mean}_t = \sum (\mathrm{price}_{i,t} \times p_{i,t}) \) 为筹码分布加权平均成本；
+    \item ④ \( \mathrm{std}_t = \sqrt{\sum (\mathrm{price}_{i,t} - \mathrm{mean}_t)^2 \times p_{i,t}} \) 为筹码成本加权标准差。
+\end{itemize}
+
+\subsection{说明}
+筹码分布是基于历史成交量与成交价格推算出的“流通股票持仓成本分布”，描述了不同时点、不同价位上市场投资者的持仓情况，是对投资者实际持仓成本情况的近似估计；筹码分布变异系数衡量了筹码分布的离散程度；经测试，筹码分布变异系数与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{平均日内正跳跌收益(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+① 利用股票日内 5 分钟行情数据，计算 Jiang and Oomen (2008) 中的跳跃统计量 \( \mathrm{JS} \)，识别出股价发生跳跃的分钟时刻，具体识别细节见研报：
+\begin{equation}
+    \mathrm{JS} = N \frac{\hat{V}_{(0,1)}}{\sqrt{\hat{\Omega}_{\mathrm{SWV}}}} \left( 1 - \frac{\mathrm{RV}_N}{\mathrm{SwV}_N} \right) \sim N(0,1)
+\end{equation}
+\begin{equation}
+    \mathrm{RV}_N = \sum_{k=1}^{N} r_k^2
+\end{equation}
+\begin{equation}
+    \mathrm{SwV}_N = 2 \sum_{k=1}^{N} (R_k - r_k)
+\end{equation}
+\begin{equation}
+    \hat{V}_{(0,1)} = \frac{1}{\mu_1^2} \sum_{k=1}^{N-1} |r_{k+1}| |r_k|
+\end{equation}
+\begin{equation}
+    \hat{\Omega}_{\mathrm{SWV}} = \frac{\mu_6}{9} \cdot \frac{N^3 \mu_1^{-6}}{N - 5} \sum_{k=0}^{N-6} \prod_{l=1}^{6} |r_{k+l}|
+\end{equation}
+\begin{equation}
+    \mu_p = 2^{p/2} \Gamma \left( \frac{p+1}{2} \right) / \sqrt{\pi}
+\end{equation}
+
+② 将所有发生价格跳跃且收益为正的时段的对数收益率累加即为当日的正跳跌收益因子值；
+
+③ 以 10 个交易日为半衰期，将过去 20 个交易日的日内正跳跌收益指数加权平均，即为最终的平均日内正跳跌收益因子。
+
+\subsection{说明}
+股价跳跃体现了投资者对信息冲击的集中反应；股价跳跃收益类因子通常呈反转特性，与股票未来收益负相关。即过去跳跃收益较高的股票未来收益较小。若股票当日出现正跳跌又出现负跳跌时，全部累积会导致正跳跌与负跳跌相互抵消，低估股票每日的跳跃，可分别累加正跳跌时刻收益作为正跳跌收益因子，同理也可得负跳跌收益因子。此外还可只统计隔夜跳跃收益得到隔夜跳跃收益因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任建, 杨帆. 2024. 如何识别股价跳跃. 招商证券.
+    \item Jiang, G. J., \& Oomen, R. C. A. (2008). \textit{Testing for jumps when asset prices are observed with noise—a “swap variance” approach}. Journal of Econometrics, 144(2), 352-370.
+    \item Jiang, G. J., \& Zhu, K. X. (2017). \textit{Information Shocks and Short-Term Market Underreaction}. Journal of Financial Economics, 124(1), 43-64.
+\end{enumerate}
+
+\section{累计跳跃绝对收益(高频因子-动量反转类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{JAR} = e^{\sum_{t=1}^{D} \{|r_t| \cdot I_{\mathrm{jump\_SwV}, t}}\} - 1
+\end{equation}
+\begin{equation}
+    I_{\mathrm{jump\_SwV}} = I(T_{\mathrm{SwV}} > \Phi^{-1}_{1-\alpha})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( I_{\mathrm{jump\_SwV}} \) 为表示日内价格是否存在跳跃的示性函数；
+    \item ② \( T_{\mathrm{SwV}} \) 为检验是否存在跳跃的检验统计量，具体计算逻辑见相关日历页；
+    \item ③ \( r_t \) 为日度对数收益率；
+    \item ④ 可以分开累计算发生跳跃时的正收益和负收益，也可以不对收益取绝对值。
+\end{itemize}
+
+\subsection{说明}
+累计跳跃收益类因子是对存在显著跳跃交易日的收益的累加值，衡量了股价对信息冲击的反应。投资者对信息冲击的反应程度，短期内通常反应不足，长期内通常反应过度，对利好信息冲击容易反应过度，对坏信息冲击容易反应不足。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jiang, G. J., \& Zhu, K. X. (2017). \textit{Information shocks and short-term market underreaction}. Journal of Financial Economics, 124(1), 43–64.
+    \item 周飞鹏, 罗军, 安守宁. 2022. 再谈股价跳跃因子. 广发证券.
+\end{enumerate}
+\end{document}

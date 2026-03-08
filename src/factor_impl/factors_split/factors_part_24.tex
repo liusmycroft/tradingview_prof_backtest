@@ -1,0 +1,289 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{新闻网络领先收益(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+以标题中股票为 lead，以同时出现在新闻正文中的其他股票为 follower，确定领边 \( l_{ij,T} \)，并构建股票共现图的邻接矩阵 \( W_T \)：
+\begin{equation}
+    l_{ij,T} \stackrel{\mathrm{def}}{=} \bigcup_{m_d \in D_T} \{(i,j)_{m_d} \mid j \text{ in } m_d \text{ title, } i \text{ in } m_d \text{ headline, } i \neq j\}
+\end{equation}
+\begin{equation}
+    W_T \stackrel{\mathrm{def}}{=} [\omega_{ij,T}]_{n \times n} = \left[ \frac{l_{ij,T}}{\sum_{j=1}^n l_{ij,T}} \right]_{n \times n}
+\end{equation}
+
+将邻接矩阵进行拆解 \( \omega_{ij,T}^{\omega} \)（同属一个行业的股票的邻接矩阵）和 \( \omega_{ij,T}^{\varepsilon} \)（不属于同一行业股票的邻接矩阵）：
+\begin{equation}
+    \omega_{ij,T}^{\omega} \stackrel{\mathrm{def}}{=} \mathbb{I}\{i,j \text{ from same sector}\} \cdot \omega_{ij,T}
+\end{equation}
+\begin{equation}
+    \omega_{ij,T}^{\varepsilon} \stackrel{\mathrm{def}}{=} \mathbb{I}\{i,j \text{ from diff sector}\} \cdot \omega_{ij,T}
+\end{equation}
+
+将 lead 股票的收益进行加权即得到属于 follower 股票的领先收益 lead return，可以根据 lead 股票的收益的正负，单独计算正（负）lead return：
+\begin{equation}
+    \mathcal{L}R_{i,t}^{+(-)} (\omega_{ij,t-l:t}) \stackrel{\mathrm{def}}{=} \sum_{j=1}^n \omega_{ij,t-l:t} \cdot |r_{j,t}^{+(-)}|
+\end{equation}
+
+由于非同一行业的 lead 股票收益有明显的反转效应，正 lead 股票收益的有明显的动量效应，也可以构建如下复合因子：
+\begin{equation}
+    \mathcal{L}R_{\mathrm{agg}} (\omega_{ij,t-365:t}) = \mathcal{L}R^{+} (\omega_{ij,t-365:t}^{\omega}) + \mathcal{L}R^{-} (\omega_{ij,t-365:t}^{\omega}) + \mathcal{L}R^{-} (\omega_{ij,t-365:t}^{\varepsilon}) - \mathcal{L}R^{+} (\omega_{ij,t-365:t}^{\varepsilon})
+\end{equation}
+
+\subsection{说明}
+对于新闻中的 lead 股票和 follower 股票，无论业务关系如何，他们之间的收益都具有较强的共振效应，lead 股票的收益率对 follower 股票的收益率有预测作用。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Hu, J., \& Härdle, W. (2021). \textit{Networks of news and cross-sectional returns}. IRTG 1792 Discussion Papers 2021-023, Humboldt University of Berlin, International Research Training Group 1792 "High Dimensional Nonstationary Time Series".
+\end{enumerate}
+
+\section{正向日内逆转的频率(高频因子-收益分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{PR}_{i,t} = \frac{\sum_{d=1}^{T} \mathrm{I}_{\{\mathrm{RET\_CO}_{i,d}<0\}} \times \mathrm{I}_{\{\mathrm{RET\_OC}_{i,d}>0\}}}{T}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RET\_CO}_{i,d} \) 和 \( \mathrm{RET\_OC}_{i,d} \) 分别为股票 \( i \) 在交易日 \( d \) 的隔夜收益率和日内收益率；
+    \item ② \( T \) 为股票 \( i \) 在 \( t \) 月内的实际交易天数。
+\end{itemize}
+
+\subsection{说明}
+当负的隔夜收益后伴随正的日内收益，即出现了正向日内逆转，通过统计月内出现正向日内逆转的频率，也可以衡量隔夜交易者和盘中交易者间“拉锯战”的强度；与未来收益负相关，正向日内逆转出现频率越高，导致日内价格被过度修正拉高，未来越有可能补跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cheema, M. A., Chiah, M., \& Man, Y. (2022). \textit{Overnight returns, daytime reversals, and future stock returns: Is China different?}. Pacific-Basin Finance Journal, 74, 101809.
+\end{enumerate}
+
+\section{成交量占比(高频因子-成交分布类)}
+
+\subsection{因子定义}
+开盘集合竞价成交量占比因子 \( \mathrm{OCVP} \)：
+\begin{equation}
+    \mathrm{OCVP}_t = \frac{1}{d} \sum_{i=1}^{d} \omega_{t-i}\left( \frac{\text{开盘集合竞价阶段成交量 } \mathrm{VOL}_{\mathrm{call}}}{\text{日内个股总成交量 } \mathrm{VOL}_{\mathrm{total}}} \right)_{t-i}
+\end{equation}
+
+收盘集合竞价成交量占比因子 \( \mathrm{BCVP} \)：
+\begin{equation}
+    \mathrm{BCVP}_t = \frac{1}{d} \sum_{i=1}^{d} \left( \frac{\text{收盘前5分钟内个股成交量 } \mathrm{VOL}_{\mathrm{call}}}{\text{日内个股总成交量 } \mathrm{VOL}_{\mathrm{total}}} \right)_{t-i}
+\end{equation}
+
+成交量占比复合因子：
+\begin{equation}
+    \mathrm{OBCVP}_t = \alpha \cdot \mathrm{OCVP}_t + (1 - \alpha) \cdot \mathrm{BCVP}_t
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( w_i \) 为开盘集合竞价期间不同时间点上的成交量加权权重，可以是等权，也可以是时间衰减权重；
+    \item ② \( \alpha \) 是两大成交量占比因子的复合权重。
+\end{itemize}
+
+\subsection{说明}
+集合竞价阶段是反映投资者行为信息的重要时点，集合竞价成交量因子能反映多空双方之间的博弈，集合竞价成交量占比越低，股票次月的收益率越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item刘均伟.2017.见微知著：成交量占比高频因子解析.光大证券
+\end{enumerate}
+
+\section{盈利卖出倾向(行为金融因子-处置效应)}
+
+\subsection{因子定义}
+
+1. 计算 \( t \) 时刻收盘价 \( \mathrm{Close}_t \) 与前 \( n \) 天 VWAP 均价 \( P_{t-n} \) 之间的涨跌幅，取涨跌幅为正的部分作为盈利收益率：
+\begin{equation}
+    \mathrm{gain}_t = \frac{\mathrm{Close}_t - P_{t-n}}{\mathrm{Close}_t} \cdot \mathbf{1}_{\{\mathrm{Close}_t \geq P_{t-n}\}}
+\end{equation}
+
+2. 以换手率 \( V_t \) 为权重加权盈利收益率得到资本盈利量即为盈利卖出倾向因子 \( \mathrm{Gain} \)：
+\begin{equation}
+    \mathrm{Gain}_t = \sum_{n=0}^{N-1} w_{t-n} \cdot \mathrm{gain}_{t-n}
+\end{equation}
+\begin{equation}
+    w_{t-n} = \frac{1}{k} V_{t-n} \prod_{s=1}^{n-1} (1 - V_{t-n+s})
+\end{equation}
+\begin{equation}
+    k = \sum_{n=1}^{T} V_{t-n} \prod_{s=1}^{n-1} (1 - V_{t-n+s})
+\end{equation}
+
+\subsection{说明}
+盈利卖出倾向因子衡量了大部分投资者“未实现”的盈利，因子值越大，投资者未实现收益越大，卖出意愿越强，抛压大，股价上涨受阻，与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 处置效应与 V 型处置效应在量化选股中的应用. 中信建投.
+    \item An, L. (2016). \textit{Asset Pricing When Traders Sell Extreme Winners and Losers}. The Review of Financial Studies, 29(3), 823-861.
+\end{enumerate}
+
+\section{基于高低价的买卖价差(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{HLI}_{i,t} = \frac{\mathrm{HL}_{i,t}}{\$ \mathrm{vol}_{i,t}}
+\end{equation}
+\begin{equation}
+    \mathrm{HL}_{i,t} = \frac{2 \times (e^{\alpha_t} - 1)}{1 + e^{\alpha_t}}
+\end{equation}
+\begin{equation}
+    \alpha_t = \frac{\sqrt{2 \times \beta_t} - \sqrt{\beta_t}}{3 - 2\sqrt{2}} - \sqrt{\frac{\gamma_t}{3 - 2\sqrt{2}}}
+\end{equation}
+\begin{equation}
+    \beta_t = \frac{\sum_{j=0}^{1} \left[ \ln \left( \frac{H_{t+j}^0}{L_{t+j}^0} \right) \right]^2}{2}, \quad \gamma_t = \left[ \ln \left( \frac{H_{t,t+1}^0}{L_{t,t+1}^0} \right) \right]^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( H_{t+j}^0, L_{t+j}^0 \) 分别为 \( t+j \) 日股票的最高价和最低价；
+    \item ② \( H_{t,t+1}^0, L_{t,t+1}^0 \) 分别为股票 \( t \) 日至 \( t+1 \) 日这两天的最高价和最低价；
+    \item ③ \( \$ \mathrm{vol}_{i,t} \) 为 \( t \) 日当天成交额。
+\end{itemize}
+
+\subsection{说明}
+每日的最高价几乎总是由买方发起的交易，而每日的最低价几乎总是由卖方发起的交易，高低价格比反映了股票价格的真实方差和买卖价差，所以可以此估计买卖价差；买卖价差越大，流动性越弱，未来可获得流动性风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升悦. 2024. 流动性高频因子构建与投资者注意力因子分析报告. 中信建投.
+\end{enumerate}
+
+\section{买单集中度(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j=1}^{N} \text{买单成交额}_{i,j,n}^2}{(\text{总成交额}_{i,n})^2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 基于逐笔成交数据中的叫买与叫卖单号将逐笔成交数据合成为买卖单数据；
+    \item ② \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日的第 \( j \) 分钟的成交额；
+    \item ③ 月度选股下，\( T=20 \) 个交易日；
+    \item ④ 将买单替换成卖单即可得卖单集中度。
+\end{itemize}
+
+\subsection{说明}
+成交集中度类因子刻画了日内买卖单成交金额分布的均匀程度，集中度越高，未来超额收益表现越好；买单集中度因子与卖单集中度因子的 IC 方向相同，并未呈现出“买单集中度看多，卖单集中度看空”的现象。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2019. 买卖单数据中的 Alpha. 海通证券.
+\end{enumerate}
+
+\section{筹码乖离率(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{BIAS}_t = \mathrm{winner}_t \times \mathrm{turnover}_t + \mathrm{BIAS}_{t-1} \times (1 - \mathrm{turnover}_t)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{winner}_t \) 为 \( t \) 日盈利筹码占总筹码的比例，即筹码分布图中红色面积占比；
+    \item ② \( \mathrm{BIAS}_{t-1} \) 为 \( t-1 \) 日乖离率；
+    \item ③ \( \mathrm{turnover}_t \) 为股票 \( t \) 日换手率。
+\end{itemize}
+
+\subsection{说明}
+筹码乖离率采用动态加权平均的方式，用于刻画盈利筹码的持续性变化，即股价与筹码持仓成本间的偏离与回归情况；一般取值越高，盈利程度越高，趋势稳定，投资者情绪相对乐观。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{个股收益最低时的领先成交量异动(高频因子-动量反转类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{AMT\_MIN}(M)_i = \frac{\sum_{t=m1}^{mM} \mathrm{AMT\_Percent}_{i,t-1}}{\frac{1}{T}\sum_{t=1}^{T} \mathrm{AMT\_Percent}_{i,t}}
+\end{equation}
+\begin{equation}
+    \mathrm{AMT\_Percent}_{i,t} = \frac{\mathrm{AMT}_{i,t}}{\sum_{k=1}^{I} \mathrm{AMT}_{k,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{AMT}_{i,t} \) 为个股 \( i \) 在 \( t \) 分钟的成交额；
+    \item ② \( \mathrm{AMT\_Percent}_{i,t} \) 为个股 \( i \) 在 \( t \) 时刻的成交额占全市场总成交额的比例；
+    \item ③ \( m1, m2, \ldots, mM \) 为日内分钟收益率最低的 \( M \) 个分钟，\( M=30 \)；
+    \item ④ \( T \) 为日内分钟数 = 240 个 1 分钟。
+\end{itemize}
+
+\subsection{说明}
+\( \mathrm{AMT\_MIN} \) 衡量了股价大幅下跌时的成交量在全市场成交量中的占比情况；若个股的股价下跌没有伴随市场成交量异动，而是由自身成交量异动造成的（因子值越大，占比越大），未在成交量上与市场形成有效共振关系，则容易受到自身交易过热的反噬，未来收益表现较弱。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任峻, 麦元勋, 许继宏. 2024. 基于分钟数据的价差共振因子. 招商证券.
+\end{enumerate}
+
+\section{分钟理想振幅(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+① 对单只股票，回溯取其最近 \( N \) 个交易日的 1 分钟数据（如：\(10 \times 240\) 个分钟 K 线），计算每分钟的分钟振幅（最高价 / 最低价 - 1）；
+
+② 选择所有分钟收盘价较高的 \( \lambda \)（如 25\%）有效交易分钟，计算振幅均值得到高价振幅因子 \( V_{\text{high}}(\lambda) \)；选择所有分钟收盘价较低的 \( \lambda \)（如 25\%）有效分钟，计算振幅均值得到低价振幅因子 \( V_{\text{low}}(\lambda) \)；
+
+③ 计算理想振幅因子：
+\begin{equation}
+    V(\lambda) = V_{\text{high}}(\lambda) - V_{\text{low}}(\lambda)
+\end{equation}
+
+\subsection{说明}
+基于股价将振幅因子进行切割得到的理想振幅因子，考虑了不同价格区间的振幅分布信息差异（高价振幅因子具有更强的负向选股能力），可用于刻画不同价格位置的资金多空博弈情况；将日频数据提升至分钟级，对交易信息提取的更充分，选股效果更优。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 高鹏. 2025. 高频振幅因子的内部切割. 开源证券.
+\end{enumerate}
+
+\section{趋势清晰度动量(趋势清晰度动量)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{TM}_{i,T} = -|\mathrm{MOM}'_{i,T} - \mathrm{TC}'_{i,T}|
+\end{equation}
+\begin{equation}
+    \mathrm{TC}'_{i,T} = R^2
+\end{equation}
+\begin{equation}
+    P_{i,t} = \beta_{i,0} + \beta_{i,1} \times t + \varepsilon_t
+\end{equation}
+\begin{equation}
+    \mathrm{Mom}_{i,T} = \sum_{t=T-20}^{T-240} r_{i,t}
+\end{equation}
+其中，\(\mathrm{MOM}'_{i,T}\) 和 \(\mathrm{TC}'_{i,T}\) 为经过横截面标准化（减均值除以标准差）后的动量和趋势清晰度。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( P_{i,t} \) 为股票 \( i \) 在第 \( t \) 日的收盘价；
+    \item ② \( t \in [T-240, T-20] \) 用 \( T-240 \) 交易日到 \( T-20 \) 交易日的收盘价时序序列进行回归（即不包含最近一个月），时序回归至少需要 200 个交易日的可用数据；
+    \item ③ \( r_{i,t} \) 为股票 \( i \) 在第 \( t \) 日的收益率。
+\end{itemize}
+
+\subsection{说明}
+“股价时间趋势回归的 \( R^2 \) 值”与“投资者对股价形成的趋势清晰感知度”之间存在正相关关系，可借助回归的 \( R^2 \) 对趋势清晰度进行量化。过去下跌股票中，下跌路径越明确、趋势越清晰的股票，未来更有可能维持下跌；下跌路径不明确、趋势不清晰的股票，未来更有可能反转上涨；过去上涨的股票中，上涨路径越明确、趋势越清晰的股票，未来更有可能维持上涨趋势；上涨路径不明确、趋势不清晰的股票，未来更有可能下跌；可借助趋势清晰度因子来加强动量。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑琳琳, 盛宝丹. 2024. 价格形成路径与趋势清晰度因子. 西南证券.
+\end{enumerate}
+\end{document}

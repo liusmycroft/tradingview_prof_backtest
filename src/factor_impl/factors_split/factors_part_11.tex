@@ -1,0 +1,280 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{客户节点度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+
+基于供应链图谱网络计算公司节点的入度即为客户节点度因子：
+\begin{equation}
+    d^{\mathrm{(in)}}_i = \sum_{j (\neq i)} w_{ij}^{in}
+\end{equation}
+
+其中，
+\begin{equation}
+    w_{ij} = 
+    \begin{cases}
+        \mathbb{I}_{[i \in N(j)]} \text{边无权重}\\
+        \frac{\mathrm{sales}_{ij}}{\mathrm{Total\_Procurement}_i}, & \text{边有权重}
+    \end{cases}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 供应链图谱网络边的方向为供应商指向客户：\(\mathrm{supplier} \rightarrow \mathrm{customer}\)；
+    \item ② \( w_{ij} \) 为公司 \( i \) 与其供应商 \( j \) 之间的边；若边无权重，取值为 1；若边有权重，取值为公司 \( i \) 对供应商 \( j \) 的采购额在公司 \( i \) 总采购额中的占比；
+    \item ③ 因子可能存在板块和市值偏好，建议对其做市值行业中心化处理。
+\end{itemize}
+
+\subsection{说明}
+若公司的供应商节点度较高（即公司有较多供应商），说明公司的供应商较为冗余，有助于减少单一供应商带来的风险，增强公司抗风险能力；但对投资者来说，供应商节点度较高的公司，因其风险较低，能从中得到的风险补偿也就相对较低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jussa et al. (2015). \textit{The Logistics of Supply Chain Alpha}. Deutsche Bank Markets Research.
+\end{enumerate}
+
+\section{小的下行跳跃波动率(高频因子-波动跳跃类q)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RVSJN}_t = \mathrm{RVJN}_t - \mathrm{RVLJN}_{\gamma,t}
+\end{equation}
+\begin{equation}
+    \mathrm{RVLJN}_{\gamma,t} = \min\left(\mathrm{RVJN}_t, \sum_{i=1}^n r_{i,t}^2 \mathrm{I}_{\{r_{i,t} < -\gamma\}}\right)
+\end{equation}
+\begin{equation}
+    \mathrm{RVJN}_t = \max\left(\mathrm{RS}_t^- - \frac{1}{2}\hat{\mathrm{IV}}_t, 0\right)
+\end{equation}
+\begin{equation}
+    \gamma = \alpha \Delta_n^{0.49} \sqrt{\hat{\mathrm{IV}}_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RVJN}_t \) 和 \( \mathrm{RVLJN}_{\gamma,t} \) 分别为交易日 \( t \) 的下行跳跃波动率和大的下行跳跃波动率，计算细节可参考相关日历页；
+    \item ② \( \gamma \) 为区分大、小跳跃的阈值，\( \Delta_n \) 为日内分钟数据个数的倒数，如 5 分钟频率的 \( \Delta_n = 1/48 \)，经验参数 \( \alpha = 4 \)；
+    \item ③ \( r_{i,t} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列。
+\end{itemize}
+
+\subsection{说明}
+跳跃波动率可以根据阈值进一步分解为大、小两个部分，即用于区分信息冲击导致的大跳跃波动和无法用信息冲击解释的小跳跃波动。下行波动率也可以做上述划分；由于小跳跃波动通常由短期流动性风险导致，投资者预期并未改变，对未来收益的预测能力要弱于大跳跃波动。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Duong, D., \& Swanson, N. R. (2015). \textit{Empirical evidence on the importance of aggregation, asymmetry, and jumps for volatility prediction}. Journal of Econometrics, 187, 606–621.
+    \item Bo Yu, Bruce Mizrach, Norman R. Swanson. (2020). \textit{New Evidence of the Marginal Predictive Content of Small and Large Jumps in the Cross-Section}. Econometrics, MDPI, 8(2), 1–52.
+\end{enumerate}
+
+\section{修正的隔夜反转(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \)，计算 t 日的隔夜距离 = \(\mathrm{abs}(t\text{日隔夜收益率} - \text{横截面均值})\)；
+
+2. 每月末计算当月的隔夜距离和隔夜距离波动率，即月末最近 20 天的隔夜距离序列的均值和标准差；
+
+3. 对股票 \( i \)，若上述隔夜距离波动率小于横截面均值，则将其当月隔夜距离取相反数（未来更可能发生动量效应），进而实现了隔夜反转的修正。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 上述因子是借助波动率对隔夜反转做修正，也可借助换手率距离来做修正，即换手距离 = \(\mathrm{abs}(t\text{日换手率变化量} - \text{其横截面均值})\) 低于其横截面均值，未来更可能发生动量，其中，换手率变化量 = \(t\text{日换手率} - (t-1)\text{日换手率}\)。
+\end{itemize}
+
+\subsection{说明}
+提高投资者对股价未来趋势判断的“可知性”，有助于更清晰的判断股票未来是否发生反转效应还是动量效应。波动率和换手率指标可代表股票的“可知性”，低波动（股价走势稳定）或低换手（投资分歧降低）的股票可知性更高，未来更可能发生动量效应；反之，可知性更低，未来更可能发生反转。通过将预判的动量做“翻转”，即可提高反转因子的表现。由于隔夜涨跌为“两边差，中间好”的因子，还需要通过“均值距离化”来修正单调性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 个股动量效应的识别及“球队硬币”因子构建. 方正证券.
+    \item Moskowitz, T. J. (2021). \textit{Asset pricing and sports betting}. Journal of Finance, Forthcoming.
+\end{enumerate}
+
+\section{上下影线/收盘价的标准差(量价因子改进)}
+
+\subsection{因子定义}
+
+每月末利用日度高开低收行情序列计算如下因子：
+\begin{equation}
+    \mathrm{std}\left( \frac{\text{每日K线的上影线长度} + \text{每日K线的下影线长度}}{\text{每日收盘价}} \right)
+\end{equation}
+
+\subsection{说明}
+上下影线表现了多空博弈状态，通过选择上下影线总长度较短的标的（因子方向为负向），规避博弈剧烈、稳定性较差的股票。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 王琦. 2023. JASON's alpha：基本面+量价复合策略. 东北证券.
+\end{enumerate}
+
+\section{“午蔽古木”因子(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+① 对股票 \( i \)，用每日 1 分钟收盘价计算得到第 \( t \) 分钟收益率序列 \( \mathrm{ret}_t \)；用每日 1 分钟成交量计算得到 1 分钟增量成交量 \( \mathrm{voldiff}_t \)：
+\begin{equation}
+    \mathrm{ret}_t = \frac{\mathrm{close}_t}{\mathrm{close}_{t-1}} - 1
+\end{equation}
+\begin{equation}
+    \mathrm{voldiff}_t = \mathrm{volume}_t - \mathrm{volume}_{t-1}
+\end{equation}
+
+② 对每天第 6 分钟至第 240 分钟的上述数据进行带截距项的最小二乘回归：
+\begin{equation}
+    \mathrm{ret}_t = \alpha_0 + \alpha_1 \mathrm{voldiff}_t + \alpha_2 \mathrm{voldiff}_{t-1} + \cdots + \alpha_6 \mathrm{voldiff}_{t-5} + \varepsilon_t
+\end{equation}
+
+③ 记上述回归得到的截距项的 \( t \) 值为 \( t-{\mathrm{intercept}} \)，回归方程的 \( F \) 值为 \( F-{\mathrm{all}} \)；
+
+④ 对股票 \( i \) 在 \( T \) 日的 \( t-{\mathrm{intercept}} \) 取绝对值，记为 \( \mathrm{abst}-{\mathrm{intercept}} \)；利用 \( F-{\mathrm{all}} \) 对 \( \mathrm{abst}-{\mathrm{intercept}} \) 做修正，即对 \( F-{\mathrm{all}} \) 小于其横截面均值的股票的 \( \mathrm{abst}-{\mathrm{intercept}} \) 乘以 -1，其余股票的 \( \mathrm{abst}-{\mathrm{intercept}} \) 保持不变，记得到“日午蔽古木”因子；
+
+\subsection{说明}
+“午蔽古木”因子衡量了市场信息和个股中长期基本面信息对价格的影响程度，且利用突然到来信息对因子做了修正，与未来收益负相关；因子值越小，表明近期突然到来的信息未对股价产生影响（\( F-{\mathrm{all}} \) 越小），且噪声对价格的推动力量也越小（\( \mathrm{abst}-{\mathrm{intercept}} \) 值越大），个股未来越容易产生高收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 推动个股价格变化的因素分解与“花隐林间”因子. 2023, 方正证券.
+\end{enumerate}
+
+\section{盘口平均深度(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    avg_depth = \frac{\mathrm{av}_1 + \mathrm{bv}_1}{2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{av}_1 \) 和 \( \mathrm{bv}_1 \) 分别为盘口委托快照数据的卖一量和买一量，若挂单量为0，则令盘口深度为0；
+    \item ② 可对上述因子日内序列求均值得到日度因子值，再进行20个交易日指数移动平均得到月度因子值，也可计算标准差。
+\end{itemize}
+
+\subsection{说明}
+盘口平均深度反映了整体市场的深度，因子取值越大，市场整体挂单量越大，市场总体深度越大，市场流动性越高，与未来收益负相关。也可对日内该因子序列求标准差，衡量其在当日均匀程度，与流动性负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 胡骏聪等. 2021. 高频视角下的微观流动性与波动性. 中金公司.
+\end{enumerate}
+
+\section{上方/下方活动筹码占比（行为金融因子-筹码分布）}
+
+\subsection{因子定义}
+
+上方活动筹码占比：
+\begin{equation}
+    \mathrm{ASR\_upper}_t = \frac{\sum \mathrm{vol}_{\mathrm{price}_{i} \in [\mathrm{close}_t, \text{高位价格}],t}}{\sum \mathrm{vol}_{i,t}}
+\end{equation}
+
+下方活动筹码占比：
+\begin{equation}
+    \mathrm{ASR\_lower}_t = \frac{\sum \mathrm{vol}_{\mathrm{price}_{i} \in [\text{低位价格},\mathrm{close}_t],t}}{\sum \mathrm{vol}_{i,t}}
+\end{equation}
+
+其中，
+\begin{equation}
+    \text{高位价格} = \mathrm{close}_t \times (1 + \mathrm{volatility})
+\end{equation}
+\begin{equation}
+    \text{低位价格} = \mathrm{close}_t \times (1 - \mathrm{volatility})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 t 日的筹码分布共有 n 个价位（\( i = 1, 2, \ldots, n \)），\( \mathrm{vol}_{i,t} \) 为第 t 日 i 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格；
+    \item ② \( \mathrm{volatility} \) 为股价最大涨跌幅，主板股票的 \( \mathrm{volatility} = 10\% \)，创业板和科创板的 \( \mathrm{volatility} = 20\% \)；
+    \item ③ \( \mathrm{close}_t \) 为 t 日收盘价。
+\end{itemize}
+
+\subsection{说明}
+上方活动筹码占比指的是收盘价与最高价之间的筹码占比，对应上方买盘强度；下方活动筹码占比指的是收盘价与最低价之间的筹码占比，对应下方卖压强度。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{平均单笔流出金额占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j=1}^{N} \mathrm{Amt}_{i,j,n} \cdot \mathrm{I}_{r_{i,j,n} < 0} \Big/ \sum_{j=1}^{N} \mathrm{TrdNum}_{i,j,n} \cdot \mathrm{I}_{r_{i,j,n} < 0}}{\sum_{j=1}^{N} \mathrm{Amt}_{i,j,n} \Big/ \sum_{j=1}^{N} \mathrm{TrdNum}_{i,j,n}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Amt}_{i,j,n} \) 为股票 \( i \) 在第 \( n \) 个交易日内第 \( j \) 分钟的成交额序列；
+    \item ② \( r_{i,j,n} \) 为股票 \( i \) 在第 \( n \) 个交易日内第 \( j \) 分钟的收益率序列；
+    \item ③ \( \mathrm{TrdNum}_{i,j,n} \) 为股票 \( i \) 在第 \( n \) 个交易日内第 \( j \) 分钟的成交笔数序列；
+    \item ④ 月度选股下，\( T = 20 \) 个交易日；周度选股下，\( T = 5 \) 个交易日；
+    \item ⑤ 还可计算平均单笔流入金额占比，只需将公式中的 \( \mathrm{I}_{\{r_{i,j,n} < 0\}} \) 改为 \( \mathrm{I}_{\{r_{i,j,n} > 0\}} \) 即可。
+\end{itemize}
+
+\subsection{说明}
+平均单笔成交金额占比类因子可以捕捉日内大单的交易行为，大单交易会使得股票在当日的平均单笔成交金额占比在全市场中处于相对较高水平。平均单笔流出金额占比因子具有较强的选股能力，与股票未来收益正相关；在股票下跌时，如果单笔成交金额大，说明委买有大单，是一种抄底行为。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 姚石. 2019. 日内分时成交中的玄机. 海通证券.
+\end{enumerate}
+
+\section{喷发成交额相关性(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 对过去20日同时点成交量按照1倍标准差的标准划分，高于1倍标准差划为“喷发成交量”，低于1倍标准差划为“温和成交量”；
+
+② 计算过去20日喷发成交时点分钟成交额与下一分钟成交额的相关系数：
+\begin{equation}
+    \mathrm{Corr}(\text{过去20日喷发成交时点分钟成交额序列}, \text{下一分钟成交额序列})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 还可以过去20日喷发成交时点分钟成交额为 \( x \)，以下一分钟成交额为 \( y \)，进行回归，回归系数记为喷发成交额跟随比例因子，用于衡量分钟成交额对大额成交的敏感度。
+\end{itemize}
+
+\subsection{说明}
+喷发成交额相关性因子衡量了大额成交后的资金的协同程度，资金协同程度越高，则个股交易中的个人投资者交易跟随的越多，个股未来表现越弱，是一个负向因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{喷发成交额相关性(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 对过去20日同时点成交量按照1倍标准差的标准划分，高于1倍标准差划为“喷发成交量”，低于1倍标准差划为“温和成交量”；
+
+② 计算过去20日喷发成交时点分钟成交额与下一分钟成交额的相关系数：
+\begin{equation}
+    \mathrm{Corr}(\text{过去20日喷发成交时点分钟成交额序列}, \text{下一分钟成交额序列})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 还可以过去20日喷发成交时点分钟成交额为 \( x \)，以下一分钟成交额为 \( y \)，进行回归，回归系数记为喷发成交额跟随比例因子，用于衡量分钟成交额对大额成交的敏感度。
+\end{itemize}
+
+\subsection{说明}
+喷发成交额相关性因子衡量了大额成交后的资金的协同程度，资金协同程度越高，则个股交易中的个人投资者交易跟随的越多，个股未来表现越弱，是一个负向因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+\end{document}

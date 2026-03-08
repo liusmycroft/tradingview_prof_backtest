@@ -1,0 +1,287 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{日内条件在险价值（高频因子-收益分布类）}
+
+\subsection{因子定义}
+
+1. 给定置信区间 \( \alpha \in (0, 1) \)，使用 \( T \) 交易日的分钟 VWAR 序列计算 VCVaR：
+\begin{equation}
+    \mathrm{VCVaR}_T = \mathrm{CVaR}_\alpha (\mathrm{VWAR}_t)
+\end{equation}
+其中，
+\begin{equation}
+    \mathrm{VWAR} = \frac{\sum \mathrm{Return}_t \times \mathrm{Volume}_t}{\sum \mathrm{Volume}_t}
+\end{equation}
+
+2. 每日计算左侧 5\% CvaR 值，每月末对当月所有交易日的 CvaR 值求算术平均，得到月频的 CvaR 因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Return}_t \) 和 \( \mathrm{Volume}_t \) 分别为股票日内的分钟收益率序列和分钟成交量序列。
+\end{itemize}
+
+\subsection{说明}
+在分钟高频数据环境下，激烈成交的时段往往比稀疏成交的时段更具有价格发现功能。利用成交量加权平均收益率可以淡化成交稀疏的时间段，强化真正由于买卖力量形成的收益率，由此计算的条件在险价值表现更优。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 严佳炜. 2020. 分钟线的尾部特征. 方正证券.
+\end{enumerate}
+
+\section{个股收益最低时的价变共振（高频因子-动量反转类）}
+
+\subsection{因子定义}
+
+1. 计算个股在日内中最低的 5 个分钟收益率期间，对应全市场等权收益率的均值：
+\begin{equation}
+    \mathrm{RM\_MIN}(N)_i = \frac{\sum_{t=m_1}^{mM} \mathrm{MEAN\_MKT}_t}{M}
+\end{equation}
+\begin{equation}
+    \mathrm{MEAN\_MKT}_t = \frac{\sum_{i=1}^I r_{i,t}}{I}
+\end{equation}
+
+2. 计算个股在日内中最低的 5 个分钟收益率期间，全市场收益率标准差的均值：
+\begin{equation}
+    \mathrm{STD\_MIN}_i = \frac{\sum_{t=m_1}^{mM} \mathrm{std}(r_t)}{M}
+\end{equation}
+
+3. 对 \( \mathrm{RM\_MIN} \) 做截面上的逆序排名名次归一化，并除以 \( \mathrm{STD\_MIN} \) 即为个股收益最低时的市场共振因子：
+\begin{equation}
+    \mathrm{CO\_MIN}_i = \frac{\mathrm{Rank}^{-1}(\mathrm{RM\_MIN}(M)_i)}{\mathrm{STD\_MIN}_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{i,t} \) 为个股 \( i \) 在 \( t \) 分钟的收益率，\( r_t \) 为 \( t \) 时刻的全部个股收益率序列；
+    \item ② \( m_1, m_2, \ldots, m_M \) 为日内分钟收益率最低的 \( M \) 个分钟，\( M=5 \)；
+    \item ③ \( \mathrm{MEAN\_MKT}_t \) 为在 \( t \) 分钟的全市场等权收益均值。
+\end{itemize}
+
+\subsection{说明}
+\( \mathrm{RM\_MIN} \) 刻画了个股与市场趋势的一致性，因子值越小，说明个股是在市场表现较差时同步出现价格下跌，与全市场下跌趋势一致。个股与市场形成有效共振，股价下跌可能是市场恐慌性错杀带来的，未来股价更容易被修正，未来收益表现较好；\( \mathrm{STD\_MIN} \) 刻画了市场整体收益的分歧度，分歧度越小，市场趋势更具市场代表性，个股与市场共振越有效，将其叠加后有助于提升 \( \mathrm{RM\_MIN} \) 的表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任耀, 袁元勋, 许继宏. 2024. 基于分钟数据的价变共振因子. 招商证券.
+\end{enumerate}
+
+\section{卖出反弹偏离小单因子(行为金融因子-遗憾规避)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{LCPS} = \frac{\sum_{i}^{N} \overline{\mathrm{price}}_{\mathrm{buy},i} \cdot \mathbf{I}_{\{P_{\mathrm{buy},i} < \mathrm{close}\}} \cdot \mathbf{I}_{\{\mathrm{vol} < \mathrm{vol}_{\mathrm{mean}}\}}}{\mathrm{close} } - 1
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{price}_{\mathrm{buy},i} \) 为主卖成交价；
+    \item ② \( \mathrm{vol}_{\mathrm{mean}} \) 为当日所有实际成交量均值；
+    \item ③ 逐笔中每笔成交买卖方向确定方式：若该笔成交为买单被拆分与多个卖单成交，则记为买方交易，反之为卖方交易；
+    \item ④ 大小单划分方式：以当日所有实际成交量均值作为区分大小单的阈值，即
+        \begin{equation*}
+            \mathrm{vol} < \mathrm{vol}_{\mathrm{mean}}
+        \end{equation*}
+        为小单，反之为大单；
+    \item ⑤ 此外，还可只统计尾盘期间 \([14:30,14:57)\) 的成交量，计算得到卖出反弹偏离尾盘因子。
+\end{itemize}
+
+\subsection{说明}
+遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自满感，避免承认之前的决策失误；对于卖出后价格反弹（当天卖出的股票收盘价高于卖出的成本价）的投资者会避免承认决策失误而存在惜售心理，不愿卖出下跌浮亏的股票；卖出反弹偏离因子从成交价格偏离维度来量化上述心理，因子值越高，卖出价格越低，成交价格偏离程度越大，未来买回动力较弱，预期收益较低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{反转残差成交不平衡因子(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 每个交易日，统计每只股票当日所有逐笔成交中主动买入和主动卖出的成交单数，并计算如下每日成交单不平衡指标：
+\begin{equation}
+    \text{成交单不平衡} = \frac{\text{主买成交单数} - \text{主卖成交单数}}{\text{主买成交单数} + \text{主卖成交单数}}
+\end{equation}
+
+2. 每月底回看过去 20 个交易日，计算 20 日成交单不平衡指标的平均值，做横截面市值中性化处理，得到成交不平衡因子；
+
+3. 将成交不平衡因子，对过去 20 个交易日的累计涨跌幅进行正交化处理，得到反转残差成交不平衡因子。
+
+\subsection{说明}
+成交不平衡因子衡量了净买单的强弱程度，若股票在过去一段时间是买方占据主动成交的优势，其未来收益表现会较好；当月的净买单数量较多通常会造成当月涨跌幅较高，而当月涨跌幅与未来涨跌幅呈现显著的负相关性，因此会削弱成交不平衡因子对未来收益的正向预测能力，可将成交不平衡因子对同期涨跌幅进行正交化处理，得到反转残差成交不平衡因子，提升因子稳定性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 沈芷琦, 刘富兵, 阮俊烨. 2024. 逐笔买卖差异中的选股信息: 条件成交不平衡因子. 国盛证券.
+\end{enumerate}
+
+\section{特质隔夜收益波动率(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+截面上对所有股票过去 20 天的隔夜收益率序列进行主成分分析 PCA，提取第一主成分 \( F_1 \) 为隐式因子溢价：
+\begin{equation}
+    \mathrm{OvernightRet}_{i,t} = \frac{\mathrm{Open}_{i,t}}{\mathrm{Close}_{i,t-1}} - 1
+\end{equation}
+
+对每只股票 \( i \)，以过去 20 天的隔夜收益率序列为 \( y \)，以隐式因子 \( F_1 \) 序列为 \( x \)，进行时序回归：
+\begin{equation}
+    \mathrm{OvernightRet}_{i,t} = \alpha_{i,t} + \beta_i^{F_1} \times F_1 + \cdots + \varepsilon_i
+\end{equation}
+
+时序回归返回的残差序列的标准差即为隐式因子框架下的特质波动因子：
+\begin{equation}
+    \mathrm{OvernightRetIV} = \mathrm{std}(\varepsilon_i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 在进行截面主成分分析时，若第一主成分的解释力度低于 20\%，则选取解释力最大的前两个主成分进行回归；
+    \item ② 还可进一步计算特异度因子：\( \mathrm{IVR} = 1 - R^2 \) 上述回归模型拟合优度；
+    \item ③ 还可进一步计算特质偏度因子：\( \mathrm{IS} = \frac{\sum \varepsilon_{it}^3}{\mathrm{IV}^3} \)。
+\end{itemize}
+
+\subsection{说明}
+计算隐式因子框架下的特质波动率时，直接通过主成分分析对资产收益序列降维来提取共同波动，而无需显式的借助多因子模型估计共同风险，系统性的解决传统多因子模型遗漏变量、估计误差的问题，计算简单；此处提取的是隔夜收益率序列的共同波动。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣鹏, 杨怡玲, 刘璐. 2022. 隐式框架下的特质因子改进. 国信证券.
+\end{enumerate}
+
+\section{基于投资者交流的关联动量(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{MRR}_{m,t} = \frac{1}{5} \sum_{j=1}^{5} \mathrm{Ret}_{j,m,t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Ret}_{j,m,t} \) 为目标公司 \( m \) 相关的关联公司 \( j \) 在 \( t \) 日的日度收益率；
+    \item ② 投资者交流信息来自于东方财富论坛 \url{http://guba.eastmoney.com/} 中的帖子，当前论坛对应的股票为目标股票 \( m \)，投资者在该论坛上发帖交流时提及的其他股票为关联股票；每月统计目标股票 \( m \) 论坛上关联股票被提及的次数，取被提及次数最多的 5 只关联股票进行收益等权复合即得到上述关联动量。
+\end{itemize}
+
+\subsection{说明}
+投资者交流过程中被提及的关联公司与目标公司间存在收益联动，而且关联股票被投资者提及的越频繁，股票间收益联动越强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jiang, L., Liu, J., \& Yang, B. (2019). \textit{Communication and comovement: Evidence from online stock forums}. Financial Management, 48(3), 805-847.
+\end{enumerate}
+
+\section{大单买入占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j=1}^{N} \text{大买单成交额}_{i,j,n}}{\sum_{j=1}^{N} \text{成交额}_{i,j,n}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 基于逐笔成交数据中的叫买与叫卖单号将逐笔成交数据合成为买卖单数据；
+    \item ② 根据买卖单分布界定大小单，如可将多日买卖单成交单数据对数调整后的“均值+1倍标准差”作为大单筛选阈值；
+    \item ③ \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日内的第 \( j \) 分钟的成交额；
+    \item ④ 月度选股下，\( T=20 \) 个交易日；周度选股下，\( T=5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+大单类因子刻画了大资金的交易行为，大资金往往具有信息优势，一般受到大资金关注的股票，未来通常具有更好的表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2021. 大单的精细化处理与大单因子重构. 海通证券.
+    \item 冯佳睿, 袁林青. 2019. 买卖单数据中的 Alpha. 海通证券.
+\end{enumerate}
+
+\section{单位成交额的百分比实现价差(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{PRSI}_{i,t} = \frac{\mathrm{PRS}_{i,t}}{\$ \mathrm{vol}_{i,t}}
+\end{equation}
+\begin{equation}
+    \mathrm{PRS}_{i,t} = 2 D_{i,k} \left( \ln(P_{i,t}) - \ln\left(\frac{\mathrm{Ask}_{i,t+5} + \mathrm{Bid}_{i,t+5}}{2}\right) \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Ask}_{i,t+5}, \mathrm{Bid}_{i,t+5} \) 分别为股票 \( i \) 在 \( t+5 \) 时刻的卖 1 价、买 1 价；
+    \item ② \( P_{i,t} \) 为股票 \( i \) 在 \( t+5 \) 时刻的收盘价；
+    \item ③ \( D_{i,k} \) 为买卖标识，买单记为 1，卖单记为 -1；
+    \item ④ \( D_{i,k} \) 买卖单判断标准：若当前收盘价高于（低于）最优买卖报价平均值，则认为是买（卖）单；当前收盘价等于最优买卖报价平均值时，若收盘价高于（低于）上一笔价格，则认为是买（卖）单；
+    \item ⑤ \( \$ \mathrm{vol}_{i,t} \) 为 \( t \) 日当天成交额。
+\end{itemize}
+
+\subsection{说明}
+单位成交额的百分比实现价差属于“每美元成本 cost-per-dollar-volume”形式的流动性，代表交易中每单位交易额的边际交易成本，反映流动性效率；股票的交易成本越高，流动性越差，未来会有正向的流动性风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升悦. 2024. 流动性高频因子构建与投资者注意力因子分析报告. 中信建投.
+\end{enumerate}
+
+\section{筹码穿透率(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{PTR} = \frac{\mathrm{winner}_t - \mathrm{winner}_{t-1}}{\mathrm{turnover}_t}
+\end{equation}
+\begin{equation}
+    \mathrm{winner}_t = t \text{ 日盈利筹码占总筹码的比例}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{turnover}_t \) 为股票 \( t \) 日换手率。
+\end{itemize}
+
+\subsection{说明}
+该筹码穿透率的计算方式为当天新增解套筹码比例除以当天换手率，用于反映穿透筹码的能力；因子值越大，说明相同换手率使套牢筹码解套的效率越高（少量换手就能让大量历史筹码解套），股票筹码的通透性越好，趋势延续性强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{成交量最高时刻笔均成交金额(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 将日内 240 个 1 分钟数据集集合标记为 \( T = \{t_1, t_2, \dots, t_{240}\} \)，将分时成交量最高的 10\% 时刻标记为集合 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \)；
+
+② 对成交量最高时刻进行汇总，根据其成交额 \( \mathrm{Amt}_t \) 之和除以成交笔数 \( \mathrm{DealNum}_t \) 之和，构造成交量最高时刻的笔均成交金额 \( \mathrm{ATD}_{\mathrm{VolumeHigh10\%}} \)：
+\begin{equation}
+    \mathrm{ATD}_{\mathrm{VolumeHigh10\%}} = \frac{\sum_{t \in P} \mathrm{Amt}_t}{\sum_{t \in P} \mathrm{DealNum}_t}
+\end{equation}
+
+③ 同理，将全天的成交金额除以全天的成交笔数，得到全天的笔均成交金额 \( \mathrm{ATD}_T \)：
+\begin{equation}
+    \mathrm{ATD}_T = \frac{\sum_{t \in T} \mathrm{Amt}_t}{\sum_{t \in T} \mathrm{DealNum}_t}
+\end{equation}
+
+④ 将成交量最高时刻的笔均成交金额除以全天的笔均成交金额，即得到去量纲化后的标准化因子 \( \mathrm{SATD}_{\mathrm{VolumeHigh10\%}} \)：
+\begin{equation}
+    \mathrm{SATD}_{\mathrm{VolumeHigh10\%}} = \frac{\mathrm{ATD}_{\mathrm{VolumeHigh10\%}}}{\mathrm{ATD}_T}
+\end{equation}
+
+\subsection{说明}
+笔均成交额类因子通过汇总“特殊的、具有较多信息含量”时刻的成交金额情况来刻画主力资金的行为动向；笔均成交金额越大，说明该特殊时间内资金优势越明显，属于主力资金的可能性越大。“成交量最高时刻”从成交热度角度刻画主力资金交易行为，也可按同样逻辑计算“成交量最低时刻”相关因子，前者对未来收益有正向预测能力，后者有负向预测能力。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣鹏, 张宇. 2025. 日内特殊时刻蕴含的主力资金 Alpha 信息. 国信证券.
+\end{enumerate}
+\end{document}

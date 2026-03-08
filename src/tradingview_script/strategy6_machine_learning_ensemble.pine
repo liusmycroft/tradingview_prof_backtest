@@ -1,0 +1,500 @@
+//@version=5
+strategy("机器学习集成策略 - 多标的多因子", overlay=true,
+         default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+         pyramiding=0)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 策略说明：使用类机器学习思想的集成方法，综合多个标的和多个技术指标
+// 核心思想：每个指标作为一个"弱分类器"，通过加权投票形成最终决策
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 输入参数
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 标的选择
+symbol2 = input.symbol("NASDAQ:MSFT", "标的2")
+symbol3 = input.symbol("NASDAQ:GOOGL", "标的3")
+market_index = input.symbol("NASDAQ:SPY", "市场指数")
+vix_index = input.symbol("CBOE:VIX", "波动率指数")
+
+// 指标周期参数
+fast_ma = input.int(5, "快速均线", minval=2, maxval=20)
+slow_ma = input.int(20, "慢速均线", minval=10, maxval=100)
+rsi_period = input.int(14, "RSI周期", minval=5, maxval=30)
+macd_fast = input.int(12, "MACD快线", minval=5, maxval=20)
+macd_slow = input.int(26, "MACD慢线", minval=15, maxval=40)
+macd_signal = input.int(9, "MACD信号", minval=5, maxval=15)
+bb_length = input.int(20, "布林带周期", minval=10, maxval=50)
+bb_mult = input.float(2.0, "布林带倍数", minval=1.0, maxval=3.0, step=0.1)
+
+// 集成学习参数
+confidence_threshold = input.float(60, "信号置信度阈值(%)", minval=50, maxval=90, step=5)
+use_market_filter = input.bool(true, "使用市场环境过滤")
+vix_threshold = input.float(25, "VIX过滤阈值", minval=15, maxval=40, step=1)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 获取多标的数据
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 标的1（当前图表）
+s1_close = close
+s1_volume = volume
+s1_high = high
+s1_low = low
+
+// 标的2
+s2_close = request.security(symbol2, timeframe.period, close)
+s2_volume = request.security(symbol2, timeframe.period, volume)
+s2_high = request.security(symbol2, timeframe.period, high)
+s2_low = request.security(symbol2, timeframe.period, low)
+
+// 标的3
+s3_close = request.security(symbol3, timeframe.period, close)
+s3_volume = request.security(symbol3, timeframe.period, volume)
+s3_high = request.security(symbol3, timeframe.period, high)
+s3_low = request.security(symbol3, timeframe.period, low)
+
+// 市场指数
+market_close = request.security(market_index, timeframe.period, close)
+market_rsi = request.security(market_index, timeframe.period, ta.rsi(close, rsi_period))
+
+// VIX波动率
+vix_close = request.security(vix_index, timeframe.period, close)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 特征工程：为每个标的计算技术指标
+// ══════════════════════════════════════════════════════════════════════════════
+
+// === 标的1技术指标 ===
+// 1. 移动平均
+s1_ma_fast = ta.sma(s1_close, fast_ma)
+s1_ma_slow = ta.sma(s1_close, slow_ma)
+s1_ma_signal = ta.crossover(s1_ma_fast, s1_ma_slow) ? 1 : ta.crossunder(s1_ma_fast, s1_ma_slow) ? -1 : 0
+
+// 2. RSI
+s1_rsi = ta.rsi(s1_close, rsi_period)
+s1_rsi_signal = s1_rsi < 30 ? 1 : s1_rsi > 70 ? -1 : 0
+
+// 3. MACD
+[s1_macd_line, s1_signal_line, s1_hist] = ta.macd(s1_close, macd_fast, macd_slow, macd_signal)
+s1_macd_signal = ta.crossover(s1_macd_line, s1_signal_line) ? 1 : ta.crossunder(s1_macd_line, s1_signal_line) ? -1 : 0
+
+// 4. 布林带
+s1_bb_basis = ta.sma(s1_close, bb_length)
+s1_bb_dev = ta.stdev(s1_close, bb_length)
+s1_bb_upper = s1_bb_basis + bb_mult * s1_bb_dev
+s1_bb_lower = s1_bb_basis - bb_mult * s1_bb_dev
+s1_bb_signal = s1_close < s1_bb_lower ? 1 : s1_close > s1_bb_upper ? -1 : 0
+
+// 5. 成交量
+s1_vol_ma = ta.sma(s1_volume, 20)
+s1_vol_signal = s1_volume > s1_vol_ma * 1.5 and s1_close > s1_close[1] ? 1 :
+                 s1_volume > s1_vol_ma * 1.5 and s1_close < s1_close[1] ? -1 : 0
+
+// 6. ATR动量
+s1_atr = ta.atr(14)
+s1_atr_pct = s1_atr / s1_close * 100
+s1_momentum = (s1_close - s1_close[10]) / s1_close[10] * 100
+s1_risk_adj_momentum = s1_momentum / s1_atr_pct
+s1_momentum_signal = s1_risk_adj_momentum > 1 ? 1 : s1_risk_adj_momentum < -1 ? -1 : 0
+
+// === 标的2技术指标 ===
+s2_ma_fast = request.security(symbol2, timeframe.period, ta.sma(close, fast_ma))
+s2_ma_slow = request.security(symbol2, timeframe.period, ta.sma(close, slow_ma))
+s2_rsi = request.security(symbol2, timeframe.period, ta.rsi(close, rsi_period))
+[s2_macd_line, s2_signal_line, s2_hist] = request.security(symbol2, timeframe.period,
+                                           ta.macd(close, macd_fast, macd_slow, macd_signal))
+s2_bb_upper = request.security(symbol2, timeframe.period, ta.sma(close, bb_length) + bb_mult * ta.stdev(close, bb_length))
+s2_bb_lower = request.security(symbol2, timeframe.period, ta.sma(close, bb_length) - bb_mult * ta.stdev(close, bb_length))
+
+s2_ma_signal = s2_ma_fast > s2_ma_slow ? 1 : -1
+s2_rsi_signal = s2_rsi < 30 ? 1 : s2_rsi > 70 ? -1 : 0
+s2_macd_signal = s2_macd_line > s2_signal_line ? 1 : -1
+s2_bb_signal = s2_close < s2_bb_lower ? 1 : s2_close > s2_bb_upper ? -1 : 0
+
+// === 标的3技术指标 ===
+s3_ma_fast = request.security(symbol3, timeframe.period, ta.sma(close, fast_ma))
+s3_ma_slow = request.security(symbol3, timeframe.period, ta.sma(close, slow_ma))
+s3_rsi = request.security(symbol3, timeframe.period, ta.rsi(close, rsi_period))
+[s3_macd_line, s3_signal_line, s3_hist] = request.security(symbol3, timeframe.period,
+                                           ta.macd(close, macd_fast, macd_slow, macd_signal))
+
+s3_ma_signal = s3_ma_fast > s3_ma_slow ? 1 : -1
+s3_rsi_signal = s3_rsi < 30 ? 1 : s3_rsi > 70 ? -1 : 0
+s3_macd_signal = s3_macd_line > s3_signal_line ? 1 : -1
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 市场环境因子
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 市场趋势
+market_ma_20 = request.security(market_index, timeframe.period, ta.sma(close, 20))
+market_ma_50 = request.security(market_index, timeframe.period, ta.sma(close, 50))
+market_trend = market_ma_20 > market_ma_50 ? 1 : -1  // 1=牛市，-1=熊市
+
+// 市场强度（ADX思想）
+market_momentum = (market_close - market_close[10]) / market_close[10] * 100
+market_strength = math.abs(market_momentum) > 2 ? 1 : 0  // 1=强趋势，0=弱趋势
+
+// VIX恐慌指标
+vix_signal = vix_close < vix_threshold ? 1 : -1  // VIX低=市场稳定，VIX高=恐慌
+
+// 市场宽度（多标的一致性）
+symbols_bullish = (s1_ma_fast > s1_ma_slow ? 1 : 0) +
+                   (s2_ma_fast > s2_ma_slow ? 1 : 0) +
+                   (s3_ma_fast > s3_ma_slow ? 1 : 0)
+market_breadth = symbols_bullish >= 2 ? 1 : symbols_bullish <= 1 ? -1 : 0
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 集成学习：加权投票系统
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 定义每个指标的权重（根据历史表现调整）
+weight_ma = 2.0          // 均线金叉死叉可靠性高
+weight_rsi = 1.5         // RSI超买超卖中等可靠
+weight_macd = 2.0        // MACD趋势确认强
+weight_bb = 1.0          // 布林带均值回归
+weight_volume = 1.5      // 成交量确认
+weight_momentum = 1.5    // 动量因子
+weight_market = 3.0      // 市场环境权重最高
+
+// 标的1综合得分
+s1_score = s1_ma_signal * weight_ma +
+           s1_rsi_signal * weight_rsi +
+           s1_macd_signal * weight_macd +
+           s1_bb_signal * weight_bb +
+           s1_vol_signal * weight_volume +
+           s1_momentum_signal * weight_momentum
+
+// 标的2综合得分
+s2_score = s2_ma_signal * weight_ma +
+           s2_rsi_signal * weight_rsi +
+           s2_macd_signal * weight_macd +
+           s2_bb_signal * weight_bb
+
+// 标的3综合得分
+s3_score = s3_ma_signal * weight_ma +
+           s3_rsi_signal * weight_rsi +
+           s3_macd_signal * weight_macd
+
+// 市场环境得分
+market_score = market_trend * weight_market + vix_signal * 1.5 + market_breadth * 1.0
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 最终集成得分
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 多标的平均得分
+avg_symbol_score = (s1_score + s2_score + s3_score) / 3
+
+// 最终得分 = 标的得分 * 市场环境调整
+final_score = use_market_filter ? avg_symbol_score * (market_score > 0 ? 1.2 : 0.8) : avg_symbol_score
+
+// 标准化为百分比置信度（0-100）
+max_possible_score = (weight_ma + weight_rsi + weight_macd + weight_bb + weight_volume + weight_momentum) * 1.2
+confidence_pct = math.min(100, math.abs(final_score) / max_possible_score * 100)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 信号生成
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 入场信号
+long_signal = final_score > 0 and confidence_pct >= confidence_threshold and
+               (not use_market_filter or market_trend == 1) and
+               (not use_market_filter or vix_close < vix_threshold)
+
+short_signal = final_score < 0 and confidence_pct >= confidence_threshold and
+                (not use_market_filter or market_trend == -1) and
+                (not use_market_filter or vix_close < vix_threshold)
+
+// 出场信号
+exit_long = final_score < 0 or confidence_pct < confidence_threshold * 0.5 or
+             (use_market_filter and vix_close > vix_threshold * 1.2)
+
+exit_short = final_score > 0 or confidence_pct < confidence_threshold * 0.5 or
+              (use_market_filter and vix_close > vix_threshold * 1.2)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 策略执行
+// ══════════════════════════════════════════════════════════════════════════════
+
+if long_signal and strategy.position_size == 0
+    strategy.entry("集成多头", strategy.long)
+    alert("机器学习集成: 多头信号 | 置信度: " + str.tostring(confidence_pct, "#.#") + "%", alert.freq_once_per_bar)
+
+if short_signal and strategy.position_size == 0
+    strategy.entry("集成空头", strategy.short)
+    alert("机器学习集成: 空头信号 | 置信度: " + str.tostring(confidence_pct, "#.#") + "%", alert.freq_once_per_bar)
+
+if strategy.position_size > 0 and exit_long
+    strategy.close("集成多头")
+
+if strategy.position_size < 0 and exit_short
+    strategy.close("集成空头")
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 可视化
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 绘制最终得分
+plot(final_score, "集成得分", color=final_score > 0 ? color.green : color.red, linewidth=2)
+plot(confidence_pct, "置信度(%)", color=color.blue, linewidth=1)
+hline(confidence_threshold, "置信度阈值", color=color.orange, linestyle=hline.style_dashed)
+hline(0, "中性", color=color.gray)
+
+// 绘制各标的得分（副图）
+plot(s1_score, "标的1得分", color=color.purple, linewidth=1, display=display.none)
+plot(s2_score, "标的2得分", color=color.teal, linewidth=1, display=display.none)
+plot(s3_score, "标的3得分", color=color.maroon, linewidth=1, display=display.none)
+
+// 信号标记
+plotshape(long_signal, "多头", shape.triangleup, location.belowbar, color.green, size=size.small)
+plotshape(short_signal, "空头", shape.triangledown, location.abovebar, color.red, size=size.small)
+
+// 背景色
+bgcolor(long_signal ? color.new(color.green, 90) : na)
+bgcolor(short_signal ? color.new(color.red, 90) : na)
+bgcolor(vix_close > vix_threshold ? color.new(color.orange, 95) : na, title="高波动期")
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 详细信息面板
+// ══════════════════════════════════════════════════════════════════════════════
+var table info_table = table.new(position.bottom_right, 4, 8, border_width=1)
+
+if barstate.islast
+    // 标题行
+    table.cell(info_table, 0, 0, "分类器", bgcolor=color.gray, text_color=color.white)
+    table.cell(info_table, 1, 0, "标的1", bgcolor=color.purple, text_color=color.white)
+    table.cell(info_table, 2, 0, "标的2", bgcolor=color.teal, text_color=color.white)
+    table.cell(info_table, 3, 0, "标的3", bgcolor=color.maroon, text_color=color.white)
+
+    // 均线信号
+    table.cell(info_table, 0, 1, "均线", text_color=color.white)
+    table.cell(info_table, 1, 1, s1_ma_signal == 1 ? "↑" : s1_ma_signal == -1 ? "↓" : "→",
+               text_color=s1_ma_signal == 1 ? color.lime : s1_ma_signal == -1 ? color.red : color.gray)
+    table.cell(info_table, 2, 1, s2_ma_signal == 1 ? "↑" : "↓",
+               text_color=s2_ma_signal == 1 ? color.lime : color.red)
+    table.cell(info_table, 3, 1, s3_ma_signal == 1 ? "↑" : "↓",
+               text_color=s3_ma_signal == 1 ? color.lime : color.red)
+
+    // RSI信号
+    table.cell(info_table, 0, 2, "RSI", text_color=color.white)
+    table.cell(info_table, 1, 2, str.tostring(s1_rsi, "#.#"),
+               text_color=s1_rsi < 30 ? color.lime : s1_rsi > 70 ? color.red : color.white)
+    table.cell(info_table, 2, 2, str.tostring(s2_rsi, "#.#"),
+               text_color=s2_rsi < 30 ? color.lime : s2_rsi > 70 ? color.red : color.white)
+    table.cell(info_table, 3, 2, str.tostring(s3_rsi, "#.#"),
+               text_color=s3_rsi < 30 ? color.lime : s3_rsi > 70 ? color.red : color.white)
+
+    // MACD信号
+    table.cell(info_table, 0, 3, "MACD", text_color=color.white)
+    table.cell(info_table, 1, 3, s1_macd_signal == 1 ? "金叉" : s1_macd_signal == -1 ? "死叉" : "→",
+               text_color=s1_macd_signal == 1 ? color.lime : s1_macd_signal == -1 ? color.red : color.gray)
+    table.cell(info_table, 2, 3, s2_macd_signal == 1 ? "↑" : "↓",
+               text_color=s2_macd_signal == 1 ? color.lime : color.red)
+    table.cell(info_table, 3, 3, s3_macd_signal == 1 ? "↑" : "↓",
+               text_color=s3_macd_signal == 1 ? color.lime : color.red)
+
+    // 综合得分
+    table.cell(info_table, 0, 4, "得分", bgcolor=color.gray, text_color=color.white)
+    table.cell(info_table, 1, 4, str.tostring(s1_score, "#.#"),
+               text_color=s1_score > 0 ? color.lime : color.red)
+    table.cell(info_table, 2, 4, str.tostring(s2_score, "#.#"),
+               text_color=s2_score > 0 ? color.lime : color.red)
+    table.cell(info_table, 3, 4, str.tostring(s3_score, "#.#"),
+               text_color=s3_score > 0 ? color.lime : color.red)
+
+    // 市场环境
+    table.cell(info_table, 0, 5, "市场环境", bgcolor=color.gray, text_color=color.white)
+    market_text = market_trend == 1 ? "牛市" : "熊市"
+    table.cell(info_table, 1, 5, market_text, text_color=market_trend == 1 ? color.lime : color.red)
+    table.cell(info_table, 2, 5, "VIX: " + str.tostring(vix_close, "#.#"),
+               text_color=vix_close < vix_threshold ? color.lime : color.red)
+    table.cell(info_table, 3, 5, "宽度: " + str.tostring(symbols_bullish) + "/3",
+               text_color=symbols_bullish >= 2 ? color.lime : color.red)
+
+    // 最终信号
+    table.cell(info_table, 0, 6, "最终得分", bgcolor=color.gray, text_color=color.white)
+    table.cell(info_table, 1, 6, str.tostring(final_score, "#.##"),
+               bgcolor=final_score > 0 ? color.new(color.green, 70) : color.new(color.red, 70),
+               text_color=color.white)
+    table.cell(info_table, 2, 6, "置信度", text_color=color.white)
+    table.cell(info_table, 3, 6, str.tostring(confidence_pct, "#.#") + "%",
+               bgcolor=confidence_pct >= confidence_threshold ? color.new(color.green, 70) : color.new(color.orange, 70),
+               text_color=color.white)
+
+    // 当前持仓
+    table.cell(info_table, 0, 7, "持仓状态", bgcolor=color.gray, text_color=color.white)
+    position_text = strategy.position_size > 0 ? "多头" : strategy.position_size < 0 ? "空头" : "空仓"
+    position_color = strategy.position_size > 0 ? color.new(color.green, 70) :
+                     strategy.position_size < 0 ? color.new(color.red, 70) : color.new(color.gray, 70)
+    table.cell(info_table, 1, 7, position_text, bgcolor=position_color, text_color=color.white)
+    table.cell(info_table, 2, 7, "收益率", text_color=color.white)
+    pnl_pct = strategy.netprofit / strategy.initial_capital * 100
+    table.cell(info_table, 3, 7, str.tostring(pnl_pct, "#.##") + "%",
+               text_color=pnl_pct > 0 ? color.lime : color.red)
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+策略6：机器学习集成策略核心要点
+═══════════════════════════════════════════════════════════════════════════════
+
+【策略类型】集成学习 (Ensemble Learning) + 多标的多因子
+
+【理论基础】
+借鉴机器学习中的集成方法（类似Random Forest、AdaBoost思想）：
+- 每个技术指标视为一个"弱分类器"
+- 通过加权投票机制形成"强分类器"
+- 多标的交叉验证提高信号可靠性
+
+【核心架构】
+
+1. 特征提取层（Feature Engineering）
+   为每个标的计算6大类技术指标：
+   - 趋势指标：快慢均线
+   - 动量指标：RSI、MACD
+   - 波动率指标：布林带、ATR
+   - 成交量指标：量价背离
+   - 风险调整收益：ATR标准化动量
+
+2. 多标的验证层
+   - 标的1（主图表）：全指标分析（6个因子）
+   - 标的2（MSFT）：核心指标分析（4个因子）
+   - 标的3（GOOGL）：核心指标分析（3个因子）
+   - 目的：通过多标的一致性降低假信号
+
+3. 市场环境过滤层
+   - 大盘趋势（SPY 20/50均线）
+   - 市场宽度（多标的一致性比例）
+   - 恐慌指数（VIX阈值过滤）
+   - 市场强度（动量幅度）
+
+4. 集成决策层
+   - 加权投票：不同指标赋予不同权重
+   - 置信度计算：标准化为0-100%
+   - 阈值过滤：只执行高置信度信号（默认60%）
+
+【权重设计哲学】
+
+指标权重根据历史可靠性分配：
+- 均线金叉死叉：2.0（趋势确认强）
+- MACD：2.0（趋势+动量双重确认）
+- 动量因子：1.5（短期预测力强）
+- RSI：1.5（超买超卖中等可靠）
+- 成交量：1.5（确认价格走势）
+- 布林带：1.0（均值回归辅助）
+- 市场环境：3.0（最高权重，环境决定一切）
+
+【信号生成机制】
+
+入场条件（多层过滤）：
+1. 最终得分 > 0（多头）或 < 0（空头）
+2. 置信度 >= 阈值（默认60%）
+3. 市场环境允许（可选）：
+   - 多头需要牛市环境（SPY 20日线 > 50日线）
+   - VIX < 阈值（市场不恐慌）
+4. 无现有持仓
+
+出场条件（风险控制）：
+1. 得分反转（多头变空头或反之）
+2. 置信度下降至入场阈值50%以下
+3. VIX暴涨超过阈值120%（市场恐慌）
+
+【实战优势】
+
+1. **降低过拟合**
+   - 多指标多标的交叉验证
+   - 不依赖单一指标或参数
+
+2. **自适应性强**
+   - 市场环境自动调整权重（牛市加权1.2，熊市降权0.8）
+   - VIX过滤自动识别高风险期
+
+3. **可解释性**
+   - 每个指标信号可视化
+   - 实时显示各标的得分和置信度
+   - 便于诊断和优化
+
+4. **风险分散**
+   - 多标的分散单一股票风险
+   - 市场环境过滤降低系统性风险
+
+【适用场景】
+
+- **最佳周期**：日线、4小时线
+- **市场环境**：趋势市场表现优异，震荡市需提高置信度阈值
+- **资金规模**：中大型账户（需要同时监控多标的）
+- **交易频率**：中低频（高置信度信号较少）
+
+【参数优化策略】
+
+1. **保守配置**（适合新手）
+   - confidence_threshold = 70%
+   - use_market_filter = true
+   - vix_threshold = 20
+   - 结果：信号少但质量高
+
+2. **激进配置**（适合经验丰富者）
+   - confidence_threshold = 55%
+   - use_market_filter = false
+   - 结果：信号多，需要更严格止损
+
+3. **自定义权重**
+   - 可根据回测结果调整各指标权重
+   - 趋势市场提高均线和MACD权重
+   - 震荡市场提高RSI和布林带权重
+
+【与真实机器学习对比】
+
+相似之处：
+- 集成弱分类器思想
+- 加权投票机制
+- 多特征融合
+- 置信度输出
+
+差异：
+- 权重手动设定（非训练得出）
+- 线性组合（非复杂模型）
+- 无回溯优化（避免过拟合）
+
+【升级方向】
+
+1. **动态权重**
+   - 根据近期各指标胜率动态调整权重
+   - 类似AdaBoost自适应加权
+
+2. **特征选择**
+   - 添加更多因子（价量背离、资金流向等）
+   - 自动剔除低效指标
+
+3. **时间序列预测**
+   - 集成LSTM等深度学习模型输出
+   - 结合传统技术指标和AI预测
+
+4. **组合优化**
+   - 多标的动态配置（不同标的分配不同仓位）
+   - 基于协方差矩阵的风险平衡
+
+【风险提示】
+
+1. 多标的相关性突变时可能失效
+2. 黑天鹅事件（如2020年3月）VIX过滤可能失效
+3. 高置信度阈值会错过部分机会
+4. 需要定期检查标的选择是否合理（行业分散）
+
+【历史回测建议】
+
+- 至少回测3年数据
+- 包含牛市、熊市、震荡市
+- 分别测试不同置信度阈值
+- 记录各指标贡献度，优化权重
+
+【总结】
+
+这是一个融合了多标的、多因子、市场环境过滤的综合策略框架。
+相比简单策略，它通过集成学习思想大幅提高了信号质量和稳定性。
+适合作为量化交易系统的核心策略，可根据个人风格灵活调整参数。
+
+═══════════════════════════════════════════════════════════════════════════════
+*/

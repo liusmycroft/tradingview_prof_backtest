@@ -1,0 +1,309 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{客户重要性(图谱网络-网络结构)}
+
+\subsection{因子定义}
+利用 PageRank 算法计算客户重要性：
+\begin{equation}
+    p(i) = \frac{q}{V} + (1 - q) \sum_{j \in V: j \to i} \frac{p(j)}{k_j^{\mathrm{out}}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( p(i) \) 为客户 \( i \) 的 PageRank 得分；
+    \item ② \( k_j^{\mathrm{out}} \) 是供应商 \( j \) 的出度，即从节点 \( j \) 发出的链接数量；
+    \item ③ \( q \) 为阻尼因子，通常取值为 0.85；
+    \item ④ \( j \in V: j \to i \) 为指向公司 \( i \) 的所有供应商节点的集合；
+    \item ⑤ \( V \) 为图中节点的总数量。
+\end{itemize}
+
+\subsection{说明}
+衡量客户重要性的 PageRank 得分相比客户节点度（入度），除了考虑指向客户的供应商数量外，还考虑了相连供应商本身的重要性，即使两个客户的入度相同，拥有更多“重要”供应商的客户也会有更高的 PageRank 得分。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jussa et al. (2015). \textit{The Logistics of Supply Chain Alpha}. Deutsche Bank Markets Research.
+\end{enumerate}
+
+\section{耀眼收益率(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \)，计算 t 日内 1 分钟成交量序列的环比差值，将成交量差值大于“该日差值序列均值+1倍标准差”的时刻定义为“成交量激增时刻 \( n \)”；
+
+2. 利用分钟收盘价，计算“成交量激增时刻 \( n \)”的分钟收益率，即为“耀眼收益率”；
+
+3. 将 t 日内所有耀眼收益率求均值即为“日耀眼收益率”；
+
+4. 将各股票的“日耀眼收益率”减去该指标的横截面均值再取绝对值，即为“适度日耀眼收益率”。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算因子需剔除开盘和收盘数据，仅考虑日内分钟频数据；
+    \item ② 可对最近 20 个交易日的日度“适度日耀眼收益率”求均值和标准差，并等权合成，即可得“月耀眼收益率”因子。
+\end{itemize}
+
+\subsection{说明}
+“耀眼收益率”衡量了日内成交量激增所引起的价格变动幅度；“耀眼收益率”与未来收益负相关，若成交量激增后的价格变动较小，说明利好消息未被市场广泛认可，适度承担该风险能获得风险补偿；若引起的价格变动较大，可能代表投资者已反应过度，未来会补跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 成交量激增时刻蕴含的 alpha 信息. 方正证券.
+\end{enumerate}
+
+\section{盘口价差(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{spread} = \frac{2 \times (a_1 - b_1)}{a_1 + b_1}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( a_1 \) 和 \( b_1 \) 分别为盘口委托快照数据的卖一价和买一价；
+    \item ② 可对上述因子日内序列求均值得到日度因子值，再进行 20 个交易日指数移动平均得到月度因子值。
+\end{itemize}
+
+\subsection{说明}
+盘口价差反映了卖一价和买一价的距离，与未来收益正相关，盘口价差越大，交易成本越高，市场宽度越大，流动性越差，而流动性较低的个股未来收益表现相对较好。也可对日内盘口价差求标准差，衡量价差的日内均匀程度。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 胡骏聪等. 2021. 高频视角下的微观流动性与波动性. 中金公司.
+\end{enumerate}
+
+\section{改进的分析师共同覆盖间接关联动量(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ADJ\_CF2\_RET}_i = \frac{\sum_{j=1}^{N} m_{ij} \times \mathrm{Ret}_j}{\sum_{j=1}^{N} m_{ij}}
+\end{equation}
+\begin{equation}
+    m_{ij} = \frac{\sum_{k=1}^{N} \log(n_{ik} + 1) \times \log(n_{kj} + 1)}{\log(\mathrm{num}_i + 1)}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( m_{ij} \) 为股票 \( i \) 和股票 \( j \) 的间接关联强度；
+    \item ② \( n_{ik}, n_{kj} \) 分别为连接股票 \( i \) 和股票 \( j \) 的中间股票 \( k \) 与双方的直接关联强度（共同覆盖的分析师数量）；
+    \item ③ \( \mathrm{Ret}_j \) 为股票 \( j \) 过去 1 个月（20 个交易日）的收益率；
+    \item ④ \( \mathrm{num}_i \) 为与股票 \( i \) 直接关联的公司数量；
+    \item ⑤ \( N \) 为股票池中的股票数量。
+\end{itemize}
+
+\subsection{说明}
+若一家公司有很多直接关联公司，市场难以迅速整合所有关联公司的信息，直接关联相比间接关联具有更显著的领先滞后效应；若一家公司的直接关联公司很少，信息传播效率较高，直接关联公司的信息会快速反映到股价上，此时进一步挖掘间接关联信息可能更有效；可以使用直接关联数量对间接关联做改进。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Ali, U., \& Hirshleifer, D. A. (2020). \textit{Shared analyst coverage: Unifying momentum spillover effects}. Journal of Financial Economics, 136(3), 649-675.
+    \item 林晓明, 李子钰, 何康. 2022. 深挖分析师共同覆盖中的关联因子. 华泰证券.
+\end{enumerate}
+
+\section{均匀分布主动占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{均匀分布主动买入金额}_i = \mathrm{Amount}_i \times \frac{\mathrm{ret}_i - 0.1}{0.2}
+\end{equation}
+
+\begin{equation}
+    \text{均匀分布主动占比因子} = \frac{\sum_{i=1}^{N} \text{均匀分布主动买入金额}_i}{\sum_{i=1}^{N} \mathrm{Amount}_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{ret}_i \) 为每个时间段收益率，频率可为 1 分钟、5 分钟等。
+\end{itemize}
+
+\subsection{说明}
+绝大部分时间段的成交几乎均有买卖双方各自驱动成交的部分，在计算主动买入金额时采用连续性值作为成交额所乘系数可以提高主买卖额估计准确度；此处收益率到主动买入占比的映射函数采用均匀分布（对应价格变动对主动买卖力量均匀影响的情况），考虑到 A 股存在涨跌停限制，个股价格变动幅度一般在 -0.1 到 0.1 之间，对原收益率做了从 -0.1 至 0.1 到 0 至 1 之间的线性变换。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2020. 高频因子(七): 分布估计下的主动成交占比. 长江证券.
+\end{enumerate}
+
+\section{一致卖出交易(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+通过定义实体 K 线，将交易日中的每根 5 分钟 K 线划分为集体一致交易与非集体一致交易：
+\begin{equation}
+    |\mathrm{close} - \mathrm{open}| \leq \alpha |\mathrm{high} - \mathrm{low}|
+\end{equation}
+
+利用下跌的实体 K 线构造一致卖出交易因子：
+\begin{equation}
+    \mathrm{NCV}_t = \frac{1}{d} \sum_{i=1}^{d} \left( \frac{\mathrm{ConsistentVolume}_{\mathrm{fall}}}{\mathrm{Volume}} \right)_{t-i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \alpha \) 为一致参数，\( \alpha \) 越大，K 线一致性越强（上下引线越短，K 线越实体）；
+    \item ② \( \mathrm{ConsistentVolume}_{\mathrm{fall}} \) 为下跌的 5 分钟实体 K 线的总成交量；
+    \item ③ \( \mathrm{Volume} \) 为当日总成交量；
+    \item ④ \( d \) 表示移动平均的周期参数。
+\end{itemize}
+
+\subsection{说明}
+集体一致交易行为预示交易机会，如果一支股票在一段时间内大部分的交易属于集体一致交易行为，趋势性显著，则很可能这支股票在这段时间内有新信息进入，正在经历市场消化过程（price-in），未来股价很可能产生大幅变化，为交易者创造交易机会。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 刘均伟. 2018. 一致交易因子:挖掘集体行为背后的收益. 光大证券.
+\end{enumerate}
+
+\section{K 线形态(量价因子改进)}
+
+\subsection{因子定义}
+
+① 用过去 3 年（720 个交易日）所有股票的 2K 形态（每两个连续交易日 K 线构成一个 2K 形态）和该形态未来 20 个交易日的收益率作为 K 线形态表现打分的样本，形态 \( p \)（\( p \) 属于 768 种形态集合）的分值为：
+\begin{equation}
+    wr_p = \frac{W(r_p > 0)}{N(r_p)}
+\end{equation}
+\begin{equation}
+    r_p = \frac{\mathrm{close}_{p+20}}{\mathrm{open}_{p+1}} - 1
+\end{equation}
+
+② 用形态胜率 \( wr_p \) 对股票最近 40 个交易日 K 线形态进行打分加总，采用衰退指数进行加权，得到形态因子 \( \mathrm{KP} \)：
+\begin{equation}
+    \mathrm{KP}_{i,T} = \sum_{t=T-40}^{T} w_t \cdot wr_{i,t}
+\end{equation}
+\begin{equation}
+    wr_{i,t} = wr_p(\mathrm{pattern}_{i,t} = \mathrm{pattern}_p \mid p \in \{1,2,3,\ldots,768\})
+\end{equation}
+\begin{equation}
+    w_t = 0.5^{\frac{T-t}{\lambda}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_p \) 为形态 \( p \) 出现后未来 20 个交易日的收益率；
+    \item ② \( wr_p \) 为窗口期内形态 \( p \) 的胜率，\( N \) 为形态 \( p \) 出现的次数，\( W \) 为形态 \( p \) 样本中未来收益大于 0 的次数；
+    \item ③ \( w_t \) 为时间衰退指数加权权重；
+    \item ④ 768 种 2K 形态组合方式详见参考文献。
+\end{itemize}
+
+\subsection{说明}
+K 线形态因子为股票最近一段时间 K 线形态得分加权之和，窗口期内测算各种 K 线形态的胜率，用以度量股票当前 K 线形态表现，与股票未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑琳琳,盛宝丹.2025.加权影线与k线形态因子.西南证券
+\end{enumerate}
+
+\section{模糊关联度(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \) 计算 \( n \) 日内的 1 分钟收益率；计算第 \( t \) 分钟的波动率，即 \([t-4, t]\) 区间内分钟收益率的标准差；计算第 \( t \) 分钟的模糊性，即 \([t-4, t]\) 区间内上述分钟波动率的标准差；
+
+2. 每日计算上述分钟模糊性序列与分钟成交额序列的相关系数，即为“模糊关联度”因子：
+\begin{equation}
+    \mathrm{FuzzyCorr}_d = \mathrm{corr}(\mathrm{Ambiguity}_t, \mathrm{Amount}_t)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算上述因子时，剔除开盘和收盘数据，仅保留日内交易数据，所以开盘前 9 分钟的模糊性为空值；
+    \item ② 每月末可对最近 20 天的上述因子求均值和标准差并将两者等权合并，即得到月度“模糊关联度”因子。
+\end{itemize}
+
+\subsection{说明}
+模糊关联度因子衡量了投资者成交金额随波动率模糊性变化而变化的程度，即从成交额维度衡量了投资者对模糊性的厌恶程度，与未来收益负相关；投资者对波动率模糊性的厌恶心理会使得投资者急于卖出而产生过度反应，未来很可能会补涨。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 波动率的波动率与投资者模糊性厌恶. 方正证券.
+    \item Kostopoulos, D., Meyer, S., \& Uhr, C. (2021). \textit{Ambiguity about volatility and investor behavior}. Journal of Financial Economics.
+\end{enumerate}
+
+\section{上行跳跃波动率(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RVJP}_t = \max\left(\mathrm{RS}_t^+ - \frac{1}{2} \hat{IV}_t, 0\right)
+\end{equation}
+\begin{equation}
+    \mathrm{RS}_t^+ = \sum_{i=1}^{n} r_{t,i}^2 \mathrm{I}_{r_{t,i} > 0} \rightarrow_u \frac{1}{2} \int_0^t \sigma_s^2 ds + \sum_{s \leq t} \Delta X_s^2 \mathrm{I}_{\Delta X_s > 0}
+\end{equation}
+\begin{equation}
+    \hat{IV}_t = \mu_{\frac{3}{2}}^{-3} \sum_{i=k}^{n} |r_{t,i}|^{\frac{2}{3}} |r_{t,i-1}|^{\frac{2}{3}} \cdots |r_{t,i-k+1}|^{\frac{2}{3}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{t,i} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( k=3 \)，\( n \) 表示该股票在交易日 \( t \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点；
+    \item ③ \( \mu_q \) 为标准正态分布的第 \( q \) 阶绝对矩；
+    \item ④ 上行跳跃波动率 \( \mathrm{RVJP}_t \) 整体取值为正，所以需要用 \( \max \) 对负差值做修正。
+\end{itemize}
+
+\subsection{说明}
+按收益涨跌情况，股价波动可分为上行波动和下行波动。跳跃波动也可据此做划分，上行跳跃波动就是上行波动中的跳跃部分；短期内，上行跳跃波动通常有负的风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Yu, B., Mizrach, B., \& Swanson, N. R. (2020). \textit{New Evidence of the Marginal Predictive Content of Small and Large Jumps in the Cross-Section}. Econometrics, MDPI, 8(2), 1–52.
+\end{enumerate}
+
+\section{前景价值 TK(行为金融因子-前景理论)}
+
+\subsection{因子定义}
+
+① 以个股过去 \( N \) 日收益率序列作为未来收益分布的预测，其中负收益率从小到大为 \( r_{-m}, \ldots, r_{-1} \)，正收益率从小到大为 \( r_1, \ldots, r_n \)，每个收益出现的概率均为 \( \frac{1}{N} = m + n + 1 \)：
+\begin{equation}
+    (r_{-m}, \frac{1}{N}; \ldots; r_{-1}, \frac{1}{N}; r_0, \frac{1}{N}; r_1, \frac{1}{N}; \ldots; r_m, \frac{1}{N})
+\end{equation}
+
+② 利用价值函数、权重函数计算前景价值 \( \mathrm{TK} \)：
+\begin{equation}
+    \mathrm{TK} = \sum_{i=-m}^{-1} v(r_i)\left[ w^-\left(\frac{i + m + 1}{N}\right) - w^-\left(\frac{i + m}{N}\right) \right] + \sum_{i=1}^{n} v(r_i)\left[ w^+\left(\frac{n - i + 1}{N}\right) - w^+\left(\frac{n - i}{N}\right) \right]
+\end{equation}
+
+③ 价值函数、权重函数如下所示，函数参数取值为 \( \alpha = 0.88, \lambda = 2.25; \gamma = 0.61, \delta = 0.69 \)：
+\begin{equation}
+    v(x) =
+    \begin{cases} 
+        x^\alpha, & x \geq 0 \\ 
+        -\lambda(-x)^\alpha, & x < 0 
+    \end{cases}
+\end{equation}
+\begin{equation}
+    \pi_l =
+    \begin{cases} 
+        w^+(p_i + \cdots + p_n) - w^+(p_{i+1} + \cdots + p_n), & 0 \leq l \leq n \\ 
+        w^-(p_m + \cdots + p_n) - w^-(p_{i+1} + \cdots + p_n), & 0 \leq i \leq n \\ 
+        w^-(p_m + \cdots + p_i) - w^-(p_m + \cdots + p_{i-1}), & -m \leq i < 0 
+    \end{cases}
+\end{equation}
+\begin{equation}
+    w^+(P) = \frac{P^\gamma}{(P^\gamma + (1 - P)^\gamma)^{\frac{1}{\gamma}}}
+\end{equation}
+\begin{equation}
+    w^-(P) = \frac{P^\delta}{(P^\delta + (1 - P)^\delta)^{\frac{1}{\delta}}}
+\end{equation}
+
+\subsection{说明}
+前景价值代表了投资者给每支个股的“打分”，基于前景理论，由于价值量 \( \mathrm{TK} \) 高的股票更具吸引力，投资者总会去买那些价值量 \( \mathrm{TK} \) 高的股票（选项），导致价值高的股票被超买，而价值低的股票由于没人关注而被低估，股票未来的预期收益率和当前的前景价值 \( \mathrm{TK} \) 呈负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Barberis, N., Mukherjee, A., \& Wang, B. (2016). \textit{Prospect theory and stock returns: An empirical test}. Review of Financial Studies, 29(11), 3068–3107.
+\end{enumerate}
+\end{document}

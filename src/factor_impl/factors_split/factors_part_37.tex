@@ -1,0 +1,244 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{APM 因子(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+对选定股票，回溯取其过去20日数据，记录上午的股票收益率为 \( r_t^{\mathrm{am}} \)，指数收益率为 \( R_t^{\mathrm{am}} \)；逐日下午的股票收益率为 \( r_t^{\mathrm{pm}} \)，指数收益率为 \( R_t^{\mathrm{pm}} \)。
+
+将得到的40组上午与下午 \((r, R)\) 的收益率数据进行回归：
+\begin{equation}
+    r_i = \alpha + \beta R_i + \varepsilon_i
+\end{equation}
+得到残差项 \( \varepsilon_i \)；
+
+以上得到的40个残差 \( \varepsilon_i \)中，上午残差记为 \( \varepsilon_i^{\mathrm{am}} \)，下午残差记为 \( \varepsilon_i^{\mathrm{pm}} \)，进一步计算每日上午与下午残差的差：
+\begin{equation}
+    \delta_t = \varepsilon_t^{\mathrm{am}} - \varepsilon_t^{\mathrm{pm}}
+\end{equation}
+
+构造统计量 \( \mathrm{stat} \) 来衡量上午与下午残差的差异程度，计算公式如下（\( \mu \) 为均值，\( \sigma \) 为标准差）：
+\begin{equation}
+    \mathrm{stat} = \frac{\mu(\delta_t)}{\sigma(\delta_t) / \sqrt{N}}
+\end{equation}
+
+为了消除动量因子影响，将统计量 \( \mathrm{stat} \) 对动量因子进行横截面回归：
+\begin{equation}
+    \mathrm{stat}_j = b \cdot \mathrm{Ret20}_j + \varepsilon_j
+\end{equation}
+其中 \( \mathrm{Ret20} \) 为股票过去20日的收益率，代表动量因子；回归得到的残差值 \( \varepsilon \) 即为APM因子。
+
+\subsection{说明}
+基于“知情交易者更加倾向于在每日上午进行交易，上午的价格行为蕴藏了更多可用于选股的信息量”的想法，构建了刻画了股票上午与下午的价格行为差异程度的APM因子；改进的APM因子是将个股和指数的上午收益 \( r_t^{\mathrm{am}} \) 替换成了隔夜收益 \( r_t^{\mathrm{overnight}} \)。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕. 2020. APM因子模型的进阶版. 开源证券.
+\end{enumerate}
+
+\section{新闻网络节点度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+① 以标题中股票为 lead，以同时出现在新闻正文中的其他股票为 follower，确定领边 \( l_{ij,T} \)，并构建股票共现图的邻接矩阵 \( W_T \)：
+\begin{equation}
+    l_{ij,T} = \bigcup_{m_d \in D_T} \{(i,j)_{m_d} \mid j \text{ in } m_d \text{ title, } i \text{ in } m_d \text{ headline, } i \neq j\}
+\end{equation}
+\begin{equation}
+    W_T = [\omega_{ij,T}]_{n \times n} = \left[ \frac{l_{ij,T}}{\sum_{j=1}^n l_{ij,T}} \right]_{n \times n}
+\end{equation}
+
+② 基于股票共现图邻接矩阵 \( W_T \) 计算节点度 degree：
+\begin{equation}
+    A_{i,t}(\omega_{ij,t-l:T}) = \# \{j : \omega_{ij,t-l:T} \neq 0\} + \# \{j : \omega_{ji,t-l:T} \neq 0\}, \quad j = 1, 2, \cdots, n
+\end{equation}
+
+\subsection{说明}
+新闻节点度为新闻共现网络中与节点相连的邻居节点的数量，节点度较高，说明该公司在新闻报道中频繁与其他多个公司共同提及，有较高的媒体关注度；媒体在报道时更愿意报道积极的、乐观的消息，有较高关注度的公司表现会优于那些受到较少媒体关注的公司。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Hu, J., \& Härdle, W. (2021). \textit{Networks of news and cross-sectional returns}. IRTG 1792 Discussion Papers 2021-023, Humboldt University of Berlin, International Research Training Group 1792 “High Dimensional Nonstationary Time Series”.
+\end{enumerate}
+
+\section{时间加权平均的股票相对价格位置(高频因子-收益分布类)}
+
+\subsection{因子定义}
+计算股票相对价格位置，即股票当期价格相对区间最高最低价的分数：
+\begin{equation}
+    \mathrm{RPP}_{i,t} = \frac{P_{i,t} - L_i}{H_i - L_i}
+\end{equation}
+
+将股票相对价格位置对时间进行积分，得到时间加权平均的相对价格位置 \( \mathrm{ARPP} \)：
+\begin{equation}
+    \mathrm{ARPP}_i = \int_0^T \mathrm{RPP}_{i,t} \, dt \quad \Rightarrow \quad \mathrm{ARPP}_{i,t} = \frac{\int_0^T P_{i,t} \, dt - L_i}{H_i - L_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RPP}_{i,t} \) 表示股票 \( i \) 在某一时间区间内的时刻 \( t \) 的相对价格位置；
+    \item ② \( H_i \) 和 \( L_i \) 为该时间区间内股票 \( i \) 的最高价和最低价；
+    \item ③ \( \displaystyle \int_0^T \mathrm{RPP}_{i,t} \, dt \) 表示股票 \( i \) 在时间区间 \( 0 \) 到 \( T \) 内的时间加权平均价格（即 TWAP），可以用分钟线高开低收均值在时序上的均值作为区间的 TWAP。
+\end{itemize}
+
+\subsection{说明}
+衡量股票在价格相对高位停留的时间长短，股票在价格相对高位停留的时间越长，因子取值越大。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱剑涛.2020.基于时间尺度度量的日内买卖压力.东方证券
+\end{enumerate}
+
+\section{反向交易系数修正后的积极灵活筹码(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+① 计算筹码买入价格相对当日开盘价的涨跌幅作为该筹码的反向交易系数：
+\begin{equation}
+    \alpha_i = \frac{\mathrm{TradePrice}_i}{\mathrm{Open}_t}
+\end{equation}
+
+② 将反向修正系数与筹码买入量相乘即可得到修正后的积极灵活筹码值：
+\begin{equation}
+    \mathrm{AFH\_Open} = \frac{\sum_{i=1}^{N} \alpha_i \times \mathrm{Vol\_AFH}_i}{\sum_{t=T-20}^{T} \mathrm{Volume}_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( i \) 为筹码购入时的订单号，统计对象为过去 20 日的订单号；
+    \item ② \( \mathrm{Vol\_AFH}_i \) 为主动买入时订单金额小于 5 万元的订单成交量；
+    \item ③ \( \mathrm{TradePrice}_i \) 为该订单的买入价格；
+    \item ④ \( \mathrm{Open}_t \)、\( \mathrm{Volume}_t \) 分别为订单买入当日的开盘价和当日总成交量。
+\end{itemize}
+
+\subsection{说明}
+处置效应下的“卖盈持亏”行为是一种反向交易行为，而在日内下跌过程中买入筹码的投资者会更具有反向交易的思维，此时的买入筹码也更具处置效应，因此可以计算筹码买入价格相对当日开盘价的涨跌幅作为该筹码的反向交易系数，用于修正原始的积极灵活筹码，提升因子表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任瞳, 许继宏. 2024. 基于逐笔数据的 AFH 改进因子. 招商证券.
+\end{enumerate}
+
+\section{下跌时刻笔均成交金额(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 将日内 240 个 1 分钟数据集合标记为 \( T = \{t_1, t_2, \dots, t_{240}\} \)，判断股票 \( i \) 的每分钟涨跌幅，将下跌时刻标记为集合 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \)；
+
+② 对下跌时刻进行汇总，根据其成交额 \( \mathrm{Amt}_t \) 之和除以成交笔数 \( \mathrm{DealNum}_t \) 之和，构造下跌时刻的笔均成交金额 \( \mathrm{ATD}_{\mathrm{Down}} \)：
+\begin{equation}
+    \mathrm{ATD}_{\mathrm{Down}} = \frac{\sum_{t \in P} \mathrm{Amt}_t}{\sum_{t \in P} \mathrm{DealNum}_t}
+\end{equation}
+
+③ 同理，将全天的成交金额除以全天的成交笔数，得到全天的笔均成交金额 \( \mathrm{ATD}_T \)：
+\begin{equation}
+    \mathrm{ATD}_T = \frac{\sum_{t \in T} \mathrm{Amt}_t}{\sum_{t \in T} \mathrm{DealNum}_t}
+\end{equation}
+
+④ 将下跌时刻的笔均成交金额除以全天的笔均成交金额，即得到去量纲化后的下跌时刻标准化笔均成交金额因子 \( \mathrm{SATD}_{\mathrm{Down}} \)：
+\begin{equation}
+    \mathrm{SATD}_{\mathrm{Down}} = \frac{\mathrm{ATD}_{\mathrm{Down}}}{\mathrm{ATD}_T}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 特殊时刻 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \) 除了下跌时刻外，还可以是上涨时刻、横盘时刻等。由此可进一步得到上涨时刻标准化笔均成交金额因子、横盘时刻标准化笔均成交额因子等。
+\end{itemize}
+
+\subsection{说明}
+笔均成交额类因子通过汇总“特殊的、具有较多信息含量”时刻的成交金额情况来刻画主力资金的行为动向；笔均成交金额越大，说明该特殊时间内资金优势越明显，属于主力资金的可能性越大。上述因子是从“股价涨跌”维度来寻找特殊时刻，测试发现股价“下跌时刻”的笔均成交金额越高，股价未来的表现越好，可能刻画了下跌时刻主力资金的“抄底行为”。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣悦, 张宇. 2025. 日内特殊时刻蕴含的主力资金 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{价格冲击偏差(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{return}_i = \gamma^{\mathrm{up}} \cdot I_i \cdot \mathrm{MF}_i + \gamma^{\mathrm{down}} \cdot (1 - I_i) \cdot \mathrm{MF}_i
+\end{equation}
+\begin{equation}
+    \mathrm{MF}_i = \frac{\mathrm{MoneyFlow}_i}{\mathrm{Amount}_i}
+\end{equation}
+\begin{equation}
+    \gamma_{\mathrm{bias}} = \frac{\gamma^{\mathrm{up}} - \gamma^{\mathrm{down}}}{(\gamma^{\mathrm{up}} + \gamma^{\mathrm{down}})/2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{return}_i \) 为第 \( i \) 个 5 分钟线的收益率；
+    \item ② \( \mathrm{MoneyFlow}_i \)、\( \mathrm{Amount}_i \) 分别为第 \( i \) 个 5 分钟内的主动净流入金额和成交额；
+    \item ③ \( \mathrm{MF}_i \) 为主动净买入占比；
+    \item ④ \( I_i \) 为示性函数，当 \( \mathrm{MF}_i \) 大于 0 时取 1，否则取 0。
+\end{itemize}
+
+\subsection{说明}
+价格冲击偏差主要表征了股票在某一时间区间上涨或者下跌的难易程度，价格冲击偏差较大（正值）的股票，相同比例的主动订单对其股价向下的冲击小于向上的冲击，股票容易上涨，反之，股票容易下跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱剑涛. 2016. 非对称价格冲击带来的超额收益. 东方证券.
+\end{enumerate}
+
+\section{基于日收益率的注意力因子}
+
+\subsection{因子定义}
+本文的因子定义包含原始因子和经过处理的因子两种形式。原始因子的核心计算如下：
+\begin{equation}
+\begin{aligned}
+\text{因子原始值}_{i, t} &= \frac{1}{T} \sum_{\tau = t-T+1}^{t} (r_{i, \tau} - R_{m, \tau})^2
+\end{aligned}
+\end{equation}
+\vspace{6pt}
+其中，$T$为一个自然年的交易日总数。在此基础上，采用“当前自然年因子值减去历史因子值”的处理方法得到最终因子：
+\begin{equation}
+\begin{aligned}
+\text{处理后的因子}_{i, t} &= \text{因子原始值}_{i, t}^{\text{(当前自然年)}} - \text{因子原始值}_{i}^{\text{(历史)}}
+\end{aligned}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item $r_{i, \tau}$ 表示在交易日 $\tau$ 基金 $i$ 的日收益率。
+    \item $R_{m, \tau}$ 表示在交易日 $\tau$ 的市场基准收益率。文中明确指出：“市场收益率，笔者直接用了全市场所有同类型基金收益率的均值”。
+    \item $T$ 表示计算窗口期的长度，文中明确为“一个自然年的数据”，即过去一个自然年所包含的交易日总数。
+    \item $\text{因子原始值}_{i}^{\text{(历史)}}$ 表示基金 $i$ 在“当前自然年”之前（即历史数据）的因子原始值的长期均值。文中未给出其具体计算窗口，仅提及“历史均值”。
+\end{itemize}
+
+\subsection{说明}
+这个因子，笔者是在研报当中看到的，然后在大A全市场所有股票中进行了第一次复现，发现效果很不错。于是，昨天在转债市场上用了一下这个因子。虽然，结果谈不上惊艳，但也还算可以。既然股票和转债上都尝试了这个因子了，而且它的计算只与收益率有关，那为啥不在基金上面也做一下尝试呢？
+
+基于之前的研究，笔者发现选基因子用当前自然年的均值减去历史均值会有奇效（在《量化选基系列（十八）：我似乎找到了量化选基因子的正确打开方式！》这篇文章有过相关介绍），因此在实证分析的时候，也加入了通过这种方式处理之后的结果。
+
+\subsection{参考文献}
+本文为独立研究，文中引用的参考文献如下：
+\begin{enumerate}
+    \item 量化选基系列（十八）：我似乎找到了量化选基因子的正确打开方式！
+    \item 量化选基系列（十四）：精心设计了一个均值回归因子，结果却变成了强者恒强！
+    \item 量化选基系列（十五）：一个对均值回归走火入魔的博主，整了个新活！结果在FOF基金上效果炸裂！
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+\end{document}

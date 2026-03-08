@@ -1,0 +1,264 @@
+//@version=5
+strategy("板块强弱背离策略 - 科技vs消费", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 策略说明：通过对比两个板块的相对强弱和动量背离进行交易
+// 核心思想：当板块间出现强弱背离时，做多强势板块，做空弱势板块
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// 输入参数
+tech_etf = input.symbol("NASDAQ:QQQ", "科技板块ETF")
+consumer_etf = input.symbol("NASDAQ:XLY", "消费板块ETF")
+spy_benchmark = input.symbol("NASDAQ:SPY", "基准指数")
+
+rsi_length = input.int(14, "RSI周期", minval=5, maxval=50)
+momentum_length = input.int(20, "动量周期", minval=10, maxval=100)
+volume_length = input.int(30, "成交量MA周期", minval=10, maxval=100)
+atr_length = input.int(14, "ATR周期", minval=5, maxval=50)
+
+// 相对强度阈值
+rs_threshold = input.float(0.15, "相对强度阈值", minval=0.05, maxval=0.5, step=0.05)
+divergence_threshold = input.float(10, "背离阈值(%)", minval=5, maxval=30, step=5)
+
+// 获取板块数据
+tech_close = request.security(tech_etf, timeframe.period, close)
+tech_volume = request.security(tech_etf, timeframe.period, volume)
+consumer_close = request.security(consumer_etf, timeframe.period, close)
+consumer_volume = request.security(consumer_etf, timeframe.period, volume)
+spy_close = request.security(spy_benchmark, timeframe.period, close)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 因子1: 相对强度指标 (Relative Strength)
+// ══════════════════════════════════════════════════════════════════════════════
+tech_vs_spy = (tech_close / spy_close) * 100
+consumer_vs_spy = (consumer_close / spy_close) * 100
+
+tech_rs_ma = ta.sma(tech_vs_spy, momentum_length)
+consumer_rs_ma = ta.sma(consumer_vs_spy, momentum_length)
+
+tech_rs_pct = (tech_vs_spy - tech_rs_ma) / tech_rs_ma * 100
+consumer_rs_pct = (consumer_vs_spy - consumer_rs_ma) / consumer_rs_ma * 100
+
+// 相对强度差值
+rs_divergence = tech_rs_pct - consumer_rs_pct
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 因子2: 动量因子 (Rate of Change)
+// ══════════════════════════════════════════════════════════════════════════════
+tech_roc = ta.roc(tech_close, momentum_length)
+consumer_roc = ta.roc(consumer_close, momentum_length)
+roc_divergence = tech_roc - consumer_roc
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 因子3: RSI背离
+// ══════════════════════════════════════════════════════════════════════════════
+tech_rsi = request.security(tech_etf, timeframe.period, ta.rsi(close, rsi_length))
+consumer_rsi = request.security(consumer_etf, timeframe.period, ta.rsi(close, rsi_length))
+rsi_divergence = tech_rsi - consumer_rsi
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 因子4: 成交量相对强度
+// ══════════════════════════════════════════════════════════════════════════════
+tech_vol_ma = request.security(tech_etf, timeframe.period, ta.sma(volume, volume_length))
+consumer_vol_ma = request.security(consumer_etf, timeframe.period, ta.sma(volume, volume_length))
+
+tech_vol_ratio = tech_volume / tech_vol_ma
+consumer_vol_ratio = consumer_volume / consumer_vol_ma
+vol_divergence = tech_vol_ratio - consumer_vol_ratio
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 因子5: 波动率调整后的收益率 (Sharpe-like ratio)
+// ══════════════════════════════════════════════════════════════════════════════
+tech_atr = request.security(tech_etf, timeframe.period, ta.atr(atr_length))
+consumer_atr = request.security(consumer_etf, timeframe.period, ta.atr(atr_length))
+
+tech_risk_adjusted = (tech_close - tech_close[momentum_length]) / tech_atr
+consumer_risk_adjusted = (consumer_close - consumer_close[momentum_length]) / consumer_atr
+risk_adj_divergence = tech_risk_adjusted - consumer_risk_adjusted
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 综合评分系统
+// ══════════════════════════════════════════════════════════════════════════════
+tech_score = 0.0
+consumer_score = 0.0
+
+// 评分权重配置
+weight_rs = 2.5
+weight_momentum = 2.0
+weight_rsi = 1.5
+weight_volume = 1.0
+weight_risk_adj = 2.0
+
+// 相对强度评分
+tech_score := tech_score + (rs_divergence > 0 ? weight_rs : 0)
+consumer_score := consumer_score + (rs_divergence < 0 ? weight_rs : 0)
+
+// 动量评分
+tech_score := tech_score + (roc_divergence > 0 ? weight_momentum : 0)
+consumer_score := consumer_score + (roc_divergence < 0 ? weight_momentum : 0)
+
+// RSI评分 (偏好RSI较低的，均值回归机会)
+tech_score := tech_score + (tech_rsi < 50 and tech_rsi > 30 ? weight_rsi : 0)
+consumer_score := consumer_score + (consumer_rsi < 50 and consumer_rsi > 30 ? weight_rsi : 0)
+
+// 成交量评分
+tech_score := tech_score + (vol_divergence > 0.2 ? weight_volume : 0)
+consumer_score := consumer_score + (vol_divergence < -0.2 ? weight_volume : 0)
+
+// 风险调整后收益评分
+tech_score := tech_score + (risk_adj_divergence > 0 ? weight_risk_adj : 0)
+consumer_score := consumer_score + (risk_adj_divergence < 0 ? weight_risk_adj : 0)
+
+// 总分差值
+score_diff = tech_score - consumer_score
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 交易信号生成
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 强背离信号：科技板块明显强于消费板块
+strong_tech_signal = score_diff > 4 and rs_divergence > divergence_threshold and tech_rsi < 70
+// 强背离信号：消费板块明显强于科技板块
+strong_consumer_signal = score_diff < -4 and rs_divergence < -divergence_threshold and consumer_rsi < 70
+
+// 出场信号：背离收敛
+exit_signal = math.abs(score_diff) < 2 or math.abs(rs_divergence) < divergence_threshold / 2
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 策略执行逻辑
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 做多科技板块（在主图表上体现为做多当前标的）
+if strong_tech_signal and strategy.position_size == 0
+    strategy.entry("做多科技板块", strategy.long)
+    alert("板块强弱背离: 做多科技(QQQ) 做空消费(XLY)", alert.freq_once_per_bar)
+
+// 做多消费板块（在主图表上体现为做空当前标的）
+if strong_consumer_signal and strategy.position_size == 0
+    strategy.entry("做多消费板块", strategy.short)
+    alert("板块强弱背离: 做空科技(QQQ) 做多消费(XLY)", alert.freq_once_per_bar)
+
+// 出场
+if exit_signal and strategy.position_size != 0
+    strategy.close_all()
+    alert("背离收敛，平仓所有头寸", alert.freq_once_per_bar)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 可视化
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 绘制背离指标
+plot(rs_divergence, "相对强度背离(%)", color=color.blue, linewidth=2)
+plot(roc_divergence, "动量背离(%)", color=color.orange, linewidth=1)
+hline(divergence_threshold, "上阈值", color=color.red, linestyle=hline.style_dashed)
+hline(-divergence_threshold, "下阈值", color=color.green, linestyle=hline.style_dashed)
+hline(0, "中性", color=color.gray)
+
+// 绘制评分
+plot(score_diff, "综合评分差", color=score_diff > 0 ? color.green : color.red, linewidth=3, style=plot.style_histogram)
+
+// 背景色标识强信号区域
+bgcolor(strong_tech_signal ? color.new(color.green, 85) : na, title="科技强势区")
+bgcolor(strong_consumer_signal ? color.new(color.red, 85) : na, title="消费强势区")
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 信息面板
+// ══════════════════════════════════════════════════════════════════════════════
+var table info_table = table.new(position.top_right, 2, 7, border_width=1)
+
+if barstate.islast
+    // 标题
+    table.cell(info_table, 0, 0, "指标", bgcolor=color.gray, text_color=color.white)
+    table.cell(info_table, 1, 0, "数值", bgcolor=color.gray, text_color=color.white)
+
+    // 科技板块评分
+    table.cell(info_table, 0, 1, "科技评分", text_color=color.white)
+    table.cell(info_table, 1, 1, str.tostring(tech_score, "#.#"),
+               bgcolor=tech_score > consumer_score ? color.new(color.green, 70) : color.new(color.gray, 70),
+               text_color=color.white)
+
+    // 消费板块评分
+    table.cell(info_table, 0, 2, "消费评分", text_color=color.white)
+    table.cell(info_table, 1, 2, str.tostring(consumer_score, "#.#"),
+               bgcolor=consumer_score > tech_score ? color.new(color.green, 70) : color.new(color.gray, 70),
+               text_color=color.white)
+
+    // 相对强度背离
+    table.cell(info_table, 0, 3, "RS背离(%)", text_color=color.white)
+    table.cell(info_table, 1, 3, str.tostring(rs_divergence, "#.##"),
+               text_color=rs_divergence > 0 ? color.lime : color.red)
+
+    // RSI差值
+    table.cell(info_table, 0, 4, "RSI差值", text_color=color.white)
+    table.cell(info_table, 1, 4, str.tostring(rsi_divergence, "#.#"), text_color=color.yellow)
+
+    // 成交量比率差
+    table.cell(info_table, 0, 5, "成交量差", text_color=color.white)
+    table.cell(info_table, 1, 5, str.tostring(vol_divergence, "#.##"), text_color=color.orange)
+
+    // 当前持仓
+    position_text = strategy.position_size > 0 ? "多科技" : strategy.position_size < 0 ? "多消费" : "无持仓"
+    table.cell(info_table, 0, 6, "当前持仓", text_color=color.white)
+    table.cell(info_table, 1, 6, position_text,
+               bgcolor=strategy.position_size != 0 ? color.new(color.blue, 70) : color.new(color.gray, 70),
+               text_color=color.white)
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+策略4：板块强弱背离策略核心要点
+═══════════════════════════════════════════════════════════════════════════════
+
+【策略类型】板块轮动 + 统计套利
+
+【核心逻辑】
+通过多维度因子分析两个不同板块（科技vs消费）的相对强弱，当出现显著背离时
+建立多空头寸，捕捉板块轮动和均值回归机会。
+
+【多因子体系】
+1. 相对强度因子 (权重2.5)
+   - 衡量板块相对大盘的表现
+   - 识别超额收益趋势
+
+2. 动量因子 (权重2.0)
+   - ROC变化率捕捉短期动量
+   - 背离度量两板块动能差异
+
+3. RSI超买超卖因子 (权重1.5)
+   - 寻找均值回归机会
+   - 偏好RSI在30-50区间（未超买但有反弹空间）
+
+4. 成交量因子 (权重1.0)
+   - 验证价格走势的可靠性
+   - 高成交量比率增加信号可信度
+
+5. 风险调整收益因子 (权重2.0)
+   - ATR标准化收益率
+   - 类似夏普比率思想，偏好波动率调整后收益高的板块
+
+【信号生成机制】
+- 入场：综合评分差 > 4 且相对强度背离 > 阈值
+- 出场：评分差收敛至 < 2 或背离度减半
+
+【优势】
+1. 多因子框架降低单一指标失效风险
+2. 板块对冲降低市场系统性风险
+3. 兼顾趋势跟踪和均值回归
+4. 可视化面板实时监控多维度指标
+
+【适用场景】
+- 板块轮动明显的市场环境
+- 科技与消费板块存在跷跷板效应时
+- 中长期持有（日线或更高周期）
+
+【风险提示】
+- 板块相关性突变时可能双向亏损
+- 需要关注宏观经济和政策对板块影响
+- 建议结合VIX等波动率指标过滤高风险时期
+
+【参数优化建议】
+- momentum_length: 可根据持仓周期调整（短线10-15，中线20-30）
+- divergence_threshold: 根据历史回测调整最优阈值
+- 权重系统可基于历史数据进行机器学习优化
+
+═══════════════════════════════════════════════════════════════════════════════
+*/

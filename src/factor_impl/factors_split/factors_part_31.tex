@@ -1,0 +1,267 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{加权上引线频率(量价因子改进)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{加权上影线频率}_{i,t} = \frac{\sum_{j=1}^{M_{i,t}} w_j \cdot \mathbb{1}_{\{ \text{上影线}_{i,j} > u \}}}{M_{i,t}}
+\end{equation}
+
+\begin{equation}
+    \text{上影线}_{i,j} = \frac{\mathrm{High}_{i,j} - \max(\mathrm{Open}_{i,j}, \mathrm{Close}_{i,j})}{\mathrm{PrevClose}_{i,j}}
+\end{equation}
+
+\begin{equation}
+    w_{\mathrm{decay},j} = 0.5^{\frac{t-j}{\lambda}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( M_{i,t} \) 为股票 \( i \) 在第 \( t \) 个回望期的天数，回望期可取 40 天；
+    \item ② \( u \) 为上影线长度阈值，可取 1\%，只关注长上影线；
+    \item ③ \( w_{\mathrm{decay},j} \) 为时间衰退指数加权权重，最近计数获得最大的权重，最远计数获得最小的权重；
+    \item ④ \( \mathrm{High}_{i,j}, \mathrm{Open}_{i,j}, \mathrm{Close}_{i,j}, \mathrm{PrevClose}_{i,j} \) 分别为股票 \( i \) 在第 \( j \) 日的最高价、开盘价、收盘价和前收盘价。
+\end{itemize}
+
+\subsection{说明}
+加权上影线频率为股票过去一段时间上影线长度大于一定阈值的天数加权之和，与股票未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑琳琳, 盛宝丹. 2025. 加权影线频率与 K 线形态因子. 西南证券.
+\end{enumerate}
+
+\section{量峰分钟数(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划为“喷发成交量”，低于 1 倍标准差划为“温和成交量”；
+
+② 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”；
+
+③ 统计过去 20 日量峰的分钟数，即为量峰分钟数因子。
+
+\subsection{说明}
+“量峰”对应的大额交易发生在情绪低迷处，更符合知情交易者的交易特征，可以通过统计发生“量峰”的分钟数量来衡量日内知情交易者参与的频率，因子值越高，知情交易参与度越高，未来收益也越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志强. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{每日平均异常成交(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ABNVOLAVG} = \frac{1}{m} \sum_{t=1}^{m} \left( \frac{\mathrm{VOL}_{i,t}}{\overline{\mathrm{VOL}}_{i,t}} \right)
+\end{equation}
+其中，\(\overline{\mathrm{VOL}}_{i,t}\) 为股票 \( i \) 在交易日 \( t \) 滚动 1 年的平均成交量。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{VOL}_{i,t} \) 为股票 \( i \) 在交易日 \( t \) 的成交量；
+    \item ② \( \overline{\mathrm{VOL}}_{i,t} \) 为股票 \( i \) 在交易日 \( t \) 滚动 1 年的平均成交量；
+    \item ③ \( m \) 为交易日窗口，一般取为月度。
+\end{itemize}
+
+\subsection{说明}
+每日平均异常成交为日频成交量除以过去一年平均成交量的均值，属于极端交易量类因子；异常成交量也是投资者注意力的常用代理指标，因子值越高，投资者对该股票的关注度越高；而有限注意力导致投资者更倾向于交易引起他们关注的股票，投资者关注度越高的股票通常意味着越多的投资购买；但 A 股市场的做多与做空不对称，使得投资者非理性买入高于非理性卖出，进而导致关注度高的股票由于投资者净买入而存在溢价，未来也更可能出现反转。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cosemans, M., \& Frehen, R. (2021). \textit{Salience theory and stock prices: Empirical evidence}. Journal of Financial Economics, 140(2), 460-483.
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{主动买卖因子(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+1. 逐日计算大单和中单总的主动买卖因子 \( \mathrm{ACT}_{\text{正向t}} \)，以及小单的主动买卖因子 \( \mathrm{ACT}_{\text{负向t}} \)：
+\begin{equation}
+    \mathrm{ACT}_{\text{正向t}} = \frac{\text{主动买入金额（大单+中单）} - \text{主动卖出金额（大单+中单）}}{\text{主动买入金额（大单+中单）} + \text{主动卖出金额（大单+中单）}}
+\end{equation}
+\begin{equation}
+    \mathrm{ACT}_{\text{负向t}} = \frac{\text{主动买入金额（小单）} - \text{主动卖出金额（小单）}}{\text{主动买入金额（小单）} + \text{主动卖出金额（小单）}}
+\end{equation}
+
+2. 回溯过去 20 个交易日，取收益率最高 \( \lambda \) 比例的交易日，称为高收益日；取收益率最低 \( \lambda \) 比例的交易日，称为低收益日；
+
+3. 对高收益日的 \( \mathrm{ACT}_{\text{正向t}} \) 因子取平均，记为 \( \mathrm{ACT}_{\text{正向}} \)；对低收益日的 \( \mathrm{ACT}_{\text{负向t}} \) 因子取平均，记为 \( \mathrm{ACT}_{\text{负向}} \)。
+
+\subsection{说明}
+切割后的主动买卖因子，细致的刻画了在市场上涨和下跌的不同情境下，不同交易者主动买卖意愿的差异；测试发现以大户和中户投资者为主的主动买卖因子，在高收益端呈现正向选股效应；而以小户为代表的主动买卖因子，在低收益端呈现负向选股效应。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕. 2020. 主动买卖因子的正确用法. 开源证券.
+\end{enumerate}
+
+\section{基于 PB 的分析师锚效益偏差(行为金融因子-锚定效应)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{CAF\_BP}_{i,t} = \frac{\mathrm{FBP}_{i,t} - \mathrm{IFBP}_t}{\mathrm{IFBP}_t}
+\end{equation}
+\begin{equation}
+    \mathrm{FBP}_{i,t} = \frac{1}{\mathrm{FPB}_{i,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{FPB}_{i,t} \) 为分析师在时间 \( t \) 对股票 \( i \) 的 PB 指标的预测值；
+    \item ② \( \mathrm{IFBP}_t \) 为股票 \( i \) 所属行业中所有成分股的 \( \mathrm{FPB}_{i,t} \) 中位数。
+\end{itemize}
+
+\subsection{说明}
+锚定效应指人们在作出判断时会将看到或听到的第一印象的影响作为锚点，并根据锚点对判断做调整，使得调整不充分偏向于该锚点而造成判断偏差的现象；假设分析师预测也会有锚定效应，即分析师以公司所在行业作为定价的“锚”，当预测的财务指标超出（低于）行业中位数时，分析师会做出悲观（乐观）预测的指标，以接近行业中位数，财报公布后，被预测的公司的财务指标将高于（低于）预测值，股价表现将更优（更差）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Ashoura, S., \& Hao, Q. (2019). \textit{Do analysts really anchor? Evidence from credit risk and suppressed negative information}. Journal of Banking \& Finance, 98, 183-197.
+    \item 陈升锐. 2023. 行为金融学在量化选股中的应用. 中信出版社.
+\end{enumerate}
+
+\section{成交量波峰计数因子(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 计算全部 240 根 K 线数据的均值与标准差，筛选出大于（均值 + 1 倍标准差）的分钟数据；
+
+② 计算上一步筛选出的每一分钟与前一分钟之间的时间差，只有时间差超过 1 分钟（即相隔超过 1 根 K 线）时，该分钟数据才会被保留；
+
+③ 经过上述两步筛选后，剩余的数据全部被视作局部峰值，峰值个数即为当日成交量波峰计数因子的取值，而最终调仓日的因子值仍为过去 20 个交易日因子值的均值。
+
+\subsection{说明}
+出现日内“放量”现象次数更多的股票可能有更多的趋势或知情交易者参与交易，进而在未来一段时间内有更高的收益率，因子与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2020. 高频因子（九）：高频波动中的时间序列信息. 长江证券.
+\end{enumerate}
+
+\section{大单的动态知情交易概率(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+构建下列自回归模型，计算股票 \( i \) 在日内区间 \( j \) 内的非预期收益率 \( \varepsilon_{i,j} \)：
+\begin{equation}
+    R_{i,j} = \gamma_0 + \sum_{k=1}^{4} \gamma_{1i,k} D_k^{\mathrm{Day}} + \sum_{k=1}^{48} \gamma_{2i,k} D_k^{\mathrm{Int}} + \sum_{k=1}^{12} \gamma_{3i,k} R_{i,j-k} + \varepsilon_{i,j}
+\end{equation}
+
+计算未预期收益率为正（负）时卖出（买入）交易量占比即为动态知情交易概率：
+\begin{equation}
+    \mathrm{DPIN}_{\mathrm{SIZE}}^{i,j} = \left[ \frac{\mathrm{NB}_{i,j}}{\mathrm{NT}_{i,j}} \cdot \mathbb{I}_{(\varepsilon_{i,j} < 0)} + \frac{\mathrm{NS}_{i,j}}{\mathrm{NT}_{i,j}} \cdot \mathbb{I}_{(\varepsilon_{i,j} > 0)} \right] \cdot \mathrm{LT}_{i,j}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( R_{i,j} \) 为股票 \( i \) 在交易日 \( t \) 内区间 \( j \) 的收益率，\( R_{i,j-k} \) 为自回归的滞后收益率，滞后阶数 \( k=12 \)；
+    \item ② \( D_k^{\mathrm{Day}} \) 为周内效应虚拟变量，当前交易日属于周 \( k \) 就取 1，其余取 0；同理，\( D_k^{\mathrm{Int}} \) 为日内效应虚拟变量，日内区间 \( j \) 的 \( D_j^{\mathrm{Int}} \) 取 1，其余取 0；
+    \item ③ \( \mathrm{NB}_{i,j}, \mathrm{NS}_{i,j}, \mathrm{NT}_{i,j} \) 分别为股票 \( i \) 在日内区间 \( j \) 的主买成交笔数、主卖成交笔数、总成交笔数；
+    \item ④ \( \mathbb{I}_{(\varepsilon_{i,j} < 0)} \) 为虚拟变量，未预期收益为负，取值为 1，否则取值为 0，反之亦然；
+    \item ⑤ \( \mathrm{LT}_{i,j} \) 为大单的虚拟变量，若交易日 \( t \) 内，股票 \( i \) 在区间 \( j \) 内的总交易量超过当日各个区间内总交易量的中位数时，赋值为 1；
+    \item ⑥ 自回归的时间窗口可以为从交易日 \( t \) 的区间 \( j \) 开始回溯过去 \( T \) 个交易日，如 5 分钟频率，则回溯过去 \( T \times 48 \) 个区间；
+    \item ⑦ 可以进一步计算日度、周度内大单 DPIN 序列的均值、标准差等统计指标，刻画大单 DPIN 的时序特征。
+\end{itemize}
+
+\subsection{说明}
+通常知情交易者更有可能进行大单交易，也就是说，大单交易区间内的反转交易更有可能来自知情交易者，所以可以进一步筛选出大单下的知情交易概率。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Chang, S. S., Chang, L. V., \& Wang, F. A. (2014). \textit{A dynamic intraday measure of the probability of informed trading and firm-specific return variation}. Journal of Empirical Finance, 29, 80-94.
+\end{enumerate}
+
+\section{衰减加权月频成交量(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ATTN} = \frac{(12 - m) \cdot \mathrm{VOL}_{i, t}}{\sum_{m=1}^{11} m}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{VOL}_{i, t} \) 为股票 \( i \) 在 \( t \) 日的成交量；
+    \item ② \( m \) 为交易日窗口，一般取为月度。
+\end{itemize}
+
+\subsection{说明}
+衰减加权月频成交量因子由股票成交量按时间线性衰减加权得到，属于极端交易量类因子；异常成交量也是投资者注意力的常用代理指标，因子值越高，投资者对该股票的关注度越高；而有限注意力导致投资者更倾向于交易引起他们关注的股票，投资者关注度越高的股票通常意味着越多的投资购买；但 A 股市场的做多与做空不对称，使得投资者非理性买入高于非理性卖出，进而导致关注度高的股票由于投资者净买入而存在溢价，未来也更可能出现反转。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Dong, D., Wu, K., Fang, J., Gozgor, G., \& Yan, C. (2021). \textit{Investor Attention Factors and Stock Returns: Evidence from China}. Journal of International Financial Markets, Institutions and Money, 77(4).
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信出版社.
+\end{enumerate}
+
+\section{绝对收益与调整后滞后成交量相关性(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{adj\_CORA\_A} = \mathrm{corr}(|\mathrm{Ret}_t|, \mathrm{adj\_Amount}_{t-1}), \quad \mathrm{Ret}_t \neq 0
+\end{equation}
+\begin{equation}
+    \mathrm{adj\_Amount}_t = \frac{\mathrm{Amount}_t - \mu_t}{\sigma_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( |\mathrm{Ret}_t| \) 为个股日内第 \( t \) 分钟的对数收益率的绝对值；
+    \item ② \( \mathrm{adj\_Amount}_t \) 为个股日内第 \( t \) 分钟的调整后的成交额，\( \mu_t \) 和 \( \sigma_t \) 分别为前 20 个交易日相同第 \( t \) 分钟成交额的均值和标准差；
+    \item ③ 月度因子可使用月末 5-15 个交易日因子的平均值来合成。
+\end{itemize}
+
+\subsection{说明}
+分钟成交额在日内呈 U 型或 W 型分布，与收益率分布的不对等会影响相关性的计算。对成交额做标准化可以捕捉成交额的相对波动；若存在较多收益为 0 的样本也会使系数偏高，需将其剔除；修正后的因子能捕捉更真实纯粹的量价异动，因子表现大幅提升。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱定豪, 严佳炜. 2020. 量价关系的高频乐章. 方正证券.
+\end{enumerate}
+
+\section{非线性高频波动率(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+1. 在 Fama 三因子基础上加入流动性和反转因子，对过去 21 天个股收益率做线性时序回归，得到新特异率 \( = 1 - \) 拟合优度 \( R^2 \)：
+\begin{equation}
+    r_t = \alpha + \beta_{\mathrm{mkt}} \mathrm{MKT}_t + \beta_{\mathrm{smb}} \mathrm{SMB}_t + \beta_{\mathrm{hml}} \mathrm{HML}_t + \beta_{\mathrm{ret}} \mathrm{RET}_t + \beta_{\mathrm{liq}} \mathrm{LIQ}_t + \varepsilon_t
+\end{equation}
+
+2. 计算个股过去 21 天的日内分钟收益率序列（频率控制在 30 分钟内较好）的标准差，得到高频波动率 \( \mathrm{std}_i \)；再对该波动率进行横截面归一化和非线性变换：
+\begin{equation}
+    \mathrm{norm}_i = \frac{\mathrm{std}_i - \min(\{\mathrm{std}_i\})}{\max(\{\mathrm{std}_i\}) - \min(\{\mathrm{std}_i\})}
+\end{equation}
+\begin{equation}
+    \mathrm{std}_i^{\mathrm{non\_linear}} = e^{\mathrm{norm}}
+\end{equation}
+
+3. 将上述非线性化后的波动率与新特异率开方相乘得到非线性波动率类因子：
+\begin{equation}
+    \text{特异波动率} = \sqrt{\text{新特异率}} \times \mathrm{std}_i^{\mathrm{non\_linear}}
+\end{equation}
+
+\subsection{说明}
+原始的高频特异波动率因子因个股波动的头部区分能力较弱导致选股性较差，以非线性的方式改进个股波动部分乘数（加强头部波动率区分，淡化尾部波动率区分），可以保留其空头端的区分能力，同时淡化头部组分的分组信息，改进特异波动率因子的表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑超. 2019. 高频因子(六): 特异视角下的波动率. 长江证券.
+\end{enumerate}
+\end{document}

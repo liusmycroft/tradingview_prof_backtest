@@ -1,0 +1,269 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{分析师共同覆盖间接关联动量(图谱网络-网络结构)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{CF2\_RET}_i = \frac{\sum_{j=1}^{N} m_{ij} \times \mathrm{Ret}_j}{\sum_{j=1}^{N} m_{ij}}
+\end{equation}
+\begin{equation}
+    m_{ij} = \sum_{k=1}^{N} \log(n_{ik} + 1) \times \log(n_{kj} + 1)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( m_{ij} \) 为股票 \( i \) 和股票 \( j \) 的间接关联强度；
+    \item ② \( n_{ik}, n_{kj} \) 分别为连接股票 \( i \) 和股票 \( j \) 的中间股票 \( k \) 与双方的直接关联强度（共同覆盖的分析师数量）；
+    \item ③ \( \mathrm{Ret}_j \) 为股票 \( j \) 过去 1 个月（20 个交易日）的收益率；
+    \item ④ \( N \) 为股票池中的股票数量。
+\end{itemize}
+
+\subsection{说明}
+间接关联较为隐蔽，不易被投资者察觉，也能带来领先滞后效应；对于直接覆盖的分析师数量较少的公司，间接关联带来的股价领先滞后效应可能更显著。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Ali, U., \& Hirshleifer, D. A. (2020). \textit{Shared analyst coverage: Unifying momentum spillover effects}. Journal of Financial Economics, 136(3), 649–675.
+    \item 林晓明, 李子钰, 何康. 2022. 深挖分析师共同覆盖中的关联因子. 华泰证券.
+\end{enumerate}
+
+\section{最大涨幅(高频因子-动量反转类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{MAX}_t = \prod_{i \in \mathrm{maxprod}} (1 + r_i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{maxprod} \) 为 \( t \) 日涨幅最大的前百分之十的分钟涨幅集合；
+    \item ② \( r_i \) 为分钟涨跌幅。
+\end{itemize}
+
+\subsection{说明}
+MAX 为当天前百分之十涨幅推动的股票具体涨幅。短期内，较大涨幅通常由大资金推动，这类“彩票型股票”也更得到投机性投资者的青睐，短期回报较高；长期内，随着投机者离场，股价又会下跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐. 2023. 高频选股因子分类体系. 中信建投证券.
+\end{enumerate}
+
+\section{非流动性因子 Gammar(高频因子-流动性类)}
+
+\subsection{因子定义}
+在每月末，对股票 \( i \) 过去一个月的数据进行如下最小二乘回归：
+\begin{equation}
+    r^e_{i,d+1,t} = \theta_{i,t} + \phi_{i,t} r_{i,d,t} + \gamma_{i,t} \cdot \mathrm{sign}(r_{i,d,t}^e) \cdot v_{i,d,t} + \epsilon_{i,d+1,t}, \quad d = 1, \ldots, D
+\end{equation}
+\begin{equation}
+    \mathrm{Gam}_{i,t} = -|\gamma_{i,t}|
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{i,d,t} \) 为股票 \( i \) 在 \( t \) 月内 \( d \) 日收益率；
+    \item ② \( r_{i,d,t}^e \) 为股票 \( i \) 在 \( t \) 月内 \( d \) 日的相对市场的超额收益率；
+    \item ③ \( v_{i,d,t} \) 为股票 \( i \) 在 \( t \) 月内 \( d \) 日成交额；
+    \item ④ 可将日度数据替换成分钟数据，计算得到高频的非流动性因子。
+\end{itemize}
+
+\subsection{说明}
+Gam 更精细地刻画了成交额对股票收益的冲击；指标越小（绝对值越高），成交额对股票收益的冲击越大，股票流动性越差，股票未来预期收益越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Pastor, L., \& Stambaugh, R. F. (2003). \textit{Liquidity Risk and Expected Stock Returns}. Journal of Political Economy, 111(3), 642-685.
+\end{enumerate}
+
+\section{筹码分布成本宽带(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{CBW}_t = \frac{\mathrm{Chip\_Highest}_t - \mathrm{Chip\_Lowest}_t}{\mathrm{Chip\_Lowest}_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 \( t \) 日的筹码分布共有 \( n \) 个价位（\( i=1,2,\ldots,n \)），\( \mathrm{vol}_{i,t} \) 为第 \( t \) 日 \( i \) 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格，\( \mathrm{Chip\_Highest}_t \) 对应筹码最高价，\( \mathrm{Chip\_Lowest}_t \) 对应筹码最低价。
+\end{itemize}
+
+\subsection{说明}
+筹码成本带宽表示当前市场上大多数流通股的买入成本区间宽度，即从最低持仓成本到最高持仓成本之间的价格范围，反映了投资者持股成本的集中或分散程度；因子值高，说明成本区间宽，筹码分散，投资者分歧较大；因子值低，说明成本区间窄，筹码集中；经测试，筹码分布成本宽带与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{成交量占比标准差(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{std}\left(\frac{\mathrm{volume}_i}{\sum \mathrm{volume}_i}\right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{volume}_i \) 为日内分钟成交量，如60分钟等；成交量占比是成交量在个股内纵向可比指标，主要从成交的分布上给出衡量；
+    \item ② 此外也可将成交量占比替换为对数成交量、换手率（全市场个股间横向可比指标，从流动性上给出衡量），计算成交量标准差类因子。
+\end{itemize}
+
+\subsection{说明}
+成交量标准差类因子均衡量了个股过去一段时间交易活跃度的离散情况，与未来收益负相关；个股成交波动较大时，多空博弈激烈，异常交易显著，个股收益不确定性较强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2019. 高频因子(四): 高阶矩高频因子. 长江证券.
+\end{enumerate}
+
+\section{置信正态分布主动占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+
+\begin{equation}
+    \text{置信正态分布主动买入金额}_i = \mathrm{Amount}_i \times N\left(\frac{\mathrm{ret}_i}{0.1} \times 1.96\right)
+\end{equation}
+
+\begin{equation}
+    \text{置信正态分布主动占比因子} = \frac{\sum_{i=1}^{N} \text{置信正态分布主动买入金额}_i}{\sum_{i=1}^{N} \mathrm{Amount}_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( N(\cdot) \) 为标准正态分布累计函数；
+    \item ② \( \mathrm{ret}_i \) 为每个时间段收益率，频率可为 1 分钟、5 分钟等。
+\end{itemize}
+
+\subsection{说明}
+绝大部分时间段的成交几乎均有买卖双方各自驱动成交的部分，在计算主动买入金额时采用连续性值作为成交额所乘系数可以提高主买卖额估计准确度；此处收益率到主动买入占比的映射函数采用正态分布，且考虑了 A 股存在涨跌停限制，对收益率做了线性变换。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2020. 高频因子(七): 分布估计下的主动成交占比. 长江证券.
+\end{enumerate}
+
+\section{极端跟随行为\_相关性因子(量价因子改进)}
+
+\subsection{因子定义}
+
+① 每个交易日 \( t \)，回看过去 \( k \) 个交易日 \( t-k, t-(k-1), \dots, t-1 \)，计算过去 \( k \) 日分钟成交量的 \( m\% \) 分位数，定义为成交量阈值，\( k=5, m=90 \)；将交易日 \( t \) 的每分钟成交量与上述阈值进行对比，若某一分钟的成交量大于上述阈值，则该分钟的交易被定义为趋势资金的交易；
+
+② 对于趋势资金的每一分钟，取随后 \( n \) 分钟里成交额最大的一分钟，将其视为跟随趋势资金的极端行为，记录这一分钟的成交额，\( n=5 \)；
+
+③ 每日将趋势资金的分钟成交额，与对应的极端跟随分钟成交额对齐，求这两个序列的相关系数；
+
+④ 月底回看过去 20 个交易日，求 20 日相关系数的平均值，再做横截面市值、行业中性化处理。
+
+\subsection{说明}
+A股市场中“追涨”和“杀跌”的两股力量是非对称的，若某个股票上出现了强烈的羊群效应，通常对利好消息的反应过度现象会更加严重，股价未来下跌的概率也就更高，所以羊群效应通常会对股票未来收益产生负面影响。极端跟随行为\_相关性因子值越大，意味着极端跟随行为越剧烈，羊群效应越明显，从而导致股票未来收益越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 沈芷琦, 刘富兵, 阮俊烨. 2024. 基于趋势资金日内交易行为的选股因子. 国盛证券.
+\end{enumerate}
+
+\section{成交量“潮汐”的价格变动速率(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \)，计算 \( T \) 日内每分钟的领域成交量，即第 \( t \) 分钟及其前后 4 分钟（共计 9 分钟）的成交量总和；
+
+2. 将领域成交量最高点所在分钟 \( t \) 记为“顶峰时刻”；将该时刻之前（第 5 到 \( t-1 \) 分钟）领域成交量最低点所在分钟 \( m \) 记为“涨潮时刻”，该分钟的领域成交量为 \( V_m \)，收盘价为 \( C_m \)；将该时刻之后（第 \( t+1 \) 到 233 分钟）领域成交量最低点所在分钟 \( n \) 记为“退潮时刻”，该分钟的领域成交量为 \( V_n \)，收盘价为 \( C_n \)；
+
+3. 上述“涨潮时刻”～“退潮时刻”的全过程记为一次“潮汐”，计算全潮汐过程的价格变动速率：
+\begin{equation}
+    \text{全潮汐价格变动速率} = \frac{C_n - C_m}{C_m / (n-m)}
+\end{equation}
+对其计算最近 20 个交易日的均值即得到“全潮汐”因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算因子需剔除开盘和收盘数据，仅考虑日内分钟频数据。
+    \item ② \( V_m \) 和 \( V_n \) 大小可将“潮汐”过程进行强弱拆分，进一步构建“强势半潮汐”因子和“弱势半潮汐”因子。
+\end{itemize}
+
+\subsection{说明}
+“全潮汐”因子衡量了投资者出售或购买股票意愿的强烈程度，与未来收益呈反比关系；在潮汐过程中，若股价快速下跌，表明部分投资者急于抛售，易导致过度反应，未来易发生补涨；若股价快速上涨，表明部分投资者急于建仓买入，同样易导致过度反应，未来也易发生补跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 个股成交量的潮汐变化及“潮汐”因子构建. 方正证券.
+\end{enumerate}
+
+\section{已实现跳跃波动率(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{RVJ}_t = \max\left(\mathrm{RV}_t - \hat{\mathrm{IV}}_t, 0\right)
+\end{equation}
+
+\begin{equation}
+    \mathrm{RV}_t = \sum_{i=1}^{n} r_{i,n}^2 \rightarrow QV_t = \int_0^t \sigma_s^2 ds + \sum_{s \leq t} \Delta X_s^2 = \mathrm{IV}_t + \mathrm{QJ}_t
+\end{equation}
+
+\begin{equation}
+    \hat{\mathrm{IV}}_t = \mu_{\frac{3}{2}}^{-3} \sum_{i=k}^{n} |r_{t_i}|^{\frac{2}{3}} |r_{t_{i-1}}|^{\frac{2}{3}} \cdots |r_{t_{i-k+1}}|^{\frac{2}{3}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{t,i} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( k=3 \)，\( n \) 表示该股票在交易日 \( t \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点；
+    \item ③ \( \mu_q \) 为标准正态分布的第 \( q \) 阶绝对矩；
+    \item ④ 已实现跳跃波动率 \( \mathrm{RVJ}_t \) 整体取值为正，所以需要用 \( \max \) 对负差值做修正。
+\end{itemize}
+
+\subsection{说明}
+已实现跳跃波动率刻画了股价波动率中股价跳跃部分的波动水平，可通过已实现波动剔除部分波动率估计得到；跳跃波动率衡量了股价在短时间内发生非连续性、剧烈变动（股价跳跃行为）的波动程度，跳跃行为能较好地动态反映市场情绪和信息冲击。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Barndorff-Nielsen, O. E., \& Shephard, N. (2004). \textit{Power and bipower variation with stochastic volatility and jumps}. Journal of Financial Econometrics, 2, 1-48.
+    \item Andersen, T. G., Bollerslev, T., \& Diebold, F. X. (2007). \textit{Roughing it up: Including jump components in the measurement, modeling, and forecasting of return volatility}. Review of Economics and Statistics, 89, 701-720.
+    \item Yu, B., Mizrach, B., \& Swanson, N. R. (2020). \textit{New Evidence of the Marginal Predictive Content of Small and Large Jumps in the Cross-Section}. Econometrics, MDPI, 8(2), 1-52.
+\end{enumerate}
+
+\section{未实现盈利量(行为金融因子-前景理论)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{CGO}_t = \frac{P_t - \mathrm{RP}_t}{\mathrm{RP}_t}
+\end{equation}
+\begin{equation}
+    \mathrm{RP}_t = \frac{1}{k} \sum_{n=1}^{N} V_{t-n} \prod_{\tau=1}^{n-1} (1 - V_{t-\tau}) P_{t-n}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( P_t \) 为 \( t \) 时刻的价格；
+    \item ② \( V_t \) 为 \( t \) 时刻的换手率；
+    \item ③ \( \dfrac{1}{k} \) 为权重归一化参数；
+    \item ④ \( N \) 为截断时间长度，可以取 \( N=40, 60 \) 日。
+\end{itemize}
+
+\subsection{说明}
+未实现盈利量衡量了当前投资者的盈亏水平，通过比较当前价格和锚定价格来确定。未实现盈利量通常与股票未来收益正相关，当投资者在盈利状态时，由于厌恶风险，更倾向于卖出股票，导致股价低估；在亏损状态下，由于偏好风险，更倾向于持有股票，导致股价高估。长期来看，上述现象在 A 股市场是成立的；但短期内，浮盈股票卖盘压力可能更大于被低估的幅度，而出现浮盈股票未来表现更差的情况。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Grinblatt, M., \& Han, B. (2005). \textit{Prospect theory, mental accounting, and momentum}. Journal of Financial Economics, 78(2), 311-339.
+\end{enumerate}
+\end{document}

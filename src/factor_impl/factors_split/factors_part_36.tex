@@ -1,0 +1,286 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{日内收益率(高频因子-动量反转类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{intraday\_ret}_{t,i} = \frac{\mathrm{close}_{t,i}}{\mathrm{open}_{t,i}} - 1
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{open}_{t,i} \) 和 \( \mathrm{close}_{t,i} \) 分别为 \( t \) 日开盘价和 \( t \) 日收盘价；
+    \item ② 若要计算周度、月度等频率的日内收益率，只需对区间内的日度日内涨跌幅求和。
+\end{itemize}
+
+\subsection{说明}
+传统日度收益率可以划分为隔夜收益和日内收益，其中日内收益通常有一定程度的反转效应（对应日度收益率的反转）；隔夜收益与日内收益两者存在显著的负相关关系，对未来收益的预测方向也往往相反，许多研究认为正是双方的反转关系削弱了总收益的表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Branch, B., \& Ma, A. (2012). \textit{Overnight Return, the Invisible Hand Behind Intraday Returns}. Journal of Financial Markets, 2, 90-100.
+    \item Lou, D., Polk, C., \& Skouras, S. (2019). \textit{A tug of war: Overnight versus intraday expected returns}. Journal of Financial Economics, 134(1), 192-213.
+\end{enumerate}
+
+\section{中间价变化率偏度(高频因子-流动性类)}
+
+\subsection{因子定义}
+高频因子-流动性类
+
+\begin{equation}
+    \mathrm{MPCskew}_{d,k} = \frac{1}{N_d - k - 1} \sum_{t=k+1}^{N_d} \left( \frac{\mathrm{MPC}_{d,t,k} - \overline{\mathrm{MPC}}_{d,t,k}}{\sigma_{d,t,k}} \right)^3
+\end{equation}
+\begin{equation}
+    \mathrm{MPC}_{d,t,k} = \frac{M_{d,t} - M_{d,t-k}}{M_{d,t-k}}, \quad M_{d,t} = \frac{P_{d,t}^B + P_{d,t}^A}{2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{MPCskew}_{d,k} \) 为 \( d \) 日 \( \mathrm{MPC}_{t,k} \) 序列的偏度；
+    \item ② \( M_{d,t} \) 为 \( d \) 日 \( t \) 时刻的市场中间价；
+    \item ③ \( N_d \) 为 \( d \) 日的交易分钟数据；
+    \item ④ \( \overline{\mathrm{MPC}}_{d,t,k} \) 和 \( \sigma_{d,t,k} \) 分别为 \( \mathrm{MPC}_{d,t,k} \) 序列的均值和标准差。
+\end{itemize}
+
+\subsection{说明}
+MPCskew 描述了中间价极端变动偏离平均值的幅度，可用于捕捉主力市场操纵行为；长期看市场中间价的极端变动与股票收益显著负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈升锐. 2021. 高频订单失衡及价差因子. 中信建投证券.
+\end{enumerate}
+
+\section{跳跃关联非正跳跃相对动量(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+
+① 利用股票日内 5 分钟行情数据，计算跳跃统计量 \( \mathrm{JS} \)，识别出股价发生跳跃的分钟时刻并计算当天的负跳跃收益 \( \mathrm{NegJump\_Ret}_{j,t} \) 和非跳跃收益 \( \mathrm{NoJump\_Ret}_{j,t} \)，具体计算细节见相关日历页：
+\begin{equation}
+    \mathrm{JS} = N \frac{\hat{V}_{(0,1)}}{\sqrt{\hat{\Omega}_{\mathrm{swv}}}} \left( 1 - \frac{\mathrm{RV}_N}{\mathrm{SwV}_N} \right) \sim N(0,1)
+\end{equation}
+
+② 计算关联跳跃次数：如果股票 \( i \) 在 \( t \) 日发生跳跃，股票 \( j \) 在 \( t-1 \) 日至 \( t+1 \) 日内也发生了一次同向跳跃，则记为一次关联跳跃；
+
+③ 计算两只股票间的跳跃关联度，即在股票 \( i \) 所有的股价跳跃 \( \mathrm{jump\_num}_i \) 中关联跳跃 \( \mathrm{cojump\_num}_{i,j} \) 所占的比例：
+\begin{equation}
+    \mathrm{Corr}_{i,j} = \frac{\mathrm{cojump\_num}_{i,j}}{\mathrm{jump\_num}_i}
+\end{equation}
+
+④ 在 \( t \) 时刻，以跳跃关联度为权重，分别加权股票 \( i \) 的那些关联股票的过去 20 天的负跳跃收益和非跳跃收益（剔除关联度最低的 50\% 的关联关系），并对过去 20 天收益率做回归取残差，将两个残差相加即为跳跃关联非正跳跃相对动量：
+\begin{equation}
+    \mathrm{Peer\_Negjump\_Ret}_{i,t} = \frac{\sum_{j=1}^{N} \mathrm{Corr}_{i,j} \cdot \mathrm{NegJump\_Ret}_{j,t}}{\sum_{j=1}^{N} \mathrm{Corr}_{i,j}}, \quad i \neq j
+\end{equation}
+\begin{equation}
+    \mathrm{Peer\_Nojump\_Ret}_{i,t} = \frac{\sum_{j=1}^{N} \mathrm{Corr}_{i,j} \cdot \mathrm{NoJump\_Ret}_{j,t}}{\sum_{j=1}^{N} \mathrm{Corr}_{i,j}}, \quad i \neq j
+\end{equation}
+\begin{equation}
+    \mathrm{Ret}_{i,t} = \alpha_1 + \beta_1 \cdot \mathrm{Peer\_Negjump\_Ret}_{i,t} + \varepsilon_{i,t}^{(1)}
+\end{equation}
+\begin{equation}
+    \mathrm{Ret}_{i,t} = \alpha_2 + \beta_2 \cdot \mathrm{Peer\_Nojump\_Ret}_{i,t} + \varepsilon_{i,t}^{(2)}
+\end{equation}
+\begin{equation}
+    \mathrm{NonPositiveJumpRelativeMomentum}_{i,t} = \varepsilon_{i,t}^{(1)} + \varepsilon_{i,t}^{(2)}
+\end{equation}
+
+\subsection{说明}
+具有相似属性的公司往往会受到类似的信息冲击，进而导致股价的同步跳跃。公司间股价跳跃的同步程度也可用于识别公司间的潜在关联程度；以股价跳跃关联度为权重加权关联股票的收益率可有效捕捉股票间的“领先-滞后”联动效应。由于个股正向跳跃收益与自身未来收益显著负相关，在加权关联公司的跳跃收益时剔除掉正跳跃收益部分（该部分收益会抵消关联股票的动量溢出效应），有助于提升因子表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任晓, 刘凯, 杨航. 2025. 基于股价跳跃关联性的选股策略. 招商证券.
+    \item 任晓, 杨航. 2024. 如何识别股价跳跃. 招商证券.
+\end{enumerate}
+
+\section{卖出反弹偏离因子(高频因子-收益分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{LCP} = \frac{\sum_{i=1}^{N} \overline{\mathrm{price}}_{\mathrm{sell},i} \cdot \mathbf{I}_{\{P_{\mathrm{sell},i} < \mathrm{close}\}}}{close} - 1
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{price}_{\mathrm{sell},i} \) 为逐笔成交数据中卖单的成交价，\( \mathrm{close} \) 为当日收盘价；
+    \item ② 可以对该因子进行小单改进和尾盘改进，即只统计小单的占比和只统计 \([14:30,14:57)\) 尾盘区间的占比。
+\end{itemize}
+
+\subsection{说明}
+卖出反弹偏离因子统计了低于收盘价卖出的价格相较于收盘价的偏离幅度，与未来收益正相关；因子取值越负，卖出后价格反弹越大，根据遗憾规避理论，为了避免产生遗憾和后悔情绪，投资者卖出股票后不愿再次买回的意愿较高，未来买入动力较低，有更低的预期收益；遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自豪感，避免承认之前的决策失误。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{量峰间隔峰度(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划分为“喷发成交量”，低于 1 倍标准差划分为“温和成交量”；
+
+② 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”；
+
+③ 对过去 20 日同日前后两个量峰之间的时间间隔分布，计算其峰度，即为量峰间隔峰度因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item 此外，还可统计两个量峰之间的时间间隔分布的标准差、偏度等指标，即可得到量峰间隔标准差因子、量峰间隔偏度因子。
+\end{itemize}
+
+\subsection{说明}
+量峰间隔峰度因子衡量了知情交易者参与交易的时间间隔的分布情况，知情交易者通常是在特定时间点集中交易，交易频率不定，而不是持续不断地买卖。所以时间间隔分布更倾向于尖峰厚尾的特点，与未来收益正相关。（报告中测试发现，量峰间隔偏度因子也为正向因子，但量峰间隔标准差因子为负向因子。）
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{筹码分布相对价位(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{CKDP}_t = \frac{\mathrm{close}_t - \mathrm{mean}_t}{\mathrm{Chip\_Highest}_t - \mathrm{Chip\_Lowest}_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 \( t \) 日的筹码分布共有 \( n \) 个价位（\( i=1,2,\ldots,n \)），\( \mathrm{vol}_{i,t} \) 为第 \( t \) 日 \( i \) 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格，\( \mathrm{Chip\_Highest}_t \) 对应筹码最高价，\( \mathrm{Chip\_Lowest}_t \) 对应筹码最低价；
+    \item ② \( \mathrm{mean}_t = \sum (\mathrm{price}_{i,t} \times p_{i,t}) \) 为筹码分布加权平均成本；
+    \item ③ \( \mathrm{close}_t \) 为 \( t \) 日收盘价。
+\end{itemize}
+
+\subsection{说明}
+筹码分布相对价位衡量了当前价格相对平均成本的偏离程度，可用于衡量投资者盈利或亏损程度。因子值小于零，说明多数投资者亏损；因子值大于零，说明多数投资者盈利；因子值接近零，说明股价接近平均成本，多空博弈相对激烈。经测试，筹码分布成本宽带与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{量谷加权价格分位点(量谷价券价格分位点)}
+
+\subsection{因子定义}
+
+① 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划为“喷发成交量”，低于 1 倍标准差划为“温和成交量”；
+
+② 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”；
+
+③ 将“日内最高价、日内最低价、昨日收盘价”三者的最高值与最低值作为[昨收,今收]区间的价格高低位，并计算每日量谷成交量加权价格的相对分位点，20 日的分位点均值即为量谷加权价格分位点因子；
+\begin{equation}
+    \mathrm{ValleyPriceQuantile}_t = \frac{1}{20} \sum_{d=1}^{20} \frac{\mathrm{VWAP}_{\mathrm{valley},d} - \min(\mathrm{Low}_d, \mathrm{PrevClose}_d)}{\max(\mathrm{High}_d, \mathrm{PrevClose}_d) - \min(\mathrm{Low}_d, \mathrm{PrevClose}_d)}
+\end{equation}
+
+④ 需对量谷加权价格分位点因子做 20 日反转因子的中性化处理。
+
+\subsection{说明}
+量谷加权价格分位点因子衡量了交易低迷时点的价格水平，在不太可能存在股价过度反应的情况下，股价越高，且可持续，未来收益也可能越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{主买强度(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\mathrm{mean}(\text{主动买入成交额}_{i,j,n})}{\mathrm{std}(\text{主动买入成交额}_{i,j,n})}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 基于逐笔成交数据中的 BS 标志将逐笔成交数据合成为分钟级别的主动买卖金额，B 为主动买入（卖出方先挂单，买入方主动触碰卖单并成交）；S 为主动卖出（买入方先挂单，卖出方主动触碰买单并成交）；
+    \item ② 剔除了处于涨跌停分钟上的主动买入金额和主动卖出金额数据；
+    \item ③ \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日内的第 \( j \) 分钟的成交额；
+    \item ④ 月度选股下，\( T = 20 \) 个交易日；周度选股下，\( T = 5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+同时刻画了投资者主动买入行为的强度和稳健性，但日内主买强度与未来收益负相关（使用日度数据计算的日间主买强度与未来收益正相关），该因子与市值存在较强的相关性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2020. 基于主动买入行为的选股因子. 海通证券.
+\end{enumerate}
+
+\section{平均换手率(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{TURNAVG} = \frac{1}{m} \sum_{t=1}^{t-m+1} \mathrm{TURN}_{i,t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{TURN}_{i,t} \) 为股票 \( i \) 在交易日 \( t \) 的换手率；
+    \item ② \( m \) 为交易日窗口，一般取为月度。
+\end{itemize}
+
+\subsection{说明}
+平均换手率属于股票交易活跃度类因子，通过衡量股票交易活跃度来反映投资者关注度，股票交易越活跃，投资者对该股票的关注度越高；而投资者有限注意力会推动关注度高的股票更易出现非理性净买入溢价，进而导致股价后续反转。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建设.
+\end{enumerate}
+
+\section{平均换手日内正跳跌收益(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+1. 利用股票日内 5 分钟行情数据，计算 Jiang and Oomen (2008) 中的跳跃统计量 \( \mathrm{JS} \)，识别出股价发生跳跃的分钟时刻，具体识别细节见研报：
+\begin{equation}
+    \mathrm{JS} = N \frac{\hat{V}_{(0,1)}}{\sqrt{\hat{\Omega}_{\mathrm{SWV}}}} \left( 1 - \frac{\mathrm{RV}_N}{\mathrm{SwV}_N} \right) \sim N(0,1)
+\end{equation}
+\begin{equation}
+    \mathrm{RV}_N = \sum_{k=1}^{N} r_k^2
+\end{equation}
+\begin{equation}
+    \mathrm{SwV}_N = 2 \sum_{k=1}^{N} (R_k - r_k)
+\end{equation}
+\begin{equation}
+    \hat{V}_{(0,1)} = \frac{1}{\mu_1^2} \sum_{k=1}^{N-1} |r_{k+1}| |r_k|
+\end{equation}
+\begin{equation}
+    \Omega_{\mathrm{SWV}} = \frac{\mu_6}{9} \cdot \frac{N^3 \mu_1^{-6}}{N - 5} \sum_{k=0}^{N-6} \prod_{l=1}^{6} |r_{k+l}|
+\end{equation}
+\begin{equation}
+    \mu_p = 2^{p/2} \Gamma \left( \frac{p+1}{2} \right) / \sqrt{\pi}
+\end{equation}
+
+2. 将所有发生价格跳跃且收益为正的时段的对数收益率累加即为当日的正向跳跃收益；
+
+3. 以 10 个交易日为半衰期，将每日的日内正向跳跃收益乘上当日的换手率，再取过去 20 个交易日的指数加权平均收益即为最终的平均换手日内正跳跌收益因子：
+\begin{equation}
+    \mathrm{AvgTurnoverPosJumpRet}_{i,t} = \frac{\sum_{d=1}^{20} w_d \cdot (\mathrm{PosJumpRet}_{i,t-d+1} \cdot \mathrm{Turnover}_{i,t-d+1})}{\sum_{d=1}^{20} w_d}
+\end{equation}
+\begin{equation}
+    w_d = 0.5^{\frac{d-1}{10}}
+\end{equation}
+
+\subsection{说明}
+股价跳跃体现了投资者对信息冲击的集中反应；股价跳跃收益类因子通常呈反转特性，与股票未来收益负相关，即过去跳跃收益较高的股票未来收益较小。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任建稳, 杨帆. 2024. 如何识别股价跳跃. 招商证券.
+    \item Jiang, G. J., \& Oomen, R. C. A. (2008). \textit{Testing for jumps when asset prices are observed with noise—a “swap variance” approach}. Journal of Econometrics, 144(2), 352-370.
+    \item Jiang, G. J., \& Zhu, K. X. (2017). \textit{Information Shocks and Short-Term Market Underreaction}. Journal of Financial Economics, 124(1), 43-64.
+\end{enumerate}
+\end{document}

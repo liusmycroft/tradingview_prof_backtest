@@ -1,0 +1,253 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{已实现双幂次变差(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RBV}_t = \mu_1^{-2} \sum_{i=2}^n |r_{t_i}| |r_{t_{i-1}}|
+\end{equation}
+\begin{equation}
+    \mu_q = E(|Z|^q) = 2^{q/2} \frac{\Gamma\left(\frac{1}{2}(q+1)\right)}{\Gamma\left(\frac{1}{2}\right)}
+\end{equation}
+\begin{equation}
+    \Gamma(\alpha) = \int_0^{+\infty} x^{\alpha-1} e^{-x} dx
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{t_i} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( k=3 \)，\( n \) 表示该股票在交易日 \( t \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点；
+    \item ③ \( \mu_q \) 为标准正态分布的第 \( q \) 阶绝对矩。
+\end{itemize}
+
+\subsection{说明}
+积分波动率 Integrated Variance 刻画了股价波动率中股价连续分量的波动水平（非跳跃部分），作者证明了积分波动率可以通过多幂次变差来有效估计，比如常见的已实现双幂次变差 realized bipower variation，已实现三幂次变差 realized tripower variation 等。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Barndorff-Nielsen, O. E., \& Shephard, N. (2004). \textit{Power and bipower variation with stochastic volatility and jumps}. Journal of Financial Econometrics, 2, 1-48.
+\end{enumerate}
+
+\section{每日最大异常成交量(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ABNVOLD} = \max_t \left( \frac{\mathrm{VOL}_{i,t}}{\overline{\mathrm{VOL}}_{i,t}} \right)
+\end{equation}
+其中，\(\overline{\mathrm{VOL}}_{i,t}\) 为股票 \( i \) 在 \( t \) 交易日滚动 1 年的平均成交量。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{VOL}_{i,t} \) 为股票 \( i \) 在 \( t \) 交易日的成交量；
+    \item ② \( \overline{\mathrm{VOL}}_{i,t} \) 为股票 \( i \) 在 \( t \) 交易日滚动 1 年的平均成交量；
+    \item ③ \( m \) 为交易日窗口，一般取为月度。
+\end{itemize}
+
+\subsection{说明}
+每日最大异常成交量为日频成交量除以过去一年平均成交量的最大值，属于极端交易量类因子；异常成交量也是投资者注意力的常用代理指标，因子值越高，投资者对该股票的关注度越高；而有限注意力导致投资者更倾向于交易引起他们关注的股票，投资者关注度越高的股票通常意味着越多的投资购买；但 A 股市场的做多与做空不对称，使得投资者非理性买入高于非理性卖出，进而导致关注度高的股票由于投资者净买入而存在溢价，未来也更可能出现反转。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cosemans, M., \& Frehen, R. (2021). \textit{Salience theory and stock prices: Empirical evidence}. Journal of Financial Economics, 140(2), 460-483.
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{偏锋涨跌幅(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 每分钟计算市场上所有上涨或者下跌股票收益率的平均值，分别作为“正向动量基准”和“负向动量基准”；
+
+2. 对每个股票、每分钟，计算该股票1分钟收益率与当前分钟同方向的“动量基准”之差，记为1分钟偏离度，若该股票1分钟收益率为0或没有股票与之收益率方向相同，则1分钟偏离度为0；
+
+3. 每分钟截面计算全市场股票偏离度的幅度，并将其大于0的时刻作为市场的“动量时刻”，将每只股票“动量时刻”的1分钟对数“偏离度”进行加总，得到日度因子；
+
+4. 高频因子低频化：每月月底，分别计算步骤3中日度因子过去20天的标准差，即为“日内偏锋涨跌幅”因子。
+
+\subsection{说明}
+1分钟偏离度的偏度刻画了当前时段市场上股票处于“离群上涨”或“离群下跌”的比例，若1分钟偏离度的偏度大于0，说明这1分钟市场上股票偏离度分布呈现右偏，即当前时段市场上离群上涨（超涨）或离群下跌（少跌）的股票的数量更多，上涨的股票更有可能过度反应，下跌的股票更有可能反应不足，在动量时段内“偏离度”越高的股票，日后越有可能使得股票价格会有更低的预期收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 叶尔乐. 2025. 日内“动量脉冲”与股价过度反应的精细刻画. 民生证券.
+\end{enumerate}
+
+\section{主买占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j=1}^{N} \text{主动买入成交额}_{i,j,n}}{\sum_{j=1}^{N} \text{成交额}_{i,j,n}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 基于逐笔成交数据中的 BS 标志将逐笔成交数据合成为分钟级别的主动买卖金额，B 为主动买入（卖出方先挂单，买入方主动触碰卖单并成交）；S 为主动卖出（买入方先挂单，卖出方主动触碰买单并成交）；
+    \item ② 剔除了处于涨跌停分钟上的主动买入金额和主动卖出金额数据；
+    \item ③ \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日内的第 \( j \) 分钟的成交额；
+    \item ④ 月度选股下，\( T = 20 \) 个交易日；周度选股下，\( T = 5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+除收盘时段外，主买占比因子呈现出的是动量效应，股票前期主买占比越高，股票未来相对收益表现越好。而使用收盘前（14:27~14:56）数据计算得到的主买占比因子呈现出的是反转效应。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2020. 基于主动买入行为的选股因子. 海通证券.
+\end{enumerate}
+
+\section{基于 PE 的分析师锚效益偏差(行为金融因子-锚定效应)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{CAF\_EP}_{i,t} = \frac{\mathrm{FEP}_{i,t} - \mathrm{IFEP}_t}{\mathrm{IFEP}_t}
+\end{equation}
+\begin{equation}
+    \mathrm{FEP}_{i,t} = \frac{1}{\mathrm{FPE}_{i,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{FPE}_{i,t} \) 为分析师在时间 \( t \) 对股票 \( i \) 的 PE 指标的预测值；
+    \item ② \( \mathrm{IFEP}_t \) 为股票 \( i \) 所属行业中所有成分股的 \( \mathrm{FPE}_{i,t} \) 中位数。
+\end{itemize}
+
+\subsection{说明}
+锚定效应指人们在作出判断时会将看到或听到的第一印象的影响作为锚点，并根据锚点对判断做调整，使得调整不充分偏向于该锚点而造成判断偏差的现象；假设分析师预测也会有锚定效应，即分析师以公司所在行业作为定价的“锚”，当预测的财务指标超出（低于）行业中位数时，分析师会做出悲观（乐观）预测的指标，以接近行业中位数，财报公布后，被预测的公司的财务指标将高于（低于）预测值，股价表现将更优（更差）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Ashoura, S., \& Hao, Q. (2019). \textit{Do analysts really anchor? Evidence from credit risk and suppressed negative information}. Journal of Banking \& Finance, 98, 183–197.
+    \item 陈升锐. 2023. 行为金融学在量化选股中的应用. 中信出版社.
+\end{enumerate}
+
+\section{成交量比值(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{VR}_t = \frac{1}{d} \sum_{i=1}^{d} w_{t-i} \times \left( \frac{\mathrm{Vol}_{\mathrm{morning}}}{\mathrm{Vol}_{\mathrm{afternoon}}} \right)_{t-i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \dfrac{\mathrm{Vol}_{\mathrm{morning}}}{\mathrm{Vol}_{\mathrm{afternoon}}} \) 为每日上午、下午开盘的前 30 分钟成交量比值；
+    \item ②
+        \begin{equation*}
+            w_{t-i} = 
+            \begin{cases} 
+                \dfrac{(1-\alpha)^{i-1}}{\sum_{j=1}^{\infty}(1-\alpha)^{j-1}}, & \text{指数加权} \\[6pt]
+                1, & \text{算术平均}
+            \end{cases}
+        \end{equation*}
+        为时间权重因子；
+    \item ③ \( \alpha \) 为信息的衰减强度，即 \( \alpha = \dfrac{2}{1+d} \)；
+    \item ④ \( d \) 为每月最后一个交易日向前回溯移动平均的交易日个数。
+\end{itemize}
+
+\subsection{说明}
+上午开盘 30 分钟的成交量越小或者下午开盘 30 分钟的成交量越大，即成交量比值因子的值越小，对于股票次月收益预测的有效性越强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 刘均伟. 2017. 高频因子：日内分时成交隐藏玄机. 光大证券.
+\end{enumerate}
+
+\section{量岭分钟收益(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+① 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划分为“喷发成交量”，低于 1 倍标准差划分为“温和成交量”；
+
+② 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”。
+
+③ 计算过去 20 日“量岭”时点的累计收益，即为量岭分钟收益因子。
+
+\subsection{说明}
+“量岭”对应的连续性大额交易，更符合个人投资者的跟随交易特征，“量岭”时刻的累计收益衡量了个人投资者交易的收益贡献，因子值越高，个人投资者交易越可能过度反应，未来收益越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{最大客户动量(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{cmom}_i^{1M} = \mathrm{mom}_{j\_{\max\_\mathrm{sales}}}^{1M}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( j\_{\max\_\mathrm{sales}} \) 为股票 \( i \) 的最大客户 \( j \)，最大客户 \( j \) 的动量即为最大客户动量因子；
+    \item ② 动量的计算周期可以是 1 月动量、6 月动量、12 月动量等。
+\end{itemize}
+
+\subsection{说明}
+最大客户动量的表现与通过完整客户加权得到的客户动量表现相近，客户动量溢出主要来源于最大客户。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jussa et al. (2015). \textit{The Logistics of Supply Chain Alpha}. Deutsche Bank Markets Research.
+\end{enumerate}
+
+\section{反向日内逆转的异常频率(高频因子-收益分布类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{AB\_NR}_{i,t} = \frac{\mathrm{NR}_{i,t}}{\frac{1}{12} \sum_{k=0}^{11} \mathrm{NR}_{i,t-k}}
+\end{equation}
+\begin{equation}
+    \mathrm{NR}_{i,t} = \frac{\sum_{d=1}^{T} \mathrm{I}_{\{\mathrm{RET\_CO}_{i,d}>0\}} \times \mathrm{I}_{\{\mathrm{RET\_OC}_{i,d}<0\}}}{T}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RET\_CO}_{i,d} \) 和 \( \mathrm{RET\_OC}_{i,d} \) 分别为股票 \( i \) 在交易日 \( d \) 的隔夜收益率和日内收益率；
+    \item ② \( T \) 为股票 \( i \) 在 \( t \) 月内的实际交易天数。
+\end{itemize}
+
+\subsection{说明}
+当正的隔夜收益后伴随负的日内收益，即出现了反向日内逆转，通过统计月内出现反向日内逆转的频率，可以衡量隔夜交易者和盘中交易者间“拉锯战”的激烈程度；反向日内逆转的异常频率为当月反向日内逆转频率相对过去12个月的异常程度，考虑了“拉锯战”的持续性，取值越高，“拉锯战”强度增高，价格修正越过度。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cheema, M. A., Chiah, M., \& Man, Y. (2022). \textit{Overnight returns, daytime reversals, and future stock returns: Is China different?}. Pacific-Basin Finance Journal, 74, 101809.
+\end{enumerate}
+
+\section{日内振幅切割因子(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+
+1. 对单只股票，回溯取其最近 \( N \) 个交易日（如 \( N=10 \)）的 1 分钟数据，计算每分钟的分钟振幅（最高价 / 最低价 -1）；
+
+2. 对每个交易日的 240 个分钟，选择 1 分钟涨跌幅较高的 \( \lambda \)（如 20\%）有效交易分钟，计算振幅均值得到高价振幅因子 \( V_{\text{high}}(\lambda) \)；选择 1 分钟涨跌幅较低的 \( \lambda \)（如 20\%）有效分钟，计算振幅均值得到低价振幅因子 \( V_{\text{low}}(\lambda) \)；进一步计算日内振幅因子：
+\begin{equation}
+    V(\lambda) = V_{\text{high}}(\lambda) - V_{\text{low}}(\lambda)
+\end{equation}
+
+3. 回看过去 \( N \) 个交易日，计算日内振幅因子的均值 \( V_{\text{mean}} \) 和标准差 \( V_{\text{std}} \)，并进行横截面标准化，等权合成后即为最终的日内振幅切割因子。
+
+\subsection{说明}
+用于振幅切割的情绪指标除了股价外，还可以是振幅、成交额、涨跌幅等指标；日内振幅切割是对分钟理想振幅（见相关日历页）的另一种构造思路：先日内切割得到日度序列再合成，且两种计算方式得到的因子相关性并不高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 高鹏. 2025. 高频振幅因子的内部切割. 开源证券.
+\end{enumerate}
+\end{document}

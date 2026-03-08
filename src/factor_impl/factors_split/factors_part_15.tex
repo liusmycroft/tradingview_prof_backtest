@@ -1,0 +1,372 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{大单资金净流入率(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j=1}^{N} \mathrm{Amt}_{i,j,n} \cdot \mathrm{I}_{\{r_{i,j,n}>0, j \in \mathrm{IdxSet}\}} - \sum_{j=1}^{N} \mathrm{Amt}_{i,j,n} \cdot \mathrm{I}_{\{r_{i,j,n}<0, j \in \mathrm{IdxSet}\}}}{\sum_{j=1}^{N} \mathrm{Amt}_{i,j,n}}
+\end{equation}
+
+其中，平均单笔成交金额为：
+\begin{equation}
+    \text{平均单笔成交金额} = \frac{\sum_{j=1}^{N} \mathrm{Amt}_{i,j,n}}{\sum_{j=1}^{N} \mathrm{TrdNum}_{i,j,n}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Amt}_{i,j,n} \) 为股票 \( i \) 在第 \( n \) 个交易日内第 \( j \) 分钟的成交额序列；
+    \item ② \( r_{i,j,n} \) 为股票 \( i \) 在第 \( n \) 个交易日内第 \( j \) 分钟的收益率序列；
+    \item ③ \( \mathrm{IdxSet} \) 为第 \( n \) 个交易日内平均单笔成交金额最大的 30\% 的分钟 \( K \) 线的序号；
+    \item ④ \( \mathrm{TrdNum}_{i,j,n} \) 为股票 \( i \) 在第 \( n \) 个交易日内第 \( j \) 分钟的成交笔数序列；
+    \item ⑤ 月度选股下，\( T=20 \) 个交易日；周度选股下，\( T=5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+平均单笔成交金额较大的 \( K \) 线多空博弈激烈，未来的反转效应更强；该因子与股票未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 姚石. 2019. 日内分时成交中的玄机. 海通证券.
+\end{enumerate}
+
+\section{已实现盈利比率(行为金融因子-处置效应)}
+
+\subsection{因子定义}
+
+1. 提取股票分钟级前复权收盘价、成交量，以及日频流通换手率数据，计算股票每日分钟级量价分布情况，其中 \( t \) 日股票 \( i \) 在每个价位的筹码峰计算公式如下：
+\begin{equation}
+    \mathrm{Chip}_{i,t,p} = \mathrm{Vol}_{i,t,p} \times T_{i,t} + \mathrm{Chip}_{i,t-1,p} \times (1 - T_{i,t})
+\end{equation}
+
+2. 基于 \( t \) 日换手和 \( t-1 \) 日筹码峰，计算当天换手的筹码的盈利总金额作为已实现盈利：
+\begin{equation}
+    \text{已实现盈利}_{i,t} = \sum_p (\mathrm{Close}_{i,t} - \mathrm{Price}_{i,p}) \times (\mathrm{Chip}_{i,t-1,p} \times T_{i,t}) \times \mathrm{I}_{\mathrm{Close}_{i,t} \geq \mathrm{Price}_{i,p}}
+\end{equation}
+
+3. 基于 \( t \) 日筹码峰，计算当天收盘时所有盈利筹码的账面盈利金额作为账面盈利总金额：
+\begin{equation}
+    \text{账面盈利}_{i,t} = \sum_p (\mathrm{Close}_{i,t} - \mathrm{Price}_{i,p}) \times \mathrm{Chip}_{i,t,p} \times \mathrm{I}_{\mathrm{Close}_{i,t} \geq \mathrm{Price}_{i,p}}
+\end{equation}
+
+4. 计算当日兑现的盈利占筹码总盈利的比例，即为已实现盈利比率 \( \mathrm{CPGR} \)：
+\begin{equation}
+    \mathrm{CPGR}_{i,t} = \frac{\text{已实现盈利}_{i,t}}{\text{已实现盈利}_{i,t} + \text{账面盈利}_{i,t}}
+\end{equation}
+
+\subsection{说明}
+已实现盈利比率衡量了投资者盈利时的卖出倾向，因子值越大，投资者越倾向于卖出赚钱的股票，抛压大，股价上涨受阻，与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升斌, 姚家敏. 2025. 处置效应与 V 型处置效应在量化选股中的应用. 中信建投.
+    \item Odean, T. (1998). \textit{Are investors reluctant to realize their losses?}. Journal of Finance, 53(5), 1775-1790.
+\end{enumerate}
+
+\section{多层加权日内信噪比(高频因子-收益分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{新}\mathrm{SNR} = \mathrm{Weight}_{\mathrm{vol}} \times \mathrm{SNR}_{\mathrm{layer2}} + (1 - \mathrm{Weight}_{\mathrm{vol}}) \times \mathrm{SNR}_{\mathrm{layer3}}
+\end{equation}
+\begin{equation}
+    \mathrm{Weight}_{\mathrm{vol}} = 0.5 + \frac{\mathrm{Vol}_{\mathrm{std}} - 0.5}{\delta}
+\end{equation}
+\begin{equation}
+    \mathrm{Vol}_{\mathrm{std}} = \frac{\mathrm{Vol} - \min(\mathrm{Vol})}{\max(\mathrm{Vol}) - \min(\mathrm{Vol})}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{SNR}_{\mathrm{layer}n} \) 为分解至 \( n \) 层后计算得到的信噪比，计算逻辑见相关日历页；
+    \item ② \( \mathrm{Vol} \) 为日内价格波动率，先在横截面上对其做极值处理和归一化处理，然后将标准化后的波动率缩至合适的权重区间。
+\end{itemize}
+
+\subsection{说明}
+新的日内信噪比因子由日内价格波动为权重对第二层和第三层信噪比因子加权得到；日内价格波动越大，剥离更多噪声，赋予第三层更大的权重；加权后的复合信噪比的表现有所提升。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 严佳炜, 朱定豪. 信息提取: 信息提取与信号分析. 华安证券.
+\end{enumerate}
+
+\section{同时点峰岭数相关性（高频因子-成交分布类）}
+
+\subsection{因子定义}
+
+① 对过去20日同时点成交量按照1倍标准差的标准划分，高于1倍标准差划为“喷发成交量”，低于1倍标准差划为“温和成交量”；
+
+② 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后1分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后1分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”；
+
+③ 计算过去20日同一时点的量峰与量岭样本数（对应240个分钟点）的相关系数：
+\begin{equation}
+    \mathrm{Corr}(\text{过去20日同一时点的量峰数序列}, \text{过去20日同一时点的量岭数序列})
+\end{equation}
+
+\subsection{说明}
+同时点峰岭数相关性因子衡量了知情交易者与个人投资者在同一交易时点的参与度一致性。一致性越高，个人投资者对知情交易者跟随越紧密，知情交易者的投资动向可能已被个人投资者识别，个股未来表现会减弱，是一个负向因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{买入浮亏偏离小单因子（行为金融因子-遗憾规避）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{HCPS} = \frac{\sum_{i}^{N} \overline{\mathrm{price}}_{\mathrm{buy},i} \cdot \mathbf{I}_{\{P_{\mathrm{buy},i} > \mathrm{close}\}} \cdot \mathbf{I}_{\{\mathrm{vol} < \mathrm{volume}_{\mathrm{mean}}\}}}{close} - 1
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{price}_{\mathrm{buy},i} 、p_{sell,i}\) 为主买成交价；
+    \item ② \( \mathrm{volume}_{\mathrm{mean}} \) 为当日所有实际成交量均值；
+    \item ③ 逐笔中每笔成交买卖方向确定方式：若该笔成交为买单被拆分与多个卖单成交，则记为买方交易，反之为卖方交易；
+    \item ④ 大小单划分方式：以当日所有实际成交量均值作为区分大小单的阈值，即
+        \begin{equation*}
+            \mathrm{vol} < \mathrm{volume}_{\mathrm{mean}}
+        \end{equation*}
+        为小单，反之为大单；
+    \item ⑤ 此外，还可只统计尾盘期间 \([14:30,14:57)\) 的成交量，计算得到买入浮亏偏离尾盘因子。
+\end{itemize}
+
+\subsection{说明}
+遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自我安慰，避免承认之前的决策失误；对于买入后浮亏（当天买入的股票收盘价低于买入的成本价）的投资者会避免承认决策失误而存在惜售心理，不愿卖出下跌浮亏的股票；买入浮亏偏离因子从成交价格偏离度来量化上述心理，因子值越高，买入成本越高，成交价格偏离程度越大，未来抛压较低，会有更高的预期收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{个股收益最高时的价变共振(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 计算个股在日内中最高的 5 个分钟收益率期间，对应全市场等权收益率的均值：
+\begin{equation}
+    \mathrm{RM\_MAX}(N)_i = \frac{\sum_{t=n1}^{n_N} \mathrm{MEAN\_MKT}_t}{N}
+\end{equation}
+\begin{equation}
+    \mathrm{MEAN\_MKT}_t = \frac{\sum_{i=1}^I r_{i,t}}{I}
+\end{equation}
+
+2. 计算个股在日内中最高的 5 个分钟收益率期间，全市场收益率标准差的均值：
+\begin{equation}
+    \mathrm{STD\_MAX}_i = \frac{\sum_{t=n11}^{nN} \mathrm{std}(r_t)}{N}
+\end{equation}
+
+3. 对 \( \mathrm{RM\_MAX} \) 做截面上的正序排名名次归一化，并除以 \( \mathrm{STD\_MAX} \) 即为个股收益最高时的市场共振因子：
+\begin{equation}
+    \mathrm{CO\_MAX}_i = \frac{\mathrm{RM\_MAX}(N)_i}{\mathrm{STD\_MAX}_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{i,t} \) 为个股 \( i \) 在 \( t \) 分钟的收益率，\( r_t \) 为 \( t \) 时刻的全部个股收益率序列；
+    \item ② \( n1, n2, \ldots, nN \) 为日内分钟收益率最高的 \( N \) 个分钟，\( N=5 \)；
+    \item ③ \( \mathrm{MEAN\_MKT}_t \) 为在 \( t \) 分钟的全市场等权收益率均值。
+\end{itemize}
+
+\subsection{说明}
+\( \mathrm{RM\_MAX} \) 刻画了个股与市场趋势的一致性，因子值越大，说明个股是在市场表现较好时同步出现价格上涨，个股上涨与全市场上涨趋势一致，个股与市场形成有效共振，股价上涨被普遍认可，更容易延续，未来收益表现较好；\( \mathrm{STD\_MAX} \) 刻画了市场整体收益的分歧度，分歧度越小，市场趋势更具市场代表性，个股与市场共振越有效，将其叠加后有助于提升 \( \mathrm{RM\_MAX} \) 的表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任继敏, 袁元勋, 许继宏. 2024. 基于分钟数据的价变共振因子. 招商证券.
+\end{enumerate}
+
+\section{单位交易额的有效价差（高频因子-流动性类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ESI}_{i,t} = \frac{\mathrm{ES}_{i,t}}{\$ \mathrm{vol}_{i,t}}
+\end{equation}
+\begin{equation}
+    \mathrm{ES}_{i,t} = 2 D_{i,k} \cdot \frac{P_{i,t} - \left( \frac{\mathrm{Ask}_{i,t} + \mathrm{Bid}_{i,t}}{2} \right)}{\left( \mathrm{Ask}_{i,t} + \mathrm{Bid}_{i,t} \right)/2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Ask}_{i,t}, \mathrm{Bid}_{i,t}, P_{i,t} \) 分别为股票 \( i \) 在 \( t \) 时刻的卖 1 价、买 1 价、收盘价；
+    \item ② \( D_{i,k} \) 为买卖标识，买单记为 1，卖单记为 -1；
+    \item ③ \( D_{i,k} \) 买卖单判断标准：若当前收盘价高于（低于）最优买卖报价平均值，则认为是买（卖）单；当前收盘价等于最优买卖报价平均值时，若收盘价高于（低于）上一笔价格，则认为是买（卖）单；
+    \item ④ \( \$ \mathrm{vol}_{i,t} \) 为 \( t \) 日当天成交额。
+\end{itemize}
+
+\subsection{说明}
+单位交易额的有效价差衡量了交易中每单位交易额的边际交易成本，反映流动性效率；股票的交易成本越高，流动性越差，未来会有正向的流动性风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升悦. 2024. 流动性高频因子构建与投资者注意力因子分析报告. 中信建投.
+\end{enumerate}
+
+\section{特质日内收益波动率（高频因子-波动跳跃类）}
+
+\subsection{因子定义}
+
+截面上对所有股票过去 20 天的日内收益率序列进行主成分分析 PCA，提取第一主成分 \( F_1 \) 为隐式因子溢价：
+\begin{equation}
+    \mathrm{IntradayRet}_{i,t} = \frac{\mathrm{Close}_{i,t}}{\mathrm{Open}_{i,t}} - 1
+\end{equation}
+
+对每只股票 \( i \)，以过去 20 天的日内收益率序列为 \( y \)，以隐式因子 \( F_1 \) 序列为 \( x \)，进行时序回归：
+\begin{equation}
+    \mathrm{IntradayRet}_{i,t} = \alpha_{i,t} + \beta_i^{F_1} \times F_1 + \cdots + \varepsilon_i
+\end{equation}
+
+时序回归返回的残差序列的标准差即为隐式因子框架下的特质波动因子：
+\begin{equation}
+    \mathrm{IntradayRetIV} = \mathrm{std}(\varepsilon_i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 在进行截面主成分分析时，若第一主成分的解释力度低于 20\%，则选取解释力最大的前两个主成分进行回归；
+    \item ② 还可进一步计算特质度因子：
+        \begin{equation*}
+            \mathrm{IVR} = 1 - R^2
+        \end{equation*}
+        上述回归模型拟合优度；
+    \item ③ 还可进一步计算特质偏度因子：
+        \begin{equation*}
+            \mathrm{IS} = \frac{\sum e_{lt}^3}{\mathrm{IV}^3}
+        \end{equation*}
+\end{itemize}
+
+\subsection{说明}
+计算隐式因子框架下的特质波动率时，直接通过主成分分析对资产收益率序列降维来提取共同波动，而无需显式的借助多因子模型估计共同风险。系统性的解决传统多因子模型遗漏变量、估计误差的问题，计算简单；此处提取的是日内收益率序列的共同波动。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣慧, 杨怡玲, 刘璐. 2022. 隐式框架下的特质因子改进. 国信证券.
+\end{enumerate}
+
+\section{筹码收益调整(量价因子改进)}
+
+\subsection{因子定义}
+
+利用过去 250 日的数据，对股票 \( i \) 在 \( T \) 日计算得到 \([T-250, T]\) 之间每日的留存筹码 \( \mathrm{RsdAmt}_{T-k}^T \) 和成交均价 \( \mathrm{Price}_{T-k}^{\mathrm{avg}} \)，即为该股票在 \( T \) 日的筹码分布估计：
+\begin{equation}
+    \mathrm{RsdAmt}_{T-k}^T = \mathrm{Amt}_{T-k} \cdot \prod_{t=T-k+1}^{T} (1 - \mathrm{Turnover}_t), \quad k \in (0, 250]
+\end{equation}
+
+计算最新日成交均价相对历史筹码的加权成本的相对收益，即为最新日的筹码收益因子：
+\begin{equation}
+    \mathrm{holding\_ret} = \frac{\sum_t \mathrm{Price}_t^{\mathrm{avg}} \times \mathrm{RsdAmt}_t^T}{\sum_t \mathrm{RsdAmt}_t^T} 
+\end{equation}
+
+对全市场的筹码收益因子加权计算均值作为 A 股市场的筹码收益 \( \mathrm{mkt\_holding\_ret} \)，用以调节个股筹码收益因子 \( \mathrm{holding\_ret} \) 的动量效应和反转效应，即得到筹码收益调整因子：
+\begin{equation}
+    \mathrm{holding\_ret\_adj} = \mathrm{holding\_ret} \times \mathrm{sign}(\mathrm{mkt\_holding\_ret})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Amt}_{T-k} \) 为股票在 \( T-k \) 日的成交额；
+    \item ② \( \mathrm{Turnover}_t \) 为股票在 \( t \) 日的换手率；
+    \item ③ 市场筹码收益切分阈值也可取 -2\%，即：\( \mathrm{sign}(\mathrm{mkt\_holding\_ret} - (-2\%)) \)。
+\end{itemize}
+
+\subsection{说明}
+原始筹码收益因子在牛市中通常表现为动量特征，在熊市中通常表现为反转特征，可借助市场筹码收益指标刻画市场赚钱效应，保留市场赚钱效应较好时（市场筹码收益为正）个股筹码收益的动量效应，扭转市场赚钱效应较差（市场筹码收益为负）时个股筹码收益的反转效应，调整后的筹码收益因子为正向因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建福, 张翔. 2025. 筹码结构视角下的动量反转融合. 开源证券.
+\end{enumerate}
+
+\section{价量相关性综合因子(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+价量相关性综合因子 \( \mathrm{PV\_corr} \) 为横截面标准化后的价量相关性平均数因子和价量相关性波动性因子的等权线性相加：
+\begin{equation}
+    \mathrm{PV_corr} = \frac{\mathrm{PV_{corravg}} - \mathrm{mean}(\mathrm{PV_{corravg}})}{\mathrm{std}(\mathrm{PV_{corravg}})} + \frac{\mathrm{PV_\section{高低位放量选股因子（五分钟波动率版本）}
+
+\subsection{因子定义}
+\begin{equation}
+\begin{aligned}
+\mathrm{Factor\_Low}_{i} &= \frac{\mathrm{Avg\_Std\_Low}}{\mathrm{Avg\_Std\_Total}} \\[12pt]
+\mathrm{Factor\_High}_{i} &= \frac{\mathrm{Avg\_Std\_High}}{\mathrm{Avg\_Std\_Total}} \\[12pt]
+\mathrm{Factor\_Diff}_{i} &= \mathrm{Factor\_Low}_{i} - \mathrm{Factor\_High}_{i}
+\end{aligned}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item 本因子基于**分钟频收益率**与**波动率**构建。若从原始价格数据开始，需计算以下前置变量：
+\end{itemize}
+\subsubsection{前置计算}
+\paragraph{分钟收益率}
+\begin{equation}
+r_{t} = \frac{P^{close}_{t}}{P^{open}_{t}} - 1
+\end{equation}
+其中，$P^{close}_{t}$ 为第 $t$ 分钟的收盘价，$P^{open}_{t}$ 为第 $t$ 分钟的开盘价，$r_{t}$ 为第 $t$ 分钟的收益率。
+
+\paragraph{五分钟滚动波动率}
+\begin{equation}
+\sigma_{t} = \mathrm{Std}(r_{t-4}, r_{t-3}, r_{t-2}, r_{t-1}, r_{t})
+\end{equation}
+其中，$\sigma_{t}$ 为截至第 $t$ 分钟的、过去5分钟收益率的标准差。
+
+\subsubsection{核心变量}
+\begin{itemize}
+    \item $T$： 回看期，默认为20个交易日。
+    \item $M$： 回看期 $T$ 内所有股票 $i$ 的分钟数据点集合。
+    \item $P_{m}$： 分钟 $m$ 的收盘价，其中 $m \in M$。
+    \item $\mathrm{Thd}_{low}$： 集合 $M$ 中分钟收盘价的20\%分位数，即 $\mathrm{Thd}_{low} = \mathrm{Quantile}(P_{m}, 0.2)$。
+    \item $\mathrm{Thd}_{high}$： 集合 $M$ 中分钟收盘价的80\%分位数，即 $\mathrm{Thd}_{high} = \mathrm{Quantile}(P_{m}, 0.8)$。
+    \item $S_{low}$： 低位分钟集合，$S_{low} = \{m | P_{m} \le \mathrm{Thd}_{low}, m \in M\}$。
+    \item $S_{high}$： 高位分钟集合，$S_{high} = \{m | P_{m} \ge \mathrm{Thd}_{high}, m \in M\}$。
+    \item $\mathrm{Avg\_Std\_Low}$： 低位分钟集合 $S_{low}$ 中所有分钟对应的五分钟波动率 $\sigma_{m}$ 的均值。
+    \item $\mathrm{Avg\_Std\_High}$： 高位分钟集合 $S_{high}$ 中所有分钟对应的五分钟波动率 $\sigma_{m}$ 的均值。
+    \item $\mathrm{Avg\_Std\_Total}$： 回看期 $T$ 内所有分钟对应的五分钟波动率 $\sigma_{m}$ 的均值。
+\end{itemize}
+
+\subsection{计算步骤（改为1分钟频率）}
+将上述所有计算中的“5分钟滚动波动率”计算基准改为“1分钟滚动波动率”，即计算**每1分钟的波动率**。具体修改如下：
+
+\paragraph{一分钟滚动波动率（前置计算修改）}
+\begin{equation}
+\sigma^{1min}_{t} = \mathrm{Std}(r_{t})
+\end{equation}
+此处 $\sigma^{1min}_{t}$ 是第 $t$ 分钟的收益率 $r_{t}$ 自身的标准差。在单点情况下，其值为0，这在实际计算中无意义。因此，**文档未详述此点，但基于我所掌握的知识**，对于1分钟频率，通常需要定义一个滚动窗口来计算波动率，例如使用过去N分钟的收益率序列（如N=5或N=20）。为保持与原逻辑一致，建议将波动率计算窗口定义为过去 $W$ 分钟（例如 $W=5$）：
+\begin{equation}
+\sigma^{1min}_{t} = \mathrm{Std}(r_{t-W+1}, r_{t-W+2}, ..., r_{t})
+\end{equation}
+其中 $W$ 为滚动窗口长度。后续所有计算中的 $\sigma_{m}$ 均替换为此 $\sigma^{1min}_{m}$。变量 $S_{low}$、$S_{high}$ 的划分依据（分钟收盘价分位数）以及 $\mathrm{Avg\_Std\_Low}$、$\mathrm{Avg\_Std\_High}$、$\mathrm{Avg\_Std\_Total}$ 的计算方式保持不变。
+
+\subsection{说明}
+该因子通过比较股票在历史价格高位区间与低位区间的日内波动率相对强弱来选股。计算时，首先识别出过去20个交易日内，所有分钟收盘价处于最高20\%（高位）和最低20\%（低位）的时段，然后分别计算这两个时段内每分钟波动率的平均值，最后将它们分别除以整个回看期内所有分钟波动率的平均值，得到“高位波动率占比”和“低位波动率占比”因子。两者相减可得到“差分”因子。文档测试表明，使用分钟频（5分钟）数据计算的该因子，在分层回测上表现优于日频版本。因子值可采用过去一段时间的均值或标准差进行合成，其中“低位”和“差分”因子使用均值合成效果较好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 本文档内容整理自《高低位放量选股因子之五分钟波动率版本，效果炸裂！只能说分钟频>>日频！》。
+    \item 原文档未提供外部学术参考文献。
+\end{enumerate}{corrstd}} - \mathrm{mean}(\mathrm{PV_{corrstd}})}{\mathrm{std}(\mathrm{PV_{corrstd}})}
+\end{equation}
+
+\subsection{说明}
+\( \mathrm{PV\_corr} \) 综合反映了价量关系对传统反转因子的修正。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高子剑. 2020. 高频价量相关性，意想不到的选股因子. 东吴证券.
+\end{enumerate}
+\end{document}

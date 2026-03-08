@@ -1,0 +1,269 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{基于PB的前景价值TK（行为金融因子-前景理论）}
+
+\subsection{因子定义}
+
+① 以个股过去N期的估值变化率为衡量公司价值的代理变量：
+\begin{equation}
+    (r_{pb,-m},\frac{1}{N}; r_{pb,-1},\frac{1}{N}; r_{pb,0},\frac{1}{N}}; r_{pb,1},\frac{1}{N}; \ldots; r_{pb,m},\frac{1}{N})
+\end{equation}
+
+② 利用价值函数、权重函数计算前景价值 TK：
+\begin{equation}
+    \mathrm{TK} = \sum_{i=-m}^{-1} v(r_{pb,i}) \left[ w^-\left(\frac{i + m + 1}{N}\right) - w^-\left(\frac{i + m}{N}\right) \right] + \sum_{i=1}^{n} v(r_{pb,i}) \left[ w^+\left(\frac{n - i + 1}{N}\right) - w^+\left(\frac{n - i}{N}\right) \right]
+\end{equation}
+
+③ 价值函数、权重函数都保持不变，函数参数取值为：\(\alpha=0.88\)，\(\lambda=2.25\)；\(\gamma=0.61\)，\(\delta=0.69\)。
+
+\subsection{说明}
+前景价值代表了投资者给每支个股价值的“打分”，而用于衡量公司价值的参考指标不一定为历史收益率，此处选用了PB估值变化率来衡量公司价值：投资者更倾向于持有低估的股票，卖出高估的股票，即高价值量的股票（高估值股票）由于卖出压力反而会被低估，而低价值量的股票（低估股票）反而会被高估，此时的前景价值与股票未来收益呈正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 胡一江. 2020. 前景理论因子的选股能力. 中信建投.
+\end{enumerate}
+
+\section{加权收盘价比因子(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{加权收盘价比} = \frac{\sum_{t=1}^T \frac{\mathrm{vol}_t}{VOL}\mathrm{close}_t }{\frac{1}{T} \sum_{t=1}^T \mathrm{close}_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{close}_t\) 和 \(\mathrm{vol}_t\) 分别为 \(t\) 时间段的收盘价和成交量；
+    \item ② \(\mathrm{Vol} = \sum^{T}_{t=1} \mathrm{vol}_t\) 为整个时间段总成交量；
+    \item ③ \(T\) 为划分时间段的个数，如日内5分钟频率的 \(T=48\)。
+\end{itemize}
+
+\subsection{说明}
+加权收盘价比因子为成交量加权的收盘价求和同收盘价等权求和的比值，刻画了个股在高位成交密集水平；与未来收益负相关，因子值越高，个股在高位成交越密集，因交易中羊群效应的影响，推动股价高估，未来收益会回调。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 川桃, 郑起. 2020. 高频因子（八）：高位成交因子——从量价匹配说起. 长江证券.
+\end{enumerate}
+
+\section{行业动量溢出效应(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RET}^{IND}_{it} =  \mathrm{Industrial\_weight}_{ij,t} \times \mathrm{ReT}_{jt}
+\end{equation}
+\begin{equation}
+    \mathrm{Industrial\_weight}_{ij,t} = \frac{\mathrm{IMV}_{j,t}}{\sum_{j=1 and j \neq i}^N \mathrm{IMV}_{j,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{Ret}_{jt}\) 为股票 \(j\) 在 \(t\) 时刻的月度收益率；
+    \item ② \(\mathrm{IMV}_{j,t}\) 为 \(t\) 时期同行业内公司 \(j\) 的市值。
+\end{itemize}
+
+\subsection{说明}
+行业动量溢出效应因子刻画了与单只股票同属于相同行业下其余股票涨跌对该股票涨跌的联动效应（领先滞后效应）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Usman Ali, David Hirshleifer. (2020). \textit{Shared analyst coverage: Unifying momentum spillover effects}. Journal of Financial Economics, 6(136), 649-675.
+\end{enumerate}
+
+\section{成交量占比峰度(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{kurt}\left( \frac{\mathrm{volume}_i}{\sum \mathrm{volume}_i} \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{volume}_i\) 为日内分钟成交量，如10分钟等；成交量占比是成交量在个股内纵向可比指标，主要从成交的分布上给出衡量；
+    \item ② 此外也可将成交量占比替换为对数成交量、换手率（全市场个股间横向可比指标，从流动性上给出衡量），计算成交量峰度类因子。
+\end{itemize}
+
+\subsection{说明}
+成交量峰度类因子均衡量了个股过去一段时间的交易极端行为，与未来收益负相关；个股成交呈尖峰时，大部分时间成交在合理范围波动，但存在特定区间交易异常活跃或几乎无成交的极端情况，此时往往多空博弈激烈，个股收益不确定性强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 川桃, 郑起. 2019. 高频因子（四）：高阶矩高频因子. 长江证券.
+\end{enumerate}
+
+\section{空间网络相对中心度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+计算股票 \( i \) 和样本股票池中其他股票 \( j \) 的近 20 个交易日收益率序列之间的 Pearson 相关系数并求均值：
+\begin{equation}
+    \bar{p}_{i,t} = \frac{1}{N-1} \sum_{j=1, j \neq i}^{N-1} \mathrm{corr}(r_{i,t}, r_{j,t})
+\end{equation}
+基于相关系数计算股票 \( i \) 和其他股票间的平均距离：
+\begin{equation}
+    \bar{d}_{i,t} = \sqrt{2 \times (1 - \bar{p}_{i,t})}
+\end{equation}
+计算空间维度的网络相对中心度：
+\begin{equation}
+    \mathrm{SCC}_{i,t} = \frac{1}{d_{i,t}^2}
+\end{equation}
+
+\subsection{说明}
+SCC 因子衡量了股票在网络中与其余股票的相对距离（关联程度），因子值越高，说明股票在网络中与其余股票的距离越近，越处于网络相对中心的位置，对其他股票的相对影响程度也越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张自力, 闫红蕾, 张楠. 2020. 股票网络、系统性风险与股票定价. 经济学, 1, 329-350.
+    \item 曹春晓, 杨国平. 2021. 股票网络与网络中心度因子研究. 华西证券.
+\end{enumerate}
+
+\section{理想振幅因子(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+
+对单只股票，回溯取其最近 \(N\) 个交易日（默认 \(N=20\)）的数据，计算每日的振幅（最高价/最低价-1）；
+
+选择收盘价较高的 \(\lambda\)（默认 25\%）有效交易日，计算振幅均值得到高价振幅因子 \(\mathrm{V}_{\mathrm{high}}(\lambda)\)；选择收盘价较低的 \(\lambda\)（默认 25\%）有效交易日，计算振幅均值得到低价振幅因子 \(\mathrm{V}_{\mathrm{low}}(\lambda)\)；
+
+计算理想振幅因子：
+\begin{equation}
+    V(\lambda) = \mathrm{V}_{\mathrm{high}}(\lambda) - \mathrm{V}_{\mathrm{low}}(\lambda)
+\end{equation}
+
+\subsection{说明}
+基于股价将振幅因子进行切割得到的理想振幅因子，考虑了不同价格区间的振幅分布信息差异（高价振幅因子具有更强的负向选股能力），选股能力更强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕. 2020. 振幅因子的隐藏结构. 开源证券.
+\end{enumerate}
+
+\section{“随波逐流”因子（高级因子-量价相关性类）}
+
+\subsection{因子定义}
+
+1. \textbf{对股票 \(i\)，计算第 \(t\) 日“合理收益率”：}
+   \begin{equation}
+       \text{合理收益率} = \frac{1}{20} \sum_{n=0}^{19} \text{日内收益率}_{t-n} = \frac{1}{20} \sum_{n=0}^{19} \left( \frac{\text{收盘价}_{t-n}}{\text{开盘价}_{t-n}} - 1 \right)
+   \end{equation}
+
+2. \textbf{对股票 \(i\)，取第 \(t\) 日内 1 分钟价格序列（剔除集合竞价），计算该日第 \(m\) 分钟“相对开盘收益率”：}
+   \begin{equation}
+       \text{相对开盘收益率}_{m,t} = \frac{\text{收盘价}_{m,t}}{\text{开盘价}_t} - 1
+   \end{equation}
+
+3. \textbf{计算第 \(t\) 日的“高位成交额”和“低位成交额”：}
+   \begin{equation}
+       \text{高位成交额}_t = \sum_{m=1}^{240} \text{分钟成交额}_m \cdot \mathrm{I}\left( \text{相对开盘收益率}_{m,t} > \text{合理收益率}_t \right)
+   \end{equation}
+   \begin{equation}
+       \text{低位成交额}_t = \sum_{m=1}^{240} \text{分钟成交额}_m \cdot \mathrm{I}\left( \text{相对开盘收益率}_{m,t} < \text{合理收益率}_t \right)
+   \end{equation}
+
+4. \textbf{计算股票 \(i\) 在 \(t\) 日价格处于高位时的相对成交额——“高低额差”：}
+   \begin{equation}
+       \text{高低额差}_t = \frac{\text{高位成交额}_t - \text{低位成交额}_t}{\text{收盘时流通市值}_t}
+   \end{equation}
+
+5. \textbf{对股票 \(i\)，每月末，取所有股票过去 20 日的“高低额差”序列，计算股票 \(i\) 与其余所有股票“高低额差”序列间的 spearman 相关系数，对相关系数取绝对值并求均值，即得到股票 \(i\) 的“随波逐流”因子。}
+
+\subsection{说明}
+“随波逐流”因子衡量了个股股价处于相对高位时，其成交额与市场趋势的关联性，与未来收益正相关；当个股股价处于相对高位时，相关系数越大的股票，其成交额更多由市场趋势带动，投资者对其股价的分歧度越小，预示个股未来收益会相对更高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 个股成交额的市场跟随性与“水中行舟”因子, 2023, 方正证券.
+\end{enumerate}
+
+\section{产业链地位优势因子（图谱网络-网络结构）}
+
+\subsection{因子定义}
+方法1：按单一维度方式计算公司 B 与公司 A 间每一对上下游产品之间的关联度，并取最大值作为两个公司最终的关联度：
+\begin{equation}
+    \mathrm{wgt}_{(B,j),(A,i),t} = \frac{(\mathrm{prdIncome}_{B,j,t} + \mathrm{prdIncome}_{A,i,t}) \times \mathbf{1}\{j \to i\}}{\sum_i \mathrm{prdIncome}_{A,i,t} + \sum_j \mathrm{prdIncome}_{B,j,t}}
+\end{equation}
+
+方法2：按整体维度方式计算公司 B 与公司 A 间每一对上下游产品之间的关联度：
+\begin{equation}
+    \mathrm{wgt}_{A,B,t} = \frac{\sum_i \mathrm{prdIncome}_{A,i,t} \times \mathbf{1}\{i \to j, i \in A\} + \sum_j \mathrm{prdIncome}_{B,j,t} \times \mathbf{1}\{i \to j, j \in B\}}{\sum_i \mathrm{prdIncome}_{A,i,t} + \sum_j \mathrm{prdIncome}_{B,j,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{prdIncome}_{A,i,t} \) 为公司 A 在产品 i 上的营业收入；
+    \item ② \( \sum_i \mathrm{prdIncome}_{A,i,t} \) 为公司 A 的当期总营收；
+    \item ③ \( \mathbf{1}\{i \to j\} \) 表示产品 j 为产品 i 的上游；
+    \item ④ 若公司 A 为上游公司，统计其与下游公司的关联度，得到的为下游关联优势地位因子；反之，为上游关联优势地位因子；若同时考虑公司 A 的上游和下游关联度，则为上下游关联度地位优势因子；
+    \item ⑤ 可以将产业链地位优势因子进行市值行业中心化处理。
+\end{itemize}
+
+\subsection{说明}
+产业链地位优势因子刻画了上市公司在产业链中的相对优势；产业链地位优势因子值越高，越处于产业链的中心地位，而位于中心行业的股票越容易受到其他行业冲击的影响，市场风险更大，进而能获得更高的股票收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑兆磊.2023.产业链视角下的Alpha传导研究.兴业证券
+\end{enumerate}
+
+\section{高频已实现偏度（高频因子-收益分布类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RSkew}_i = \frac{\sqrt{N} \sum_{j=1}^N (r_{ij} - \bar{r}_i)^3}{\mathrm{RVar}_i^{3/2}}
+\end{equation}
+\begin{equation}
+    \mathrm{RVar}_i = \sum_{j=1}^N (r_{ij} - \bar{r}_i)^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{ij} \) 为股票 \( i \) 的 1 分钟对数收益率序列或 5 分钟对数收益率序列；
+    \item ② \( N \) 表示个股在交易日 \( t \) 中特定频率的分钟级别数据个数；
+    \item ③ 在任意选股时刻，因子值为前几日指标的均值，如月度选股，计算因子值时使用的是股票过去 20 个交易日的均值。
+\end{itemize}
+
+\subsection{说明}
+高频已实现偏度因子刻画了股价日内快速拉升或下跌的特征，与股票未来收益负相关；短期大幅拉升的股票，未来更有可能出现反转；而日内快速下跌的股票，往往具有更高的下行风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2017. 高频因子之股票收益分布特征. 海通证券.
+    \item Amaya, D., Christoffersen, P., Jacobs, K., and Vasquez, A. (2016). \textit{Does Realized Skewness Predict the Cross-Section of Equity Returns?}. Journal of Financial Economics, 118, 135–167.
+\end{enumerate}
+
+\section{尾盘半小时收益率（高频因子-动量反转类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ret}_{14:30-15:00,i} = \frac{\mathrm{close}_{15:00,i}}{\mathrm{close}_{14:30,i}} - 1
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{close}_{14:30,i} \) 和 \( \mathrm{close}_{15:00,i} \) 分别为尾盘 14:30 分钟收盘价和当日收盘价；
+    \item ② 基于相同的逻辑，也可以用开盘价和 10:00 的收盘价计算开盘半小时收益率。
+\end{itemize}
+
+\subsection{说明}
+通常股票在开盘后半小时和收盘前半小时的成交相对更活跃，多空博弈激烈，蕴含的信息相对更多，所以可以单独统计这些时间段的量价因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 艾玛钧, 安宁宁, 罗军. 2021. 高频量化数据因子化方法. 广发证券.
+\end{enumerate}
+\end{document}

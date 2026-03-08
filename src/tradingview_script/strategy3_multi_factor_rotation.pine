@@ -1,0 +1,159 @@
+//@version=5
+strategy("多因子轮动策略", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+// 输入参数
+symbol2 = input.symbol("NASDAQ:WMT", "第二标的")
+rsi_period = input.int(14, "RSI周期")
+momentum_period = input.int(20, "动量周期")
+volatility_period = input.int(20, "波动率周期")
+rebalance_period = input.int(5, "再平衡周期（K线数）")
+
+// 获取第二标的数据
+price2 = request.security(symbol2, timeframe.period, close)
+volume2 = request.security(symbol2, timeframe.period, volume)
+
+// 计算标的1的因子
+rsi1 = ta.rsi(close, rsi_period)
+momentum1 = (close - close[momentum_period]) / close[momentum_period] * 100
+volatility1 = ta.stdev(ta.change(close), volatility_period)
+volume_ma1 = ta.sma(volume, 20)
+volume_ratio1 = volume / volume_ma1
+
+// 计算标的2的因子
+rsi2 = request.security(symbol2, timeframe.period, ta.rsi(close, rsi_period))
+momentum2 = request.security(symbol2, timeframe.period, (close - close[momentum_period]) / close[momentum_period] * 100)
+volatility2 = request.security(symbol2, timeframe.period, ta.stdev(ta.change(close), volatility_period))
+volume_ma2 = request.security(symbol2, timeframe.period, ta.sma(volume, 20))
+volume_ratio2 = volume2 / volume_ma2
+
+// 评分系统（分数越高越好）
+score1 = 0.0
+score2 = 0.0
+
+// 动量因子（动量越高分数越高）
+score1 := score1 + (momentum1 > momentum2 ? 1 : 0)
+score2 := score2 + (momentum2 > momentum1 ? 1 : 0)
+
+// RSI因子（偏好超卖，均值回归）
+score1 := score1 + (rsi1 < rsi2 ? 1 : 0)
+score2 := score2 + (rsi2 < rsi1 ? 1 : 0)
+
+// 波动率因子（偏好低波动）
+score1 := score1 + (volatility1 < volatility2 ? 1 : 0)
+score2 := score2 + (volatility2 < volatility1 ? 1 : 0)
+
+// 成交量因子（偏好高相对成交量）
+score1 := score1 + (volume_ratio1 > volume_ratio2 ? 1 : 0)
+score2 := score2 + (volume_ratio2 > volume_ratio1 ? 1 : 0)
+
+// 再平衡逻辑
+var int bars_since_rebalance = 0
+bars_since_rebalance := bars_since_rebalance + 1
+
+should_rebalance = bars_since_rebalance >= rebalance_period
+
+if should_rebalance
+    bars_since_rebalance := 0
+
+    // 先平掉所有仓位
+    if strategy.position_size != 0
+        strategy.close_all()
+
+    // 根据评分建立新仓位
+    if score1 > score2
+        strategy.entry("多头标的1", strategy.long)
+        alert("轮动至标的1 (AAPL)", alert.freq_once_per_bar)
+    else if score2 > score1
+        strategy.entry("空头标的1", strategy.short)  // 这代表持有标的2
+        alert("轮动至标的2 (WMT)", alert.freq_once_per_bar)
+
+// 绘图
+plot(score1, "评分1", color=color.green, linewidth=2)
+plot(score2, "评分2", color=color.red, linewidth=2)
+hline(2, "中性", color=color.gray, linestyle=hline.style_dashed)
+
+// 显示当前选择
+var table score_table = table.new(position.bottom_right, 3, 3)
+if barstate.islast
+    table.cell(score_table, 0, 0, "因子", bgcolor=color.gray, text_color=color.white)
+    table.cell(score_table, 1, 0, "标的1", bgcolor=color.green, text_color=color.white)
+    table.cell(score_table, 2, 0, "标的2", bgcolor=color.red, text_color=color.white)
+
+    table.cell(score_table, 0, 1, "评分", text_color=color.white)
+    table.cell(score_table, 1, 1, str.tostring(score1), text_color=color.white)
+    table.cell(score_table, 2, 1, str.tostring(score2), text_color=color.white)
+
+    table.cell(score_table, 0, 2, "选中", text_color=color.white)
+    table.cell(score_table, 1, 2, score1 > score2 ? "✓" : "", text_color=color.yellow)
+    table.cell(score_table, 2, 2, score2 > score1 ? "✓" : "", text_color=color.yellow)
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+策略核心要点：
+═══════════════════════════════════════════════════════════════════════════════
+
+1. 策略类型：多因子评分 - 资产轮动（Factor-Based Rotation）
+
+2. 核心逻辑：
+   - 基于多个量化因子对不同资产进行综合评分
+   - 定期（每5根K线）将资金轮动至评分最高的资产
+   - 结合趋势追踪（动量）和均值回归（RSI）两种风格
+
+3. 因子体系（共4个因子）：
+
+   a) 动量因子（Momentum Factor）
+      - 计算20期价格变化率
+      - 理论：价格趋势具有惯性，强者恒强
+      - 权重：1/4
+
+   b) RSI超卖因子（Mean Reversion Factor）
+      - 偏好RSI较低的资产
+      - 理论：超卖后容易反弹
+      - 权重：1/4
+
+   c) 波动率因子（Volatility Factor）
+      - 偏好低波动率资产
+      - 理论：低波动意味着风险较低，风险调整后收益更优
+      - 权重：1/4
+
+   d) 相对成交量因子（Volume Factor）
+      - 偏好成交量高于均值的资产
+      - 理论：高成交量代表市场关注度和流动性
+      - 权重：1/4
+
+4. 轮动机制：
+   - 每5根K线（可调整）进行一次再平衡
+   - 先平掉当前所有持仓
+   - 重新建仓至评分最高的资产
+   - 避免频繁交易（降低成本）同时保持灵活性
+
+5. 风险控制：
+   - 单一时刻只持有一个资产，集中度高
+   - 定期强制再平衡，避免错过市场变化
+   - 多因子综合评分降低单一指标失效风险
+
+6. 适用场景：
+   - 震荡市：在多个资产间来回切换捕捉短期机会
+   - 板块轮动明显的市场
+   - 资产相关性不高时效果更好
+
+7. 优化方向：
+   - 增加更多因子（如估值、基本面、技术面等）
+   - 引入因子权重优化（机器学习）
+   - 添加交易成本约束，避免过度交易
+   - 可以扩展为3个以上资产的轮动
+   - 考虑因子IC衰减，动态调整因子权重
+
+8. 局限性：
+   - 等权重因子可能不是最优
+   - 固定再平衡周期可能不适应所有市场环境
+   - 不能真正做空第二个标的（TradingView限制）
+   - 交易成本在频繁轮动时会侵蚀收益
+
+9. 扩展思路：
+   - 结合宏观环境（利率、VIX等）动态调整因子权重
+   - 添加行业轮动逻辑（科技股 vs 消费股 vs 金融股）
+   - 使用ETF构建更多元化的轮动池
+
+═══════════════════════════════════════════════════════════════════════════════
+*/

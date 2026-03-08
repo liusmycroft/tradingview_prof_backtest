@@ -1,0 +1,291 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{绝对收益与成交量相关性(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{CORA} = \mathrm{corr}(| \mathrm{Ret}_t |, \mathrm{Amount}_t), \quad t \in [1, 240]
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( | \mathrm{Ret}_t | \) 为个股日内第 \( t \) 分钟的对数收益率的绝对值；
+    \item ② \( \mathrm{Amount}_t \) 为个股日内第 \( t \) 分钟的成交额；
+    \item ③ 月度因子可使用月末 5-15 个交易日因子的平均值来合成。
+\end{itemize}
+
+\subsection{说明}
+CORA 代表单位成交额对股价推动的关系（双方通常正相关），与未来收益负相关；因子值过高，表明股票成交额放量时伴随着价格剧烈波动，该类股票投机属性强，资金对价格的扰动多，短期交易过热，该类因子月度上往往具有负向 Alpha。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱定豪, 严佳炜. 2020. 量价关系的高频乐章. 方正证券.
+\end{enumerate}
+
+\section{SLSV 模型(行为金融因子-羊群效应)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{SLSV}_{i,t} = 
+    \begin{cases} 
+        \mathrm{LSV}_{i,t}, & p_{i,t} > p_t \\ 
+        -\mathrm{LSV}_{i,t}, & p_{i,t} < p_t 
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    \mathrm{LSV}_{i,t} = |p_{i,t} - p_t| - E|p_{i,t} - p_t|
+\end{equation}
+
+\begin{equation}
+    E|p_{i,t} - p_t| = \mathrm{AF}(i,t) = \sum_{k=1}^{N_{i,t}} \binom{N_{i,t}}{k} p_t^k (1 - p_t)^{N_{i,t} - k} \left| \frac{k}{N_{i,t}} - p_t \right|
+\end{equation}
+
+\begin{equation}
+    p_{i,t} = \frac{B(i,t)}{B(i,t) + S(i,t)}, \quad p_t = \frac{\sum_{i=1}^{N} p_{i,t}}{N}, \quad N_{i,t} = B(i,t) + S(i,t)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( B(i,t), S(i,t) \) 分别为区间 \( t \) 内买入股票和卖出股票的基金数量；
+    \item ② \( N_{i,t} \) 为持仓发生变动的基金数量；
+    \item ③ \( p_{i,t} \) 为股票 \( i \) 在区间 \( t \) 内买入股票基金占持仓变动基金的比例；
+    \item ④ 此处使用的是基金年报和半年报持仓数据，假设有 300 只基金加仓股票 \( i \)，则 \( B(i,t) = 300 \)；
+    \item ⑤ \( N \) 为全市场股票总数。
+\end{itemize}
+
+\subsection{说明}
+LSV 模型从基金持股变动数据出发判断一只股票是否被集中买入或集中卖出，进而捕捉基金“抱团”现象；而 SLSV 在 LSV 基础上，考虑了投资者的买卖方向，当 SLSV 显著为正时，对应买入从众效应，当 SLSV 显著为负时，对应卖出从众效应，SLSV 越趋于 0 时，从众效应越弱。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Wermers, R. (1999). \textit{Mutual Fund Herding and the Impact on Stock Prices}. The Journal of Finance, 54, 581-622.
+\end{enumerate}
+
+\section{分钟成交额方差(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{VMA} = \frac{1}{N} \sum_{t=1}^{N} (\mathrm{Amount}_t - \mu)^2
+\end{equation}
+\begin{equation}
+    \mu = \frac{1}{N} \sum_{t=1}^{N} \mathrm{Amount}_t
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Amount}_t \) 为交易日内的分钟成交额；
+    \item ② \( N \) 为日内不同分钟频率下的时间段数量。
+\end{itemize}
+
+\subsection{说明}
+分钟成交额方差刻画了日内分钟成交额的高阶矩特征；此外，还可对日内分钟序列计算偏度和峰度；分钟成交额高阶矩因子在中心化后的表现一般。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 尹治技. 2020. 高频视角下成交额蕴藏的 Alpha. 华安证券.
+\end{enumerate}
+
+\section{买卖委托价格比率(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{PIR}_t = \frac{P_t^{\mathrm{WB}} - P_t^{\mathrm{WA}}}{P_t^{\mathrm{WB}} + P_t^{\mathrm{WA}}}
+\end{equation}
+\begin{equation}
+    P_t^{\mathrm{WB(A)}} = \frac{\sum_{i=1}^{5} w_i \times P_{i,t}^{\mathrm{B(A)}}}{\sum_{i=1}^{5} w_i}
+\end{equation}
+\begin{equation}
+    w_i = 1 - (i - 1)/5, \quad i = 1, 2, 3, 4, 5
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( P_t^{\mathrm{WB(A)}} \) 为衰减加权委托价格；
+    \item ② \( P_{i,t}^{\mathrm{B}} \) 和 \( P_{i,t}^{\mathrm{A}} \) 分别是 \( t \) 时刻第 \( i \) 档的买一和卖一的委托价格；
+    \item ③ \( w_i = 1 - (i - 1)/5, \ i = 1, 2, 3, 4, 5 \)。
+\end{itemize}
+
+\subsection{说明}
+PIR 为买卖委托价差与其和的比值，从价格的角度描述了买盘的压力。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐. 2023. 高频选股因子分类体系. 中信建投证券.
+\end{enumerate}
+
+
+\section{净支撑成交量因子(量价因子改进)}
+
+\subsection{因子定义}
+
+1. 每个交易日，计算所有分钟收盘价的均值，筛选收盘价小于该平均值的分钟，将它们的成交量加总，得到支撑成交量；
+
+2. 将收盘价大于上述平均值的分钟成交量加总，得到阻力成交量；
+
+3. 每个交易日，计算如下因子：
+\begin{equation}
+    \text{净支撑成交量} = \frac{\text{支撑成交量} - \text{阻力成交量}}{\text{当日流通股本}}
+\end{equation}
+
+4. 每月月底回看过去 20 个交易日，计算上述因子的平均值，并做横截面市值、中信一级行业中性化处理。
+
+\subsection{说明}
+净支撑成交量因子值较大，则表明支撑价格不破位的力量较强，后市上涨概率较高；若因子值较小，则表明阻碍价格上涨的力量较强，后市相对偏空。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 沈芷琦, 刘富兵. 2024. 基于趋势资金日内交易行为的选股因子. 国盛证券.
+\end{enumerate}
+
+\section{博弈因子(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{Stren} = \frac{\sum \mathrm{weight}_t \times \mathrm{Vol\_Buy}_t}{\sum \mathrm{weight}_t \times \mathrm{Vol\_Sell}_t}
+\end{equation}
+\begin{equation}
+    \mathrm{Vol\_Buy}_t = \sum \mathrm{vol\_buy}_i
+\end{equation}
+\begin{equation}
+    \mathrm{Vol\_Sell}_t = \sum \mathrm{vol\_sell}_i
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{vol\_buy}_i \) 为每日逐笔成交数据中，当前成交价大于上一笔买一价，交易以买方主导的成交量，每日加总得到主买量，用以衡量多空博弈中的多头力量；
+    \item ② \( \mathrm{vol\_sell}_i \) 为每日逐笔成交数据中，当前成交价小于上一笔卖一价，交易以卖方主导的成交量，每日加总得到主卖量，用以衡量多空博弈中的空头力量；
+    \item ③ \( \mathrm{weight}_t \) 为加权权重，可以等权或 21 天、42 天半衰期等指数加权。
+\end{itemize}
+
+\subsection{说明}
+博弈因子衡量了多空双方博弈的相对力量，与未来收益负相关；通常买卖双方的短期博弈均存在过度反应的现象，当个股过去一段时间主买量大于主卖量时，买方力量强于卖方力量，多头筹码量增价，个股价格容易被高估；反之当个股过去一段时间主卖量大于主买量时，卖方力量强于买方力量，个股价格容易被低估。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑超. 2019. 高频因子(五)：高频因子与交易行为. 长江证券.
+\end{enumerate}
+
+\section{上下行波动率不对称性(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RSJ}_d = \frac{\mathrm{RV}_{\mathrm{up}_d} - \mathrm{RV}_{\mathrm{down}_d}}{\mathrm{RV}_d}
+\end{equation}
+其中，
+\begin{equation}
+    \mathrm{RV}_d = \sum_{i=1}^{N_d} r_{d,i}^2
+\end{equation}
+\begin{equation}
+    \mathrm{RV}_{\mathrm{up},d} = \sum_{i=1}^{N_d} r_{d,i}^2 \cdot \mathrm{I}_{r_{d,i}>0}
+\end{equation}
+\begin{equation}
+    \mathrm{RV}_{\mathrm{down},d} = \sum_{i=1}^{N_d} r_{d,i}^2 \cdot \mathrm{I}_{r_{d,i}<0}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{d,i} \) 为某股票交易日 \( d \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( N_d \) 表示该股票在交易日 \( d \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点。
+\end{itemize}
+
+\subsection{说明}
+RSJ 衡量了上下行波动的不对称性；RSJ 通常有负风险溢价，短期日内的情绪不稳定的大幅上涨往往跟着未来的补跌（RSJ 越大），短期日内情绪不稳定的大幅下跌也往往跟着未来的补涨。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Barndorff-Nielsen, O. E., Kinnebrock, S., \& Shephard, N. (2010). \textit{Measuring downside risk: realised semivariance}. In T. Bollerslev, J. Russell, \& M. Watson (Eds.), Volatility and Time Series Econometrics: Essays in Honor of Robert F. Engle (pp. 117–136). Oxford University Press.
+\end{enumerate}
+
+\section{客户 Katz-Bonacich 中心性(图谱网络-网络结构)}
+
+\subsection{因子定义}
+\begin{equation}
+    k_i = \lambda \sum_{j \neq i} x_{ij} k_j + \beta
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\lambda\) 为介于 0-1 之间的衰减因子，通常小于邻接矩阵最大特征值的倒数，用于减少随着路径长度增加的贡献；
+    \item ② \(x_{ij}\) 为供应链邻接矩阵的元素，若公司 \(i\) 和公司 \(j\) 相连，取值可以为 1，或是销售占比等；
+    \item ③ \(\beta\) 为基础中心度，通常为一个小的正数；
+    \item ④ \(k_i\) 为节点公司 \(i\) 的 Katz 中心度，初始取值可以为 \(\beta\)，然后不断迭代，直到中心度得分收敛。
+\end{itemize}
+
+\subsection{说明}
+Katz 中心性在衡量供应链节点重要性时考虑了节点间的所有路径长度，可以捕捉节点间较长路径的影响；供应链网络中占据中心位置的企业更能吸引投资者的注意力，市场对其信息反应更快，有较低的股票回报可预测性；中心性较低的企业由于信息传播较慢，有较高的股票回报可预测性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Bozok, İ., \& Özyıldırım, S. (2022). \textit{Firm centrality and limited attention}. International Review of Economics \& Finance, 78, 483-500.
+\end{enumerate}
+
+\section{注意力衰减-惊恐因子(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 计算各股票的日度“惊恐度”：
+   \begin{equation}
+       \text{惊恐度} = \frac{\text{偏离度}}{\text{基准项}} = \frac{\mathrm{abs}(\text{个股收益率} - \text{市场收益率})}{\mathrm{abs}(\text{个股收益率}) + \mathrm{abs}(\text{市场收益率}) + 0.1}
+   \end{equation}
+
+2. 计算 \( t \) 日衰减后的“惊恐度”，并将负值替换成空值：
+   \begin{equation}
+       \text{衰减惊恐度}_t = \text{惊恐度}_t - \frac{\text{惊恐度}_{t-1} + \text{惊恐度}_{t-2}}{2}
+   \end{equation}
+
+3. 对各股票，将每日衰减惊恐度与每日收益率相乘，得到加权调整收益率；
+
+4. 对各股票，每月末计算过去 20 日加权调整收益率序列的均值和标准差，分别称为“注意力衰减-惊恐收益”因子和“注意力衰减-惊恐波动”因子，再将二者等权合成为“注意力衰减-惊恐因子”。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 选取中证全指 000985 代表市场水平；
+    \item ② “偏离度”衡量了个股收益率对市场收益率的偏离水平；“基准项”衡量了市场总体收益水平。
+\end{itemize}
+
+\subsection{说明}
+注意力衰减-惊恐因子对原始惊恐度做了时间衰减，考虑了投资者对短暂连续显著收益的注意力会随时间减弱，过度反应也会逐渐缓解。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 显著效应、极端收益扭曲决策权重和“草木皆兵”因子, 2022, 方正证券.
+    \item Cosemans, M., \& Frehen, R. (2021). \textit{Salience theory and stock prices: Empirical evidence}. Journal of Financial Economics, 140(2), 460-483.
+\end{enumerate}
+
+\section{大成交量价量相关性(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{corr\_VP}_{D,i} = \mathrm{corr} \left( v_{t,D,i}, \; p_{t,D,i} \right), \quad t \in \{ \text{大成交量对应的分钟区间} \}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 将个股在每个交易日的分钟成交量时间序列按照成交量大小排序，将分钟成交量排名前 \( \frac{1}{3} \) 的成交量定为“大成交量”；
+    \item ② \( t=1,2,3,\ldots,T \) 为交易日内的相应分钟频率的第 \( t \) 个时间区间，此处 \( T \) 为大成交量对应的那些区间；
+    \item ③ \( v_{t,D,i} \) 和 \( p_{t,D,i} \) 分别为股票 \( i \) 在交易日 \( D \) 内分钟频率下的成交量和价格。
+\end{itemize}
+
+\subsection{说明}
+在传统价量相关性因子计算逻辑的基础上加入了成交量大小的信息，大单成交更能代表主力行为，蕴含的信息更多。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 文巧钧, 安宁宁, 罗军. 2021. 高频量化数据因子化方法. 广发证券.
+\end{enumerate}
+\end{document}

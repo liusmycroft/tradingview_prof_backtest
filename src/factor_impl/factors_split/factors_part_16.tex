@@ -1,0 +1,315 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{高低价复合交易占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{高低价复合交易占比} = \frac{\text{非高低价买单\&非高低价卖单的成交量} - \text{高价买单\&高价卖单的成交量}}{\text{总成交量}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 高低价订单划分方式为：委托价格处于同类型订单委托价格前 10\% 分位点的订单为高价单，处于后 10\% 分位点的订单为低价单。
+\end{itemize}
+
+\subsection{说明}
+高低价复合交易占比因子从订单委托价格高低维度对逐笔订单进行划分和归整。测试发现，“高价买\&高价卖”成交量占比和“低价买\&低价卖”成交量占比越高，其未来反转效应越明显，且前者比后者更有效；“非高低价买+非高低价卖”成交量占比越高，其未来的动量效应越强；高低价复合交易占比因子为两者的复合，与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣慰, 张宇. 2024. 高频订单成交数据蕴含的 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{横盘时刻-主买笔均成交金额(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 将日内 240 个 1 分钟数据集合标记为 \( T = \{t_1, t_2, \dots, t_{240}\} \)，判断股票 i 的每分钟涨跌幅，将涨跌幅为 0 时刻标记为集合 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \)；
+
+2. 利用逐笔成交数据，进一步对 P 中时刻的所有成交记录划分为主动买入成交 \( P\_Buy \) 和主动卖出成交 \( P\_Sell \) 两类；
+
+3. 对横盘时刻下的主动买入成交额和成交笔数进行汇总，根据其成交额 \( \mathrm{Amt} \) 之和除以成交笔数 \( \mathrm{DealNum}\) 之和，构造横盘时刻且主买的笔均成交金额 \( \mathrm{ATD}_{\mathrm{Zero\_Buy}} \)：
+\begin{equation}
+    \mathrm{ATD}_{\mathrm{Zero\_Buy}} = \frac{\sum_{t \in P\_\mathrm{Buy}} \mathrm{Amt}_t}{\sum_{t \in P\_\mathrm{Buy}} \mathrm{DealNum}_t}
+\end{equation}
+
+4. 同理，将全天的成交金额除以全天的成交笔数，得到全天的笔均成交金额 \( \mathrm{ATD}_T \)：
+\begin{equation}
+    \mathrm{ATD}_T = \frac{\sum_{t \in T} \mathrm{Amt}_t}{\sum_{t \in T} \mathrm{DealNum}_t}
+\end{equation}
+
+5. 将横盘时刻且主买的笔均成交金额除以全天的笔均成交金额，即得到去量纲化后的标准化因子 \( \mathrm{SATD}_{\mathrm{Zero\_Buy}} \)：
+\begin{equation}
+    \mathrm{SATD}_{\mathrm{Zero\_Buy}} = \frac{\mathrm{ATD}_{\mathrm{Zero\_Buy}}}{\mathrm{ATD}_T}
+\end{equation}
+
+\subsection{说明}
+笔均成交额类因子通过汇总“特殊的、具有较多信息含量”时刻的成交金额情况来刻画主力资金的行为动向；笔均成交金额越大，说明该特殊时间内资金优势越明显，属于主力资金的可能性越大。买方主导的横盘时刻，成交越多，未来收益越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣鹏, 张宇. 2025. 日内特殊时刻蕴含的主力资金 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{结构化反转(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+① 将一段时间内每个时间段的成交量，从小到大进行排序，将成交量小于等于 10\% 的时间段记为动量时间段 \(\mathrm{period}_{\mathrm{mom}}\)，大于 10\% 的时间段记为反转时间段 \(\mathrm{period}_{\mathrm{rev}}\)；
+
+② 以成交量倒数为权重构建动量时间段反转因子：
+\begin{equation}
+    \mathrm{Rev}_{\mathrm{mom}} = \sum_{i=1}^{\mathrm{period}_{\mathrm{mom}}} w_i \log \left( \frac{\mathrm{Close}_{t-i+1}}{\mathrm{Close}_{t-i}} \right), \quad w_i \propto \frac{1}{\mathrm{volume}_i}
+\end{equation}
+
+③ 以成交量为权重构建反转时间段反转因子：
+\begin{equation}
+    \mathrm{Rev}_{\mathrm{rev}} = \sum_{i=1}^{\mathrm{period}_{\mathrm{mom}}} w_i \log \left( \frac{\mathrm{Close}_{t-i+1}}{\mathrm{Close}_{t-i}} \right), \quad w_i \propto \mathrm{volume}_i
+\end{equation}
+
+④ 以动量时间段反转因子和反转时间段反转因子合成结构化反转因子：
+\begin{equation}
+    \mathrm{Rev}_{\mathrm{struct}} = \mathrm{Rev}_{\mathrm{rev}} - \mathrm{Rev}_{\mathrm{mom}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{period}\) 为过去一段时间按一定规则划分时间段的总时间段个数，如过去 21 个交易日的日内 10 分钟频率数据的 \(\mathrm{period}=24 \times 21\)，\(\mathrm{period} = \mathrm{period}_{\mathrm{mom}} \cup \mathrm{period}_{\mathrm{rev}}\)；大小成交量划分阈值也可选 10\%、15\%、20\% 等。
+\end{itemize}
+
+\subsection{说明}
+结构化反转因子改进了高频反转因子头部分组收益的线性单调性。多空双方的博弈状态会影响反转效应的强弱；在好坏信息发生初期，多空双方可能几乎不存在博弈，价格呈现很强的确定性，不可逆性强，此时成交量低，动量效应强；随着时间推移，逐渐进入新的博弈阶段，成交量开始恢复，反转效应加强；即存在一个成交量的阈值，小于该阈值时的价格变动呈现动量效应，大于该阈值时的价格变动呈现反转效应。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 骤川桃, 郑起. 2019. 高频因子（二）：结构化反转因子. 长江证券.
+\end{enumerate}
+
+\section{跳跃强度(高顿因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+计算检验是否存在跳跃的检验统计量，原假设为不存在跳跃：
+\begin{equation}
+    \mathrm{T}_{SwV} = \frac{\mathrm{BV}_t}{N^{-1}\sqrt{\hat{\Omega}_{\mathrm{SwV}}}} \left(1 - \frac{\mathrm{RV}_t}{\mathrm{SwV}_t}\right) \xrightarrow{d} N(0,1)
+\end{equation}
+\begin{equation}
+    \hat{\Omega}_{\mathrm{SwV}} = \frac{\mu_6}{9} \frac{N^3}{N - 5} \int_{t-1}^{t} \sigma_s^6 ds = \frac{\mu_6}{9} \frac{N^3}{N - 3}\mu_{3/2}^{-4}\sum_{i=0}^{N-3} (\prod_{k=1}^4|r_{t_{i+k}}|^{3/2})
+\end{equation}
+\begin{equation}
+    \mathrm{SwV}_t = 2 \sum_{i=1}^N (R_{t_i} - r_{t_i})
+\end{equation}
+
+构建用于表示日内价格是否存在跳跃的示性函数：
+\begin{equation}
+    I_{\mathrm{jump\_SwV}} = I(\mathrm{T}_{SwV} > \Phi_{1-\alpha}^{-1})
+\end{equation}
+
+计算观察期内跳跃强度，如月度的 \( D = 20 \)：
+\begin{equation}
+    \mathrm{JArr} = \frac{1}{D} \sum_{t=1}^D I_{\mathrm{jump\_SwV},t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( R_{t_i} \) 和 \( r_{t_i} \) 分别为交易日 \( t \) 内第 \( i \) 个时间区间内的简单收益率和对数收益率；
+    \item ② \( \Phi \) 为标准正态分布累计分布函数，\( \alpha \) 为显著性水平；
+    \item ③ 可根据日内收益的正负方向，分开统计正向跳跃强度和负向跳跃强度。
+\end{itemize}
+
+\subsection{说明}
+跳跃强度为一段时间内出现价格跳跃的天数占比，衡量了股价异常波动的持续性，可以用于刻画信息冲击的强度。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Tauchen, G., \& Zhou, H. (2011). \textit{Realized jumps on financial markets and predicting credit spreads}. Journal of Econometrics, 160(1), 102-118.
+    \item 周飞鹏, 罗军, 安宁宁. 2022. 再谈股价跳跃因子. 广发证券.
+\end{enumerate}
+
+\section{基于市场波动率的注意力捕捉(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+
+对每个行业内分别统计每日行业成分股截面收益标准差作为市场关注代理指标：
+\begin{equation}
+    \mathrm{indus\_vol}_d = \mathrm{std}(\text{行业内成分股的日度收益序列 } r_{i,d})
+\end{equation}
+
+将市场关注代理指标与股票日收益进行月度时序回归，代理指标前的系数绝对值 \(|\beta_{i,t}|\) 即为股票对市场关注的敏感程度：
+\begin{equation}
+    r_{i,d} = \mu_{i,t} + \beta_{i,t} \mathrm{indus\_vol}_d + \rho_{1,i,t} \mathrm{Mkt}_d + \rho_{2,i,t} \mathrm{SMB}_d + \rho_{3,i,t} \mathrm{HML}_d + \rho_{4,i,t} \mathrm{UMD}_d + \varepsilon_{i,d}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+     \item ① \(n_{\mathrm{upper},d}\)、\(n_{\mathrm{lower},d}\)、\(N_d\) 分别为 \(d\) 日涨停股票数量、跌停股票数量、当日交易股票总数；
+    \item ① \( r_{i,d} \) 为个股日度收益；
+    \item ② \( \mathrm{Mkt}_d, \mathrm{SMB}_d, \mathrm{HML}_d \) 为经典的 Fama-French 三因子；
+    \item ③ \( \mathrm{UMD}_d \) 为动量因子收益，即全市场过去 11 个月累积收益前后 30\% 的组合在 \( d \) 日的收益差。
+\end{itemize}
+
+\subsection{说明}
+不同股票对同一市场关注度事件的反映程度往往是不同的，可借助个股收益对市场关注度事件的敏感程度来衡量股票对该事件的注意力捕捉效应；捕捉能力越强（敏感程度越高），表明个股更能吸引市场注意，从而导致买盘压力增大，股价高估；上述因子以市场波动率作为市场关注度事件，收益的分化也表明市场交易活跃，关注度高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Lin, F., Qiu, Z., \& Zheng, W. (2023). \textit{Cranes among chickens: The general-attention-grabbing effect of daily price limits in China's stock market}. Journal of Banking \& Finance, 150, 106818.
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信出版社.
+\end{enumerate}
+
+\section{模糊金额比(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \) 计算 \( n \) 日内的 1 分钟收益率；计算第 \( t \) 分钟的波动率，即 \([t-4, t]\) 区间内分钟收益率的标准差；计算第 \( t \) 分钟的模糊性，即 \([t-4, t]\) 区间内上述分钟波动率的标准差；
+
+2. 将日内模糊性大于日内模糊性均值的时间段记为“起雾时刻”；
+
+3. 计算“起雾时刻”的分钟成交额均值为“雾中金额”，计算日内所有时刻的分钟成交额均值为“总体金额”；
+
+4. 计算“日模糊金额比”：
+\begin{equation}
+    \text{日模糊金额比} = \frac{\text{雾中金额}}{\text{总体金额}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算上述因子时，剔除开盘和收盘数据，仅保留日内交易数据，所以开盘前 9 分钟的模糊性为空值；
+    \item ② 每月末可对最近 20 天的上述因子求均值和标准差并将两者等权合并，即得到月度“模糊金额比”因子。
+\end{itemize}
+
+\subsection{说明}
+模糊金额比因子从金额维度统计了投资者在模糊性较大时的成交程度，同样衡量了投资者对模糊性的厌恶程度，与未来收益负相关；投资者对波动率模糊性的厌恶心理会使得投资者急于卖出而产生过度反应，未来很可能会补涨。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 波动率的波动率与投资者模糊性厌恶. 方正证券.
+    \item Kostopoulos, D., Meyer, S., \& Uhr, C. (2021). \textit{Ambiguity about volatility and investor behavior}. Journal of Financial Economics.
+\end{enumerate}
+
+\section{知情交易概率(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{PIN} = \frac{\alpha \mu}{\alpha \mu + 2\varepsilon}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设信息事件发生的概率为 \( \alpha \)，且坏消息发生的概率为 \( \delta \)；
+    \item ② 假设知情交易者的委托单到达速率为 \( \mu \)，非知情交易者的委托单到达速率为 \( \varepsilon \)，上述过程满足泊松分布；
+    \item ③ 上述参数需通过求解买卖委托单混合泊松分布的极大似然函数估计得到。
+\end{itemize}
+
+\subsection{说明}
+PIN 是最早对知情交易概率进行直接测度的方法；知情交易概率指在一段时间内，拥有信息优势的知情交易者提交的订单数量占总委托单数量的比例，用以刻画该段时间内的信息不对称程度，通常与未来收益正相关，取值越大，信息不对称程度越大，投资者要求的风险回报越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Easley, D., Kiefer, N. M., O'Hara, M., \& Paperman, J. B. (1996). \textit{Liquidity, information and infrequently traded stocks}. Journal of Finance, 51(4), 1405-1436.
+\end{enumerate}
+
+\section{CSAD模型（基于时序回归变形）(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+
+1. 每个月末提取当前可交易股票过去 120 个交易日的涨跌幅数据，计算股票 \( S_* \) 和其他股票（不活跃交易日不超过 20 天）之间日涨跌幅相关系数；
+
+2. 选取相关系数最大的 9 只股票，连同 \( S_* \) 一起构成一个板块：
+   \begin{equation}
+       S_i \ (i = 1, \dots, 10)
+   \end{equation}
+
+3. 以 \( S_* \) 为中心，计算板块过去 120 个交易日的横截面绝对偏差 \( \mathrm{CSAD} \)：
+   \begin{equation}
+       \mathrm{CSAD}_t = \frac{1}{10} \sum_{i=1}^{10} |r_{it} - r_{*t}|
+   \end{equation}
+
+4. 对 CSAD 波动率相对个股波动率比值的变化作为羊群效应因子：
+   \begin{equation}
+       \mathrm{ratio}[t_1, t_2] = \frac{\sigma_{[t_1, t_2]}(\mathrm{CSAD})}{\sigma_{[t_1, t_2]}(r_*)}
+   \end{equation}
+   \begin{equation}
+       f_{jt} = -\frac{\mathrm{ratio}[t-19, t]}{\mathrm{ratio}[t-119, t]}
+   \end{equation}
+
+\subsection{说明}
+CSAD 模型对羊群效应的检验主要基于时序回归上市场收益平方项前回归系数正负及显著性（系数显著为负，说明股票收益分散度的增速随市场极端收益的增加而放缓，股价走势越一致，羊群效应越强）；考虑到时序长度不易确定和回归易受异常值影响等问题，可以对时序回归进行变形，通过 CSAD 方差相对收益方差的比值变动来衡量羊群效应的强弱，比值越小，板块羊群效应越强，所在板块受关注程度提升越明显，未来收益越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Chang, E. C., Cheng, J., \& Khorana, A. (2000). \textit{An Examination of Herd Behavior in Equity Markets: An International Perspective}. Journal of Banking \& Finance, 24(10), 1651-1679.
+    \item 丁鲁明, 陈元勋. 2019. 基于市场羊群效应的股票 alpha 研究. 中信出版社.
+\end{enumerate}
+
+\section{高频弹性因子(高频因子-流动性类)}
+
+\subsection{因子定义}
+使用 Hodrick-Prescott 算法将自然对数后的 1 分钟或 5 分钟股票价格分解为基础价格 \( q_t \) 和暂时价格 \( z_t \)：
+\begin{equation}
+    p_t = q_t + z_t
+\end{equation}
+
+计算 \( z_t \) 离散傅里叶变换后的频谱函数 \( Z_k \)，其中 \( k \) 为频域单位，\( D \) 为交易日总天数，\( i \) 为虚数单位：
+\begin{equation}
+    Z_k = \sum_{t=1}^{D} z_t e^{-\frac{i2\pi kt}{D}}, \quad (k = 1, 2, \cdots, D)
+\end{equation}
+
+计算归一化后的频谱函数的幅度 \( |\bar{Z}_k| \)：
+\begin{equation}
+    |\bar{Z}_k| = \left| \frac{1}{D} Z_k \right|
+\end{equation}
+
+计算暂时价格恢复的平均速度即为弹性因子，其中 \( D_{i,t} \) 为股票 \( i \) 在滚动窗口中的可用样本天数，符号 \([\cdot]\) 表示取最近整数：
+\begin{equation}
+    \mathrm{Resiliency}_{i,t} = \frac{1}{\left[ \frac{D_{i,t}}{2} \right]} \sum_{k=1}^{\left[ D_{i,t}/2 \right]} \frac{2|\bar{Z}_{k,i,t}|}{T_{k,i,t}} = \frac{1}{\left[ \frac{D_{i,t}}{2} \right]} \sum_{k=1}^{\left[ D_{i,t}/2 \right]} 2|\bar{Z}_{k,i,t}| \cdot f_{k,i,t}
+\end{equation}
+
+\subsection{说明}
+弹性可以描述为价格从信息优势交易者驱动的暂时价格影响恢复到其基本价格的速率，而该弹性因子直接衡量了暂时价格的恢复速度，即通过频域的频谱分析得到暂时价格的距离和恢复时间，然后用距离除以恢复时间来计算速度；与未来收益负相关，因子值越高，说明股价从先前暂时价格影响中恢复越快，流动性越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Kim, J., \& Kim, Y. (2019). \textit{Transitory prices, resiliency, and the cross-section of stock returns}. International Review of Financial Analysis, 63, 243-256.
+    \item 陈原文, 罗军, 安宁宁. 2023. 弹性因子研究：从高频数据说起. 广发证券.
+\end{enumerate}
+
+\section{“待著而救”因子（高频因子-量价相关性类）}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \) 在交易日 \( T \) 内，将当日成交量最大的 10 个分钟时刻定义为“海量时刻”；
+
+2. 从时间上最靠前的“海量时刻”开始，若相邻两个“海量时刻”间隔小于 5 分钟，认为第二个“海量时刻”大概率仍是上个“海量时刻”导致的跟随交易，需剔除这些“海量时刻”，剩余时刻定义为“优势时刻”，“优势时刻”之后的 5 分钟定义为“跟随时刻”；
+
+3. 计算每个“跟随时刻”的成交量总和，并除以对应的“优势时刻”的成交量，得到“跟随系数”；对每只股票，将其日内所有“跟随系数”求均值，即为“日跟随系数”；
+
+4. 每月末，分别计算每只股票过去 20 天的“日跟随系数”的均值和标准差，并将两者等权合成得到“待著而救”因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算该因子时，仅使用开盘后第 16 分钟开始的 1 分钟交易数据。
+\end{itemize}
+
+\subsection{说明}
+“待著而救”因子衡量了股票日内普通投资者跟随优势投资者的反应程度，与未来收益负相关；因子值越大，表明优势投资者短时间内大量买入造成的成交量激增将导致普通投资者的明显跟随买入，使得股价短期内反应过度，股价未来更可能出现较大回落。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 大单成交后的跟随效应与“待著而救”因子, 2023, 方正证券.
+\end{enumerate}
+\end{document}

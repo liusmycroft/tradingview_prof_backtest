@@ -1,0 +1,266 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{开盘后净主买强度（高频因子-资金流类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\mathrm{mean}(\text{净主买成交额}_{i,j,n})}{\mathrm{std}(\text{净主买成交额}_{i,j,n})}
+\end{equation}
+\begin{equation}
+    \text{净主买成交额}_{i,j,n} = \text{主动买入成交额}_{i,j,n} - \text{主动卖出成交额}_{i,j,n}
+\end{equation}
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 基于逐笔成交数据中的 BS 标志将逐笔成交数据合成为分钟级别的主动买卖金额，B 为主动买入（卖出方先挂单，买入方主动触碰卖单并成交）；S 为主动卖出（买入方先挂单，卖出方主动触碰买单并成交）；
+    \item ② 剔除了处于涨跌停分位上的主动买入金额和主动卖出金额数据；
+    \item ③ \(i, j, n\) 分别表示第 \(i\) 只股票在第 \(n\) 个交易日内的第 \(j\) 分钟的成交额；
+    \item ④ 开盘后的买入意愿占比用的是 9:30-10:00 范围内的数据；
+    \item ⑤ 月度选股下，\(T=20\) 个交易日；周度选股下，\(T=5\) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+同时刻画了投资者在开盘后 30 分钟内主动买入行为的强度和稳健性，开盘后净主买强度越高，投资者的主动买入行为越稳健。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2020. 基于主动买入行为的选股因子. 海通证券.
+    \item 冯佳睿等. 2020. 高频因子的发现与思考. 海通证券.
+\end{enumerate}
+
+\section{单笔成交金额分位数(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    S = \frac{A_{0.1} - A_{\min}}{A_{\max} - A_{\min}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(A\) 为某只股票某个交易内的分钟单笔成交金额序列，下标 0.1、max、min 分别表示该序列的 10\% 分位数、最大值、最小值；
+    \item ② 需要将 \(A\) 序列从小到大排序，剔除最大的 10 个样本值（极端值）；
+    \item ③ 滚动 20 个交易日计算 \(S\) 指标的均值，即可得到 \(\mathrm{QUA}\) 因子。
+\end{itemize}
+
+\subsection{说明}
+单笔成交金额分位数 \(\mathrm{QUA}\) 本质上刻画了大单相对小单的成交金额偏离程度，\(\mathrm{QUA}\) 取值越小，双方偏离程度越高，而大单相对小单的成交金额偏离越大，主力（“相对大单”）对于该股票的关注度越高，主力资金参与交易的意愿越强，未来股价表现会越好；单笔成交金额分布形态除了计算分位数外，还可以计算标准差 \(\mathrm{STD}\)、峰度 \(\mathrm{KURT}\)、偏度 \(\mathrm{SKEW}\) 等。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 苏良. 2022. 高频因子：分钟单笔金额序列中的主力行为刻画. 开源证券.
+\end{enumerate}
+
+\section{供应商行业集中度（图谱网络-网络结构）}
+
+\subsection{因子定义}
+
+
+供应商行业集中度 \(\mathrm{SH}\) 的计算公式如下：
+\begin{equation}
+    \mathrm{SH} = \sum_{i=1}^{I} w_{ji} \times H_j
+\end{equation}
+
+其中 \(H_j\) 为供应商公司所属行业的赫芬达尔指数：
+\begin{equation}
+    H_j = \sum_{i=1}^{I} s_{ij}^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(H_j\) 为供应商公司j所属行业的赫芬达尔指数；
+    \item ② \(s_{ij}\) 为属于行业 \(j\) 的公司在该行业的市场份额，市场份额可以通过营业收入或市值来计算；
+    \item ③ \(w_{ij}\) 为客户 \(i\) 对供应商 \(j\) 的采购额占自身总采购额的占比。
+\end{itemize}
+
+\subsection{说明}
+供应商行业集中度为公司所有供应商所属行业集中度的加权平均，反映了公司在其供应商行业中的竞争地位；若供应商行业集中度过高，意味着公司依赖少数几家供应商，更易面临供应中断的风险；若供应商行业集中度过低，意味着公司可以从众多供应商中选择，具有较高的灵活性和议价能力。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jing Wu, John R. Birge. (2014). \textit{Supply Chain Network Structure and Firm Returns}. SSRN Electronic Journal.
+\end{enumerate}
+
+\section{单和小单的错位相关性(高额因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{RankCorr}(S_t, S_{t+1})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( S_t \) 和 \( S_{t+1} \) 都为小单（<4万元）过去20个交易日同期的资金净流入序列，但是双方日期错开1个交易日。
+\end{itemize}
+
+\subsection{说明}
+在资金流错位相关性因子中，上述小单和小单的错误相关性因子表现最好；该因子的alpha来源是“散户追涨杀跌的羊群效应”，其中，散户羊群效应可以通过股票“过去N日收益率”与“小单未来N日净流入”的秩相关系数数学公式：
+\begin{equation}
+    \mathrm{RankCorr}(R_t, S_{t+1})
+\end{equation}
+来衡量。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 盛少成. 2022. 新型因子：资金流动力学与散户羊群效应. 开源证券.
+\end{enumerate}
+
+\section{卖单非流动性（高频因子-流动性类）}
+
+\subsection{因子定义}
+\begin{equation}
+    r_{i,t} = \alpha + \beta_1 * S_{i,t} + \beta_2 * B_{i,t} + \epsilon_{it}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \beta_1 \) 为卖出非流动性系数；
+    \item ② \( \beta_2 \) 为买入非流动性系数；
+    \item ③ \( S_{i,t} \) 为股票 \( i \) 在 \( t \) 时间区间内的主动卖出金额；
+    \item ④ \( B_{i,t} \) 为股票 \( i \) 在 \( t \) 时间区间内主动买入金额。
+\end{itemize}
+
+\subsection{说明}
+卖单非流动性衡量了高频数据下主动卖出的交易金额对于股票价格变动的影响；卖单非流动性在控制风险后的 Fama-MacBeth 截面回归对收益率显著，且预测效果要好于买单非流动性，主要是由于投资者存在亏损厌恶的心理。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Brennan, M. J., Chordia, T., Subrahmanyam, A., \& Tong, Q. (2012). \textit{Sell-order liquidity and the cross-section of expected stock returns}. Journal of Financial Economics, 105(3), 523-541.
+    \item 朱剑涛. 2017. 技术类新 Alpha 因子的批量测试. 东方证券.
+\end{enumerate}
+
+\section{地理动量溢出效应（图谱网络-动量溢出）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RET}_{it}^{\mathrm{GEO}} = \sum_{j \neq i} \mathrm{geographic\_weight}_{ij,t} \times \mathrm{Re T}_{jt}
+\end{equation}
+\begin{equation}
+    \mathrm{geographic\_weight}_{ij,t} = \frac{\mathrm{GMV}_{j,t}}{\sum_{j=1 and j \neq i}^N \mathrm{GMV}_{j,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{ReT}_{jt} \) 为股票 \( j \) 在 \( t \) 时刻的月度收益率；
+    \item ② \( \mathrm{GMV}_{j,t} \) 为 \( t \) 时期同地理区域内公司 \( j \) 的市值。
+\end{itemize}
+
+\subsection{说明}
+地理动量溢出效应因子刻画了与单只股票同位于相同地理其余股票涨跌对该股票涨跌的联动效应（领先滞后效应）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Usman Ali, David Hirshleifer. (2020). \textit{Shared analyst coverage: Unifying momentum spillover effects}. Journal of Financial Economics, 6(136), 649-675.
+\end{enumerate}
+
+\section{上下行跳跃波动的不对称性（高频因子-波动跳跃类）}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{SRVJ}_t = \mathrm{RVJP}_t - \mathrm{RVJN}_t
+\end{equation}
+\begin{equation}
+    \mathrm{RVJP}_t = \max\left(\mathrm{RS}^+_t - \frac{1}{2}\hat{IV}_t, 0\right)
+\end{equation}
+\begin{equation}
+    \mathrm{RVJN}_t = \max\left(\mathrm{RS}^-_t - \frac{1}{2}\hat{IV}_t, 0\right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RVJP}_t \) 和 \( \mathrm{RVJN}_t \) 分别为交易日 \( t \) 的上行跳跃波动率和下行跳跃波动率，计算细节可参考相关日历页。
+\end{itemize}
+
+\subsection{说明}
+将上行跳跃波动率减下行跳跃波动率即可得到上下行跳跃波动的不对称性；短期内，跳跃波动的不对称性通常有负的风险溢价，股价短期大幅上涨，未来更易补跌，股价短期大幅下跌，未来更易补涨。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Bo Yu, Bruce Mizrach, Norman R. Swanson. (2020). \textit{New Evidence of the Marginal Predictive Content of Small and Large Jumps in the Cross-Section}. Econometrics, MDPI, 8(2), 1-52.
+\end{enumerate}
+
+\section{成交量分桶熵(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{vol\_entropy}(V) = -\sum_{k=0}^{\min(\mathrm{maxbin}, \mathrm{len}(V))} p_k \ln(p_k) \cdot \mathbf{1}_{(p_k > 0)}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 对日内分钟成交量 \( V \) 序列基于 \([\min(V), \max(V)]\) 区间进行等距分桶，并计算成交量 \( V \) 序列取值落在第 \( k \) 个桶的概率 \( p_k \)；
+    \item ② \( \mathrm{maxbin} \) 为桶的个数，\( \mathrm{len}(V) = T \) 为日内分钟成交量 \( V \) 序列的长度；
+    \item ③ 计算个股分桶熵数值近 20 日标准差以衡量个股分桶熵在时序上的离散程度。
+\end{itemize}
+
+\subsection{说明}
+成交量分桶熵（标准差）衡量了成交量不稳定性的分散程度，该因子值越大，说明该股在近一段时间内成交量不稳定性的分散程度较大，股价曾经或正在受到知情交易者的带动，此时个股不稳定性极高，整体下行风险较大；日度成交量分桶熵取值越大，日内成交量分布越均匀。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑兆森. 2022. 成交量分布中的 Alpha. 兴业证券.
+\end{enumerate}
+
+\section{机构交易热度(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{TURN\_INST} = \frac{1}{m}\frac{ \sum_{t=1}^{t-m+1} \left( \mathrm{INFLOW\_INST}_{i,t} + \mathrm{OUTFLOW\_INST}_{i,t} \right)}{\mathrm{CAP}_{i,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{INFLOW\_INST}_{i,t}\) 和 \(\mathrm{OUTFLOW\_INST}_{i,t}\) 分别为股票 \(i\) 在交易日 \(t\) 的机构买入金额和卖出金额；
+    \item ② 将单笔成交额高于 100 万元的投资者作为机构投资者；
+    \item ③ \(\mathrm{CAP}_{i,t}\) 为股票 \(i\) 在交易日 \(t\) 的流通市值；
+    \item ④ \(m\) 为交易日窗口，一般取为月度。
+\end{itemize}
+
+\subsection{说明}
+机构交易热度属于股票交易活跃度类因子，通过衡量股票交易活跃度来反映投资者关注度。股票交易越活跃，投资者对该股票的关注度越高；而投资者有限注意力会推动关注度高的股票更易出现非理性净买入溢价，进而导致股价后续反转。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{净委买变化率(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{净委买变化率}^{T}_{k,t} = \frac{\text{净委买变化量}^{T}_{k,t}}{\text{流通股本}_{T}}
+\end{equation}
+\begin{equation}
+    \text{净委买变化量}^{T}_{k,t} = \sum_{j=1}^{k}  \text{委买变化量}^{T}_{j,t} - \sum_{j=1}^{k}\text{委卖变化量}_{j,t}^T 
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\text{委买变化量}^{T}_{j,t}\) 和 \(\text{委卖变化量}^{T}_{j,t}\) 分别为 \(T\) 日内 \(t\) 至 \(t+1\) 时刻的第 \(j\) 档委买的变化量和第 \(j\) 档委卖的变化量；
+    \item ② \(\text{流通股本}_{T}\) 为 \(T\) 日股票的流通股本；
+    \item ③ 一般用前 1 档位数据即可；使用的档位数量越多，因子的选股能力越弱；
+    \item ④ 此外还可计算 \(T\) 日内净委买变化率序列的均值、标准差和偏度等分布特征；也可分时间区间计算因子，如使用 9:30-10:00 范围内的数据计算开盘后 30 分钟净委买变化率；
+    \item ⑤ 可将过去 5 日、20 日上述因子的均值和中位数作为周度和月度的因子值。
+\end{itemize}
+
+\subsection{说明}
+刻画了投资者的买入意愿，委买量的增加代表了投资者买入意愿的增强，委卖量的增加代表了投资者卖出意愿的增强；开盘后 30 分钟的数据更是包含了投资者对于前一天收盘后股票信息的集中反馈，集中反馈越正面，体现出的买入意愿越强，股票未来的超额收益表现越好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2019. 捕捉投资者的交易意愿. 海通证券.
+\end{enumerate}
+\end{document}

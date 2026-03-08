@@ -1,0 +1,302 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{改进的客户动量因子（基于信息离散度）（图谱网络-动量溢出）}
+
+\subsection{因子定义}
+利用供应链的相关数据，计算如下客户动量因子：
+\begin{equation}
+    \mathrm{comm}_i^{1M} = \sum_{j=1}^{N_i} w_{ij}^{\mathrm{sales}} \mathrm{mom}_j^{1M}, \quad i=1,2,\ldots,N
+\end{equation}
+
+对每个客户 \( c \) 计算信息离散度 ID：
+\begin{equation}
+    \mathrm{ID}_{c,t} = \mathrm{sign}(\mathrm{CR}_{c,t}) \times [\%\mathrm{neg}_{c,t} - \%\mathrm{pos}_{c,t}]
+\end{equation}
+
+先基于信息离散度 ID（负向）进行分组，在各组内基于客户动量因子（正向）进行分组，以此构建投资组合。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{mom}_j^{1M} \) 为公司 \( j \) 的客户过去一个月收益率；
+    \item ② \( w_{ij}^{\mathrm{sales}} \) 为销售占比；
+    \item ③ \( \mathrm{CR}_{c,t} \) 为客户 \( c \) 在过去 3 个月的累计收益率；
+    \item ④ \( \%\mathrm{neg}_{c,t} \)、\( \%\mathrm{pos}_{c,t} \) 分别为客户 \( c \) 在过去 3 个月内负收益天数占比和正收益天数占比。
+\end{itemize}
+
+\subsection{说明}
+客户动量因子可以从“投资者有限注意力或信息反应不足”这个维度来解释，投资者对客户信息反应越不足，客户动量效应可能越强；信息离散度统计了收益形成期间日度股价涨跌天数占比的差异，间接反映了投资者对信息的反应程度，当信息连续时（即收益由小幅但大量的上涨天数来推动），投资者可能由于有限注意力而未能及时反应，股票动量效应更强；当信息离散时（即收益由大幅但少量的上涨天数来推动），投资者能够更快反应，股票动量效应更弱。同样的，投资者对经济相关公司（如供应链、竞争对手等）提供的连续信息反应不足，而对离散信息则反应迅速，所以可以用信息离散度来改进客户动量等关联性因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Huang, S., Lee, C. M. C., Song, Y., \& Xiang, H. (2022). \textit{A Frog in Every Pan: Information Discreteness and the Lead-Lag Returns Puzzle}. Journal of Financial Economics, 145(2), 83-102.
+    \item Da, Z., Gurun, U. G., \& Warachka, M. (2014). \textit{Frog in the Pan: Continuous Information and Momentum}. Review of Financial Studies, 27(7), 528-554.
+\end{enumerate}
+
+\section{波动率加剧-惊恐因子（高频因子-动量反转类）}
+
+\subsection{因子定义}
+
+1. 计算各股票的日度“惊恐度”：
+\begin{equation}
+    \text{惊恐度} = \frac{\text{偏离度}}{\text{基准项}} = \frac{\mathrm{abs}(\text{个股收益率} - \text{市场收益率})}{\mathrm{abs}(\text{个股收益率}) + \mathrm{abs}(\text{市场收益率}) + 0.1}
+\end{equation}
+
+2. 计算各股票日内波动率，即对各股票日内的 1 分钟收益率序列求标准差；
+
+3. 对各股票，将每日惊恐度、每日收益率、日内波动率相乘，得到加权调整收益率；
+
+4. 对各股票，每月末计算过去 20 日加权调整收益率序列的均值和标准差，分别称为“波动率加剧-惊恐收益”因子和“波动率加剧-惊恐波动”因子，再将二者等权合成为“波动率加剧-惊恐”因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 选取中证全指 000985 代表市场水平；
+    \item ② “偏离度”衡量了个股收益率对市场收益率的偏离水平；“基准项”衡量了市场总体收益率水平。
+\end{itemize}
+
+\subsection{说明}
+波动率加剧-惊恐因子在原始惊恐因子上新增了日内波动率权重，因为“显著效应（投资者会被具有显著收益的股票所吸引，导致它们被错误定价）在波动率加剧时更加强烈”。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 显著效应, 极端收益扭曲决策权重和“草木皆兵”因子, 2022, 方正证券.
+    \item Cakici, N., \& Zaremba, A. (2022). \textit{Salience theory and the cross-section of stock returns: International and further evidence}. Journal of Financial Economics, 146(2), 689-725.
+\end{enumerate}
+
+\section{下行已实现波动率（高频因子-波动跳跃类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RS}_t^- = \sum_{i=1}^N r_{t,i}^2 \cdot \mathrm{I}_{r_{t,i} \leq 0}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{t,i} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( \mathrm{I}_{r_{t,i} \leq 0} \) 为示性函数，对数收益率小于等于 0 时取 1，否则取 0；
+    \item ③ \( N \) 表示该股票在交易日 \( t \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点。
+\end{itemize}
+
+\subsection{说明}
+下行已实现波动率对应资产价格波动中的下行波动；下行已实现波动率较高的股票伴随着较高的下行风险，可以期望未来能获得更高的风险补偿。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Barndorff-Nielsen, O. E., Kinnebrock, S., \& Shephard, N. (2010). \textit{Measuring downside risk: realised semivariance}. In T. Bollerslev, J. Russell, \& M. Watson (Eds.), Volatility and Time Series Econometrics: Essays in Honor of Robert F. Engle (pp. 117-136). Oxford University Press.
+\end{enumerate}
+
+\section{供应链节点度（图谱网络-网路结构）}
+
+\subsection{因子定义}
+基于供应链图谱网络计算公司的节点度：
+\begin{equation}
+    d_i = d_i^{(\mathrm{in})} + d_i^{(\mathrm{out})}
+\end{equation}
+\begin{equation}
+    d_i^{(\mathrm{out})} = \sum_{j \neq i} w_{ij}^{\mathrm{out}}; \quad d_i^{(\mathrm{in})} = \sum_{j \neq i} w_{ij}^{\mathrm{in}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 供应链图谱网络边的方向为供应商指向客户：\(\mathrm{supplier} \rightarrow \mathrm{customer}\)；
+    \item ② \( d_i^{(\mathrm{in})}, d_i^{(\mathrm{out})} \) 分别为公司 \( i \) 的入度（供应商数量）和出度（客户数量），计算详情见相关日历页；
+    \item ③ 因子可能存在板块和市值偏好，建议对其做市值行业中心化处理。
+\end{itemize}
+
+\subsection{说明}
+供应链节点度较高的公司，说明公司的供应链关系更复杂，公司可以通过多样化供应链或建立冗余系统来减少潜在的供应链中断风险（物流对冲）；供应链简单的公司，由于缺乏物流对冲会面临更高的风险，但投资者因承担了更高的风险可获得更高的风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jussa et al. (2015). \textit{The Logistics of Supply Chain Alpha}. Deutsche Bank Markets Research.
+\end{enumerate}
+
+\section{持续异常交易量(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+计算日内异常交易量：
+\begin{equation}
+    \mathrm{ATV}_{t,i} = \frac{\text{实际交易量}}{\text{预期交易量}} = \frac{t\text{日第}i\text{分钟交易量}}{\mathrm{mean}(\text{过去一段时间分钟交易量})}
+\end{equation}
+
+在各分钟全市场横截面上，计算每只股票该分钟异常交易量的排名百分位 \( \mathrm{rank\_ATV}_{t,i} \)；
+
+计算日内持续异常交易量：
+\begin{equation}
+    \mathrm{PATV}_t = \frac{\mathrm{mean}(\mathrm{rank\_ATV}_{t,i})}{\mathrm{std}(\mathrm{rank\_ATV}_{t,i})} + \mathrm{kurt}(\mathrm{rank\_ATV}_{t,i})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算预期交易量的“过去一段时间”可以为过去1个交易日；分钟交易量的频率可以为5分钟频率的成交数据；
+    \item ② \( \mathrm{rank\_ATV}_{t,i} \) 的均值越高，日内的异常交易量相对更高；标准差越小，日内异常交易量相对更稳定；高峰点的数据分布往往更集中。
+\end{itemize}
+
+\subsection{说明}
+持续异常交易量衡量了股票日内异常交易量的持续性，取值越高，持续性越强，与未来收益负相关；持续异常的高交易量才真正代表了非理性的情绪化交易，当极端情绪持续越长，累计的股价偏差越大，随后的错误定价修正幅度也会越大，反转趋势的确定性才更大。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任继. 2023. “持续异常交易量”选股因子 PATV. 招商证券.
+\end{enumerate}
+
+\section{羊群行为(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    H(i, T) = \left| \frac{B(i, T)}{B(i, T) + S(i, T)} - p_T \right| - \mathrm{AF}(i, T)
+\end{equation}
+
+\begin{equation}
+    \mathrm{AF}(i, T) = \sum_{k=0}^{N_{i,T}} \binom{N_{i,T}}{k} p_T^k (1 - p_T)^{N_{i,T}-k} \left| \frac{k}{N_{i,T}} - p_T \right|
+\end{equation}
+
+\begin{equation}
+    \mathrm{HB}(i, T) = H(i, T) \quad \text{if} \quad \frac{B(i, T)}{B(i, T) + S(i, T)} > p_T
+\end{equation}
+\begin{equation}
+    \mathrm{HS}(i, T) = H(i, T) \quad \text{if} \quad \frac{B(i, T)}{B(i, T) + S(i, T)} < p_T
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( B(i, T) \) 和 \( S(i, T) \) 分别为股票 \( i \) 在交易日 \( T \) 的所有买方驱动单数量和卖方驱动单数量；
+    \item ② \( p_T \) 为交易日 \( T \) 每只股票买单占其交易单位比例在该日横截面上的均值；
+    \item ③ \( \mathrm{AF}(i, T) \) 为调整项，在投资者各自独立进行交易的假设下，其为个股买单比例占比相对所有股票平均买单比例占比的偏离程度的期望值；买方驱动单服从二项分布 \( B(i, T) \sim B(N_{i,T}, p_T) \)，其中，\( N_{i,T} = B(i, T) + S(i, T) \)；
+    \item ④ 可根据买单占比相对横截面均值的高低，将羊群行为划分为买入羊群行为 \( \mathrm{HB}(i, T) \) 和卖出羊群行为 \( \mathrm{HS}(i, T) \)。
+\end{itemize}
+
+\subsection{说明}
+日内羊群行为衡量了股票的日内买卖压力；通常认为短期羊群行为会伴随着价格的反转，即出现买入（卖出）羊群行为时，未来股价可能会下跌（上涨），而且羊群行为越剧烈，未来价格变动的幅度越大。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Bikhchandani, S., Hirshleifer, D., \& Welch, I. (1992). \textit{A Theory of Fads, Fashion, Custom, and Cultural Change as Informational Cascades}. Journal of Political Economy, 100(5), 992-1026.
+    \item Christofersen, S. E., \& Tang, Y. (2010). \textit{Institutional Herding and Information Cascades: Evidence from Daily Trades}. SSRN Working Paper, No. 1572726.
+    \item 朱菲菲等. 2019. 短期羊群行为的影响因素与价格效应——基于高频数据的实证验证. 金融研究, 469, 191-206.
+\end{enumerate}
+
+\section{上方/下方锁定筹码占比(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+
+上方锁定筹码占比：
+\begin{equation}
+    \mathrm{ASR\_above}_t = \frac{\sum \mathrm{vol}_{\mathrm{price}_{i,t} \in [\text{高位价格}, \mathrm{Chip\_Highest}],t}}{\sum \mathrm{vol}_{i,t}}
+\end{equation}
+
+下方锁定筹码占比：
+\begin{equation}
+    \mathrm{ASR\_below}_t = \frac{\sum \mathrm{vol}_{\mathrm{price}_{i,t} \in [ \mathrm{Chip\_Lowest}，\text{低位价格}],t}}{\sum \mathrm{vol}_{i,t}}
+\end{equation}
+
+其中，
+\begin{equation}
+    \text{高位价格} = \mathrm{close}_t \times (1 + \mathrm{volatility})
+\end{equation}
+\begin{equation}
+    \text{低位价格} = \mathrm{close}_t \times (1 - \mathrm{volatility})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 \( t \) 日的筹码分布共有 \( n \) 个价位（\( i = 1, 2, \ldots, n \)），\( \mathrm{vol}_{i,t} \) 为第 \( t \) 日 \( i \) 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格，\( \mathrm{Chip\_Highest} \)、\( \mathrm{Chip\_Lowest} \) 分别对应筹码最高价和筹码最低价；
+    \item ② \( \mathrm{volatility} \) 为股价最大涨跌幅，主板股票的 \( \mathrm{volatility} = 10\% \)，创业板和科创板的 \( \mathrm{volatility} = 20\% \)；
+    \item ③ \( \mathrm{close}_t \) 为 \( t \) 日收盘价。
+\end{itemize}
+
+\subsection{说明}
+锁定筹码指的是涨跌停价格以外的筹码，该部分筹码不易交易，通常较为稳定；上方/下方锁定筹码占比是对锁定筹码占比的进一步细分，分别可用于衡量高位套牢程度和低价筹码集中程度。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{逐档订单失衡率（高频因子-流动性类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{SOIR}_t = \frac{\sum_{i=1}^{5} w_i \mathrm{SOIR}_{i,t}}{\sum_{i=1}^{5} w_i}
+\end{equation}
+\begin{equation}
+    \mathrm{SOIR}_{i,t} = \frac{V_{i,t}^B - V_{i,t}^A}{V_{i,t}^B + V_{i,t}^A}
+\end{equation}
+\begin{equation}
+    w_i = 1 - (i - 1)/5, \quad i = 1, 2, 3, 4, 5
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( V_{i,t}^B \) 和 \( V_{i,t}^A \) 分别为 \( t \) 时刻第 \( i \) 档的委买量和委卖量。
+\end{itemize}
+
+\subsection{说明}
+SOIR 是对各档订单失衡率的加权，可以避免某一档订单量过大对总体比率的影响；其综合衡量了盘口各档买卖委托量的不均衡程度，SOIR 为正说明市场买压大于卖压，未来价格趋向上涨，且 SOIR 的值越大，上涨的概率越高，反之亦然。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈升锐. 2021. 高频订单失衡及价差因子. 中信建投证券.
+\end{enumerate}
+
+\section{价量相关性趋势因子（高频因子-量价相关性类）}
+
+\subsection{因子定义}
+
+1. 每月月底，回溯每只股票过去 20 个交易日的价量信息，每日计算该股票分钟收盘价 \( p_t \) 与分钟成交量 \( v_t \) 的相关系数：
+\begin{equation}
+    \rho_t = \mathrm{corr}(v_t, p_t)
+\end{equation}
+
+2. 将每只股票的 20 个相关系数 \( \rho_t \) 对时间 \( t \) 回归，取回归系数 \( \beta \)，即
+\begin{equation}
+    \rho_t = \beta t + \varepsilon_t
+\end{equation}
+其中，\( t = 1, 2, 3, \ldots, 20 \)；
+
+3. 将所有股票的回归系数 \( \beta \) 在横截面上剔除市值、传统价量类因子（20 日反转、20 日换手率、20 日波动率因子），得到的结果即为价量相关性趋势因子 \( \mathrm{PV\_corr\_trend} \)。
+
+\subsection{说明}
+\( \mathrm{PV\_corr\_trend} \) 越小，即价量相关系数随时间推移变小的股票，未来收益倾向于越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高子剑. 2020. 高频价量相关性：意想不到的选股因子. 东吴证券.
+\end{enumerate}
+
+\section{基于收益规模的信息离散度（量价因子改进）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ID_{MAG}} = -\frac{1}{N} \mathrm{sgn}(\mathrm{PRET}) \times \sum_{i=1}^{N} \mathrm{sgn}(\mathrm{Return}_i) \times w_i
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{PRET} \) 为过去 12 个月的累计收益率，剔除最近 1 个月的收益数据；
+    \item ② \( \mathrm{Return}_i \) 为区间内第 \( i \) 个交易日的日度收益率；
+    \item ③ \( w_i \) 为权重：每日对个股日度收益绝对值进行横截面上的排序分为 5 组（第 1 组取值最小），将为第 1 组到第 5 组中赋予单调递减的权重（日度收益越小权重越高），分别为 \( 5/15 \)、\( 4/15 \)、\( 3/15 \)、\( 2/15 \) 和 \( 1/15 \)。
+\end{itemize}
+
+\subsection{说明}
+作者认为“一系列频繁但微小的变化对于人的吸引力远不如少数却显著的变化，投资者对于连续信息造成的股价变化是反应不足的”，信息离散度越低（信息连续性越强）越好；上述计算方式考虑了日度收益规模对信息离散度的影响。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Da, Z., Gurun, U. G., \& Warachka, M. (2014). \textit{Frog in the pan: Continuous information and momentum}. Review of Financial Studies, 27(7), 2171-2218.
+\end{enumerate}
+\end{document}

@@ -1,0 +1,277 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{理想反转(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+
+① 对单只股票，回溯取其过去 20 日的数据，计算每日日内逐笔成交金额分布的 13/16 分位值；
+
+② 13/16 分位值高的 10 个交易日，涨跌幅加总，记作 \( M_{\text{high}} \)；
+13/16 分位值低的 10 个交易日，涨跌幅加总，记作 \( M_{\text{low}} \)；
+
+③ 计算理想反转因子：
+\begin{equation}
+    M = M_{\text{high}} - M_{\text{low}}
+\end{equation}
+
+\subsection{说明}
+早期版本的理想反转因子是以“每日的平均单笔成交金额（成交金额/成交笔数）”作为切割标准；作者分析得出“反转之力的微观来源，是大单成交”，由高分位值较高（即大单成交较多）的那些交易日得到的反转因子，具有更强的反转特性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕. 2019. A 股反转之力的微观来源. 开源证券.
+\end{enumerate}
+
+\section{加权下引线频率(量价因子改进)}
+
+\subsection{因子定义}
+
+加权下影线频率：
+\begin{equation}
+    \mathrm{WeightedLowerShadowFreq}_{i,t} = \frac{\sum_{j=1}^{M_{i,t}} w_j \cdot \mathbb{1}_{\{ \text{下影线}_{i,j} > u \}}}{M_{i,t}}
+\end{equation}
+
+下影线：
+\begin{equation}
+    \text{下影线}_{i,j} = \frac{\min(\mathrm{Open}_{i,j}, \mathrm{Close}_{i,j}) - \mathrm{Low}_{i,j}}{\mathrm{PrevClose}_{i,j}}
+\end{equation}
+
+时间衰退权重：
+\begin{equation}
+    w_{\mathrm{decay},j} = 0.5^{\frac{t-j}{\lambda}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( M_{i,t} \) 为股票 \( i \) 在第 \( t \) 个回望期的天数，回望期可取 40 天；
+    \item ② \( u \) 为下影线长度阈值，可取 1\%，只关注长下影线；
+    \item ③ \( w_{\mathrm{decay},j} \) 为时间衰退指数加权权重，最近计数获得最大的权重，最远计数获得最小的权重；
+    \item ④ \( \mathrm{Open}_{i,j}, \mathrm{Close}_{i,j}, \mathrm{Low}_{i,j}, \mathrm{PrevClose}_{i,j} \) 分别为股票 \( i \) 在第 \( j \) 日的开盘价、收盘价、最低价和前收盘价。
+\end{itemize}
+
+\subsection{说明}
+加权下影线频率为股票过去一段时间下影线长度大于一定阈值的天数加权之和，与股票未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑琳琳, 盛宝丹. 2025. 加权影线频率与 K 线形态因子. 西南证券.
+\end{enumerate}
+
+\section{量岭分钟数(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划为“喷发成交量”，低于 1 倍标准差划为“温和成交量”；
+
+2. 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”；
+
+3. 统计过去 20 日“量岭”的分钟数，即为量岭分钟数因子。
+
+\subsection{说明}
+“量岭”对应的连续性大额交易，更符合个人投资者的跟随交易特征，可以通过统计发生“量岭”的分钟数量来衡量个人投资者参与度，因子值越高，个人投资者参与度越高，未来收益越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{基于跳跃幅度关联的点度中心性(图谱网络-网络结构)}
+
+\subsection{因子定义}
+
+
+① 利用股票日内 5 分钟行情数据，计算跳跃统计量 \( \mathrm{JS} \)，识别出股价发生跳跃的分钟时刻，具体计算细节见相关日历页：
+\begin{equation}
+    \mathrm{JS} = N \frac{\hat{V}_{(0,1)}}{\sqrt{\hat{\Omega}_{\mathrm{SWV}}}} \left( 1 - \frac{\mathrm{RV}_N}{\mathrm{SwV}_N} \right) \sim N(0,1)
+\end{equation}
+
+② 计算关联跳跃次数：如果股票 \( i \) 在 \( t \) 日发生跳跃，股票 \( j \) 在 \( t+1 \) 日内也发生了一次同向跳跃，则记为一次关联跳跃；
+
+③ 计算两只股票间的跳跃关联度，\( \mathrm{cojump\_size}_{i,j} \) 为过去一段时间内股票 \( i \) 的所有跳跃中与股票 \( j \) 相关联的跳跃收益绝对值之和，\( \mathrm{jump\_size}_i \) 为过去一段时间股票 \( i \) 发生跳跃的交易日跳跃收益绝对值的和：
+\begin{equation}
+    \mathrm{Corr}_{i,j} = \frac{\mathrm{cojump\_size}_{i,j}}{\mathrm{jump\_size}_i}
+\end{equation}
+
+④ 对网络做稀释处理，剔除整个网络中关联度最低的 50\% 的关联关系，统计每只股票与之直接相连的股票数量即为该股票的点度中心性值。
+
+\subsection{说明}
+具有相似属性的公司往往会受到类似的信息冲击，进而导致股价的同步跳跃。公司间股价跳跃的同步程度也可用于识别公司间的潜在关联程度；跳跃关联网络的点度中心性因子衡量了股票在整个网络中的重要性或影响程度，与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任晓, 刘凯, 杨航. 2025. 基于股价跳跃关联性的选股策略. 招商证券.
+    \item 任晓, 杨航. 2024. 如何识别股价跳跃. 招商证券.
+\end{enumerate}
+
+\section{残差资金流强度因子(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+计算小单资金流强度：分子为（小单买额-小单卖额）之和，分母为其绝对值；计算大单资金流强度：分子为（大单买额-大单卖额）之和，分母为其绝对值：
+\begin{equation}
+    S_t = \frac{\sum_{k=t-T}^{t} (\mathrm{buy}_k - \mathrm{sell}_k)}{\sum_{k=t-T}^{t} |\mathrm{buy}_k - \mathrm{sell}_k|}
+\end{equation}
+
+分别将大（小）单资金流强度与过去20日涨跌幅做回归，得到残差，即为大（小）单残差资金流因子：
+\begin{equation}
+    S_t = a + b \cdot \mathrm{Ret20}_t + \varepsilon_t
+\end{equation}
+\begin{equation}
+    \text{残差资金流因子} = \varepsilon_t
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 将主动大单净流入和主动中单净流入相加，计算主动大中单残差，再和非主动大单强度排序相加，可以改进原始大单残差资金流因子的表现；
+    \item ② 使用非主动小单净流入计算非主动小单残差，可以提升原始小单残差资金流因子表现。
+\end{itemize}
+
+\subsection{说明}
+残差资金流因子剥离了涨跌幅对资金流强度的影响，衡量的是在同等涨跌幅（\(\mathrm{Ret20}\)）的情况下资金流强度的选股能力。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建梅, 高鹏. 2021. 大单与小单资金流的 alpha 能力. 开源证券.
+    \item 魏建梅, 盛少成. 2022. 大单资金流的 alpha 探究. 交易精选与高频测算. 开源证券.
+\end{enumerate}
+
+\subsection{因子定义}
+\section{成交量占比偏度()}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{skew}\left(\frac{\mathrm{volume}_i}{\sum \mathrm{volume}_i}\right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{volume}_i \) 为日内分钟成交量，如 10 分钟等；成交量占比是成交量在个股内纵向可比指标，主要从成交的分布上给出衡量；
+    \item ② 此外也可将成交量占比替换为对数成交量、换手率（全市场个股间横向可比指标，从流动性上给出衡量），计算成交量偏度类因子。
+\end{itemize}
+
+\subsection{说明}
+成交量偏度类因子均衡量了个股过去一段时间的交易异常行为，与未来收益负相关；成交量呈右偏时，大部分时间段个股交易并不活跃，但存在特定区间成交量骤升的情况，而这类交易异常放量的个股，多头方存在短期筹码调整行为，价格被高估，之后回落至正常水平。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2019. 高频因子(四): 高阶矩高频因子. 长江证券.
+\end{enumerate}
+
+\section{交易量变异系数(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{VCV}_{i,\gamma} = \frac{\hat{\sigma}_{V\{i,t \in \gamma\}}}{\hat{\mu}_{V\{i,t \in \gamma\}}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \hat{\mu}_V \) 和 \( \hat{\sigma}_V \) 分别为过去 \( \gamma \) 区间内（如 1 周）的 5 分钟或 1 分钟成交额序列的均值和标准差；
+    \item ② 也可用成交量、换手率等指标来计算成交量变异系数。
+\end{itemize}
+
+\subsection{说明}
+VCV 衡量了市场的信息不对称性，市场总会存在知情交易者利用私有信息获取超额收益。VCV 与知情交易比例严格正相关；VCV 为负向因子，取值越大，知情交易者占比越高，股价会偏离真实价值，也更不会被大资金看好，未来更易利空。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Lof, M., \& van Bommel, J. (2022). \textit{Asymmetric information and the distribution of trading volume}. Available at: https://ssrn.com/abstract=4081052.
+    \item 任建, 崔浩瀚. 2023. 再观知情交易者的踪迹. 招商证券.
+\end{enumerate}
+
+\section{筹码盈亏系数修正后的积极灵活筹码(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+基于最新收盘价计算过去买入筹码的涨跌幅作为筹码盈亏系数：
+\begin{equation}
+    \alpha_i = \frac{\mathrm{Close}_t}{\mathrm{TradePrice}_i}
+\end{equation}
+
+将筹码盈亏系数与筹码买入量相乘即可得到修正后的积极灵活筹码值：
+\begin{equation}
+    \mathrm{AFH\_Return} = \frac{\sum_{i=1}^{N} \alpha_i \times \mathrm{Vol\_AFH}_i}{\sum_{k=T-20}^{T} \mathrm{Volume}_k}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( i \) 为筹码购入时的订单号，统计对象为过去 20 日的订单号；
+    \item ② \( \mathrm{Vol\_AFH}_i \) 为主动买入时订单金额小于 5 万元的订单成交量；
+    \item ③ \( \mathrm{TradePrice}_i \) 为该订单的买入价格；
+    \item ④ \( \mathrm{Close}_t \) 为截止日的收盘价；
+    \item ⑤ \( \mathrm{Volume}_k \) 为 \( k \) 日当天的总成交量。
+\end{itemize}
+
+\subsection{说明}
+在处置效应的影响下，当投资者持有的股票盈利时，投资者出于对风险的厌恶，投资行为会更加谨慎，追求“落袋为安”，表现为卖出盈利的股票；而当投资者亏损时，投资者的行为更加激进，表现为将亏损的股票继续持有；可以根据最新收盘价计算过去买入筹码的盈亏状态对筹码量进行调整，提升原始积极灵活筹码的因子表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任瞳, 许继宏. 2024. 基于逐笔数据的 AFH 改进因子. 招商证券.
+\end{enumerate}
+
+\section{滞后绝对收益与调整后成交量相关性(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+
+\begin{equation}
+    \mathrm{adj\_CORA\_R} = \mathrm{corr}(|\mathrm{Ret}_{t-1}|, \mathrm{adjAmount}_t), \quad \mathrm{Ret}_{t-1} \neq 0
+\end{equation}
+\begin{equation}
+    \mathrm{adjAmount}_t = \frac{\mathrm{Amount}_t - \mu_t}{\sigma_t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( |\mathrm{Ret}_{t-1}| \) 为个股日内第 \( t-1 \) 分钟的对数收益率的绝对值，相比成交额滞后一期；
+    \item ② \( \mathrm{adjAmount}_t \) 为个股日内第 \( t \) 分钟的调整后的成交额，\( \mu_t \) 和 \( \sigma_t \) 分别为前 20 个交易日相同第 \( t \) 分钟成交额的均值和标准差；
+    \item ③ 月度因子可使用月末 5-15 个交易日因子的平均值来合成。
+\end{itemize}
+
+\subsection{说明}
+分钟成交额在日内呈 U 型或 W 型分布，与收益率分布的不对等会影响相关性的计算，对成交额做标准化可以捕捉成交额的相对波动；若存在较多收益为 0 的样本也会使系数偏高，需将其剔除；修正后的因子能捕捉更真实纯粹的量价异动，因子表现大幅提升。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱定豪, 严佳炜. 2020. 量价关系的高频乐章. 方正证券.
+\end{enumerate}
+
+\section{高频成交量波动(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \sigma_{\mathrm{day}} = \mathrm{std}(\{\mathrm{vol}_i\})
+\end{equation}
+\begin{equation}
+    \sigma_{\mathrm{vol}} = \frac{\mathrm{std}(\{\sigma_{\mathrm{day}}\})}{\mathrm{mean}(\{\sigma_{\mathrm{day}}\})}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{vol}_i \) 为个股日内 240 根 1 分钟 K 线的成交量，\( \sigma_{\mathrm{day}} \) 取过去 20 个交易日数据；
+    \item ② 除以均值是为了剔除量纲的影响；
+    \item ③ 可以将分钟成交量替换成成交笔数、高频振幅等计算相应的高频波动因子。
+\end{itemize}
+
+\subsection{说明}
+上述高频波动因子衡量了“波动的波动”，其优势在于能够同时刻画日内波动与日间波动；传统波动因子多以日度收益率为基础构建，除股价外，也可用成交量、成交笔数、振幅等指标来度量波动，因为在非理性驱动下这些指标也会呈现与股价相对一致的波动特点；样本区间内，这三种高频波动因子与传统日度波动因子相比，多头组收益更强，信息比和多空夏普比更高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2020. 高频因子（九）：高频波动中的时间序列信息. 长江证券.
+\end{enumerate}
+\end{document}

@@ -1,0 +1,266 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{“自信溢出”因子(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 将股票按照代码从小到大进行排序后，对每只股票计算相邻 \( n \) 只股票在过去 \( T \) 日的日均涨跌幅，并等权合成为焦点股票 \( i \) 的 \( \mathrm{NBR\_ret} \)；
+
+2. 将焦点股票 \( i \) 的 \( \mathrm{NBR\_ret} \) 对其自身的日均涨跌幅进行截面回归，回归得到的残差即为“自信溢出”因子 \( \mathrm{NRBR\_ret} \)：
+\begin{equation}
+    \mathrm{ret}_{i,T} = \alpha + \beta \cdot \mathrm{NBR\_ret}_{i,T} + \varepsilon_i
+\end{equation}
+\begin{equation}
+    \mathrm{NRBR\_ret}_{i,T} = \varepsilon_i
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 焦点股票 \( i \) 的相邻股票数对因子效果影响不大，建议使用较少数量的股票（如 \( n=10 \)）；
+    \item ② 日均涨跌幅的计算窗口 \( T \) 建议取 5-20 天最为适宜。
+\end{itemize}
+
+\subsection{说明}
+由于投资者的注意力有限，以及行情软件通常是根据代码顺序依次展示股票信息，投资者会较容易地关注到与焦点股票相邻的其它股票，出现“注意力溢出”，焦点股票与相邻股票之间会存在价格与交易情绪的转移；“自信溢出”对应投资者因近期获利的过度自信向邻近股票外溢的情况，与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任建, 麦元勋, 李世杰. 2023. 基于股票代码有序性的“注意力溢出”. 招商证券.
+\end{enumerate}
+
+\section{多层订单斜率(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{MLQS}_{\mathrm{Weight}} = \frac{\sum_{i=1}^{5} w_i \times \mathrm{LogquoteSlope}_t^{(i)}}{\sum_{i=1}^{5} w_i}, \quad w_i = \frac{i}{5}, \quad i = 1, 2, 3, 4, 5
+\end{equation}
+\begin{equation}
+    \mathrm{LogquoteSlope}_t = \frac{\log\left(P_t^A\right) - \log\left(P_t^B\right)}{\log\left(V_t^A\right) + \log\left(V_t^B\right)}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( P_t^B \) 和 \( P_t^A \) 分别为 \( t \) 时刻的买一价和卖一价；
+    \item ② \( V_t^B \) 和 \( V_t^A \) 分别为 \( t \) 时刻的买一量和卖一量；
+    \item ③ 对订单单价和订单量取对数是为了使序列更接近正态分布，增加因子平稳性；
+    \item ④ 考虑订单方向：假设卖为正向，买为负向。
+\end{itemize}
+
+\subsection{说明}
+订单斜率因子衡量的是订单价差对订单量差的敏感度，是对市场流动性的衡量。因子值越大，代表买卖价差越大，市场流动性越差，因此其长期具有流动性风险溢价，长期表现越好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈升锐. 2021. 多层次订单失衡及订单斜率因子. 中信建投证券.
+    \item Seppi, D. J. (2001). \textit{Common factors in prices, order flows, and liquidity}. Journal of Financial Economics.
+\end{enumerate}
+
+\section{当日新增筹码亏损占比(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{TLRatio}_{i,t} = \frac{\mathrm{TL}_{i,t}}{\mathrm{PL}_{i,t}}
+\end{equation}
+\begin{equation}
+    \mathrm{PL}_{i,t} = \sum \left( \mathrm{IF}(p> close_{i,t},Chip_{i,t,p}* (close_{i,t}-p),0))
+\end{equation}
+\begin{equation}
+    \mathrm{TL}_{i,t} = \sum (IF(p > close_{i,t},Vol_{i,t,p}*(p-close_{i,t})*T_{i,t},0))
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票 \( i \) 在 \( t \) 日的筹码分布共有 \( n \) 个价位（\( p = 1, 2, \ldots, n \)），\( \mathrm{Chip}_{i,t,p} \) 为第 \( t \) 日 \( p \) 价位上的筹码峰高度，\( p \) 为该筹码峰对应的价格；
+    \item ② \( \mathrm{Vol}_{i,t} \) 为股票 \( i \) 在 \( t \) 日的成交量；
+    \item ③ \( T_{i,t} \) 为股票 \( i \) 在 \( t \) 日的换手率；
+    \item ④ \( \mathrm{close}_{i,t} \) 为股票 \( i \) 在 \( t \) 日的收盘价。
+\end{itemize}
+
+\subsection{说明}
+当日新增筹码亏损占比为当日成交的新增筹码亏损总额占账面总亏损额的比例；若某只股票当日新增筹码的亏损比例较高，也可能意味着该股票短期不稳定筹码比例越大，新资金被套，筹码抛压变大，可能对股价走势产生不利影响。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{T分布主动占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    T \text{分布主动买入金额}_i = \mathrm{Amount}_i \times t\left(\frac{\mathrm{ret}_i}{\sigma_{\mathrm{ret}}}, \mathrm{df}\right)
+\end{equation}
+\begin{equation}
+    T \text{分布主动占比因子} = \frac{\sum_{i=1}^{N} T \text{分布主动买入金额}_i}{\sum_{i=1}^{N} \mathrm{Amount}_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( t(\cdot) \) 为 t 分布的累计分布函数，取值范围在 0 到 1 之间；
+    \item ② \( \mathrm{ret}_i \) 为每个时间段收益率，\( \sigma_{\mathrm{ret}} \) 为全部时间段收益率标准差，频率可为 1 分钟、5 分钟等；
+    \item ③ \( \mathrm{df} \) 为自由度，针对相同的股价变动，自由度越小，则根据 t 分布得到的主动买入金额占比越小。
+\end{itemize}
+
+\subsection{说明}
+原始的批量成交划分法以价格变动作为自变量，做价格变化相对于价格标准差的标准化处理，但价格变化是指数级别上的变动，可以将价格替换成收益率，既保留了价格变动方向和变动幅度上对主动买卖占比的刻画，时间序列上又不会存在受价格高低影响的占比估计误差。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2020. 高频因子(七): 分布估计下的主动成交占比. 长江证券.
+\end{enumerate}
+
+\section{卖出反弹占比因子(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{LCVOL} = \frac{\sum_{i=1}^{N} \mathrm{volume}_{\mathrm{sell},i} \cdot \mathbf{I}_{\{P_{\mathrm{sell},i} < \mathrm{close}\}}}{\mathrm{total\_volume}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{volume}_{\mathrm{sell},i} \) 和 \( P_{\mathrm{sell},i} \) 分别为逐笔成交数据中卖单的成交量和成交价；
+    \item ② \( \mathrm{close} \) 和 \( \mathrm{total\_volume} \) 分别为当日收盘价和成交量；
+    \item ③ 可以对该因子进行小单改进和尾盘改进，即只统计小单的占比和只统计 \([14:30,14:57)\) 尾盘区间的占比。
+\end{itemize}
+
+\subsection{说明}
+卖出反弹占比因子统计了低于收盘价卖出的成交量占比，与未来收益负相关；因子取值越高，根据遗憾规避理论，为了避免产生遗憾和后悔情绪，投资者卖出股票后不愿再次买回的意愿较高，未来买入动力较低，有更低的预期收益；遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自豪感，避免承认之前的决策失误。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{极端跟随行为\_比值因子(量价因子改进)}
+
+\subsection{因子定义}
+① 每个交易日 \( t \)，回看过去 \( k \) 个交易日 \( t-k, t-(k-1), \ldots, t-1 \)，计算过去 \( k \) 日分钟成交量的 \( m\% \) 分位数，定义为成交量阈值，\( k=5, m=90 \)；将交易日 \( t \) 的每分钟成交量与上述阈值进行对比，若某一分钟的成交量大于上述阈值，则该分钟的交易被定义为趋势资金的交易；
+
+② 对于趋势资金的每一分钟，取随后 \( n \) 分钟里成交额最大的一分钟，将其视为跟随趋势资金的极端行为，记录这一分钟的成交额，\( n=5 \)；
+
+③ 将极端跟随行为的分钟成交额，除以对应趋势资金的分钟成交额，得到该次跟随行为对应的比值；
+
+④ 月底回看过去 20 个交易日，求 20 日比值的平均值，再做横截面市值、行业中性化处理。
+
+\subsection{说明}
+A股市场中“追涨”和“杀跌”的两股力量是非对称的，若某个股票上出现了强烈的羊群效应，通常对利好消息的反应过度现象会更加严重，股价未来下跌的概率也就更高。所以羊群效应通常会对股票未来收益产生负面影响；极端跟随行为\_比值因子值越大，意味着极端跟随行为越剧烈，羊群效应越明显，从而导致股票未来收益越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 沈芷琦, 刘富兵, 阮俊辉. 2024. 基于趋势资金日内交易行为的选股因子. 国盛证券.
+\end{enumerate}
+
+\section{主力交易情绪(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{TE} = \mathrm{RankCorr}(A_{\mathrm{order}}, C_{\mathrm{minute}})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( A_{\mathrm{order}} \) 为某只股票某个交易内的分钟单笔成交金额序列；
+    \item ② \( C_{\mathrm{minute}} \) 为某只股票某个交易内的分钟收盘价序列；
+    \item ③ 滚动 20 个交易日计算 \( \mathrm{TE} \) 指标的均值，即主力交易情绪因子 \( \mathrm{MTE} \)。
+\end{itemize}
+
+\subsection{说明}
+MTE 因子实质上反映了主力参与交易的相对价位，因子值越大，表明主力交易更倾向于出现在高价位，这是“逢高出货”的表现，反映了主力悲观态度；而因子值越小，则表明主力交易更多出现在低价位，这是“逢低吸筹”的表现，属于乐观情绪。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 苏良. 2022. 高频因子：分钟单笔金额序列中的主力行为刻画. 开源证券.
+\end{enumerate}
+
+\section{已实现三幂次变差(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{RTV}_t = V_{\frac{2}{3}, \frac{2}{3}, \frac{2}{3}} \; \mu_{\frac{2}{3}}^{-3}
+\end{equation}
+
+\begin{equation}
+    V_{m_1, m_2, \dots, m_k} = \sum_{i=k}^{n} |r_{t_i}|^{m_1} |r_{t_{i-1}}|^{m_2} \cdots |r_{t_{i-k+1}}|^{m_k}
+\end{equation}
+
+\begin{equation}
+    \mu_q = E(|Z|^q) = 2^{q/2} \frac{\Gamma\left(\frac{1}{2}(q+1)\right)}{\Gamma\left(\frac{1}{2}\right)}
+\end{equation}
+
+\begin{equation}
+    \Gamma(\alpha) = \int_0^{+\infty} x^{\alpha-1} e^{-x} dx
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{t_i} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( k=3 \)，\( n \) 表示该股票在交易日 \( t \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点；
+    \item ③ \( \mu_q \) 为标准正态分布的第 \( q \) 阶绝对矩。
+\end{itemize}
+
+\subsection{说明}
+积分波动率 Integrated Variance 刻画了股价波动率中股价连续分量的波动水平（非跳跃部分），作者证明了积分波动率可以通过多幂次变差来有效估计，比如常见的已实现双幂次变差 realized bipower variation，已实现三幂次变差 realized tripower variation 等。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Barndorff-Nielsen, O. E., \& Shephard, N. (2004). \textit{Power and bipower variation with stochastic volatility and jumps}. Journal of Financial Econometrics, 2, 1–48.
+\end{enumerate}
+
+\section{最大供应商动量(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{smm}_i^{1M} = \mathrm{mom}_{j\_{\max\_\mathrm{sales}}}^{1M}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( j\_{\max\_\mathrm{sales}} \) 为股票 \( i \) 的最大供应商 \( j \)，最大供应商 \( j \) 的动量即为最大供应商动量因子；
+    \item ② 动量的计算周期可以是 1 月动量、6 月动量、12 月动量等。
+\end{itemize}
+
+\subsection{说明}
+最大供应商动量的表现与通过完整供应商加权得到的供应商动量表现相近，供应商动量溢出主要来源于最大供应商。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jussa et al. (2015). \textit{The Logistics of Supply Chain Alpha}. Deutsche Bank Markets Research.
+\end{enumerate}
+
+\section{日内最大回撤(高频因子-动量反转类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{intraday\_maxdrawdown}_{D,i} = \min_{0 < t < T} \; \min_{0 < \tau < T - t} \left( \frac{p_{t+\tau,D,i}}{p_{t,D,i}} - 1 \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( p_{t,D,i} \) 为股票 \( i \) 在交易日 \( D \) 内分钟频率下的价格；
+    \item ② \( t = 1,2,3,\ldots,T \) 为交易日内相应分钟频率的第 \( t \) 个时间区间，如 5 分钟频率，\( T=48 \)。
+\end{itemize}
+
+\subsection{说明}
+日内最大回撤统计了股票日内的最大回撤情况，取值范围为 \((-1,0]\)，可用于衡量一天内股价的上涨趋势程度，通常与未来收益正相关；取值越大（越接近于 0），说明日内股价上涨趋势越明显，上涨情绪越稳定。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 文巧钧, 安宁宁, 罗军. 2021. 高频量化数据因子化方法. 广发证券.
+\end{enumerate}
+\end{document}

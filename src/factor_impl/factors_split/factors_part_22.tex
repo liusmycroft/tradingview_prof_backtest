@@ -1,0 +1,296 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{基于异常收益的注意力捕捉(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+
+对每个行业内分别统计每日行业成分股收益率绝对值高于 7\% 的股票数量占比作为市场关注代理指标：
+\begin{equation}
+    \mathrm{indus\_abn}_d = \frac{n_{|\mathrm{ret}| \geq 7\%, d}}{N_d}
+\end{equation}
+
+将市场关注代理指标与股票日收益进行月度时序回归，代理指标前的系数绝对值 \(|\beta_{i,t}|\) 即为股票对市场关注的敏感程度：
+\begin{equation}
+    r_{i,d} = \mu_{i,t} + \beta_{i,t} \mathrm{indus\_abn}_d + \rho_{1,i,t} \mathrm{Mkt}_d + \rho_{2,i,t} \mathrm{SMB}_d + \rho_{3,i,t} \mathrm{HML}_d + \rho_{4,i,t} \mathrm{UMD}_d + \varepsilon_{i,d}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( n_{|\mathrm{ret}| \geq 7\%, d} \) 为 \( d \) 日收益率绝对值大于等于 7\% 的行业内股票数量，\( N_d \) 为行业内当日交易股票总数；
+    \item ① \(n_{\mathrm{upper},d}\)、\(n_{\mathrm{lower},d}\)、\(N_d\) 分别为 \(d\) 日涨停股票数量、跌停股票数量、当日交易股票总数；
+    \item ② \( r_{i,d} \) 为个股日度收益；
+    \item ③ \( \mathrm{Mkt}_d, \mathrm{SMB}_d, \mathrm{HML}_d \) 为经典的 Fama-French 三因子；
+    \item ④ \( \mathrm{UMD}_d \) 为动量因子收益，即全市场过去 11 个月累积收益前后 30\% 的组合在 \( d \) 日的收益差。
+\end{itemize}
+
+\subsection{说明}
+不同股票对同一市场关注度事件的反映程度往往是不同的，可借助个股收益对市场关注度事件的敏感程度来衡量股票对该事件的注意力捕捉效应；捕捉能力越强（敏感程度越高），表明个股更能吸引市场注意，从而导致买盘压力增大，股价高估；上述因子以异常收益占比作为市场关注度事件，极端日收益是衡量关注度的一个重要指标，出现较高或较低收益都代表关注度高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Lin, F., Qiu, Z., \& Zheng, W. (2023). \textit{Cranes among chickens: The general-attention-grabbing effect of daily price limits in China's stock market}. Journal of Banking \& Finance, 150, 106818.
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{引入主动买卖特征的改进大单交易占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{改进大单交易占比} = \frac{\text{大买\&大卖\&主卖} - \text{大买\&非大卖\&主买} - \text{非大买\&大卖\&主卖}}{\text{总成交量}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 大单和非大单的判断标准为：先将同一委买ID（或委卖ID）对应的实际成交量进行加总，再将全部实际成交的委买ID（或委卖ID）成交量进行降序排列，最后将成交量大于前10\%分位点的委买单（或委卖单）记为“大买单”（或“大卖单”），要剔除开盘集合竞价成交记录；
+    \item ② 主动买卖单的判断标准为：采用的是一种结合成交价格及委托时间的主动买卖特征划分法，结合当前成交价及委托订单第一次出现时的主动买卖特征进行综合判断，具体细节见报告原文。
+\end{itemize}
+
+\subsection{说明}
+在订单大小特征基础上再叠加主动买卖的特征，能更准确的追踪知情交易者的交易意图，提升因子表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣鹏, 张宇. 2024. 基于主动买卖特征的高频订单因子改进. 国信证券.
+\end{enumerate}
+
+\section{基于筹码分布的处置效应(行为金融因子-处置效应)}
+
+\subsection{因子定义}
+
+1. 基于筹码分布等相关数据，计算当日兑现的亏损占筹码总亏损的比例 \( \mathrm{CPLR} \) 和当日兑现的盈利占筹码总盈利的比例 \( \mathrm{CPGR} \)：
+\begin{equation}
+    \mathrm{CPGR}_{i,t} = \frac{\text{已实现盈利}_{i,t}}{\text{已实现盈利}_{i,t} + \text{账面盈利}_{i,t}}
+\end{equation}
+\begin{equation}
+    \mathrm{CPLR}_{i,t} = \frac{\text{已实现亏损}_{i,t}}{\text{已实现亏损}_{i,t} + \text{账面亏损}_{i,t}}
+\end{equation}
+
+2. 计算如下筹码分布下的处置效应因子：
+\begin{equation}
+    \mathrm{CDE}_{i,t} = \mathrm{CPGR}_{i,t} - \mathrm{CPLR}_{i,t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 已实现盈利、账面盈利、已实现亏损、账面亏损等指标的计算逻辑，见“已实现盈利比率”和“已实现亏损比率”等相关因子日历页。
+\end{itemize}
+
+\subsection{说明}
+处置效应因子由已实现盈利比率和已实现亏损比率组合而成，用于衡量投资者“卖盈持亏”行为意愿；因子值越大，则兑现盈利并卖出股票的处置效应越明显，因子值越小，则继续持有亏损股票的处置效应越明显。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 处置效应与 V 型处置效应在量化选股中的应用. 中信建投.
+    \item Odean, T. (1998). \textit{Are investors reluctant to realize their losses?}. Journal of Finance, 53(5), 1775–1798.
+\end{enumerate}
+
+\section{修正模糊价差(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 计算各股票每日的“日模糊价差”因子：
+   \begin{equation}
+       \text{日模糊价差} = \text{日模糊金额比} - \text{日模糊数量比}
+   \end{equation}
+
+2. 每日计算各股票过去 10 日的“日模糊价差”的标准差；
+
+3. 每日将横截面上“日模糊价差”为负的“日模糊价差”求和得 \( s_1 \)：
+
+4. 将“日模糊价差”为负的“日模糊价差”除以其过去 10 日标准差，得到“修正日模糊价差”，“日模糊价差”为正部分不变：
+
+5. 每日将横截面上“修正日模糊价差”为负的“修正日模糊价差”求和得 \( s_2 \)；
+
+6. 将“修正日模糊价差”为负的部分加以调整，除以 \( s_2 \)，乘以 \( s_1 \)，使其负的部分数量级与原来保持一致，避免市值行业中心化时受影响。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① “日模糊金额比”和“日模糊数量比”因子计算逻辑见相应日历页；
+    \item ② 每月末可对最近 20 天的上述因子求均值和标准差并将两者等权合并，即得到月度“修正模糊价差”因子。
+\end{itemize}
+
+\subsection{说明}
+模糊价差因子衡量了投资者因厌恶波动模糊而急于出售股票时所付出的流动性成本，与未来收益负相关；上述计算逻辑包含了对该因子的修正细节，识别出了多头组中基本面恶化而不会发生补涨的股票（利用标准差对负的日模糊价差进行调整）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 波动率的波动率与投资者模糊性厌恶. 方正证券.
+    \item Kostopoulos, D., Meyer, S., \& Uhr, C. (2021). \textit{Ambiguity about volatility and investor behavior}. Journal of Financial Economics.
+\end{enumerate}
+
+\section{流动性溢价因子-加权(高频因子-流动性类)}
+
+\subsection{因子定义}
+
+1. 每月底，以 \( T=21 \) 个交易日为周期，以 \( n=48,120 \) 次为频率（对应 5 分钟线和 2 分钟线），按日结算，进行评估；
+
+2. 分别以每只股票当日成交额的 1\% 或当日成交额的开方，配置每日个股资金 \( M_s \)，并将个股资金按频率等分得到每个交易周期下的资金量 \( M_s/n \)；
+
+3. 获得每个交易周期下收盘时的买单信息（买一到买五），以撮合机制模拟交易股票的操作。当资金不能以五档的挂单量完全成交时，采用线性插值的方式设置虚拟档进行模拟撮合交易，具体算法见参考文献；
+
+4. 按上述算法得到每个周期下，需求方定价下交易的股票数量 \( \mathrm{Vol}_{i,\mathrm{need}} \)，并以当时交易周期的均价得到实际平均交易的股票数量 \( \mathrm{Vol}_{i,\mathrm{actual}} \)，再按当前交易周期收盘价计算股票市值，并每日对上述 2 个市值序列求和得到当日总市值：
+\begin{equation}
+    \mathrm{Cap}_{\mathrm{need}} = \sum_{i=1}^{n} (\mathrm{Vol}_{i,\mathrm{need}} \times \mathrm{Close}_i,n)
+\end{equation}
+\begin{equation}
+    \mathrm{Cap}_{\mathrm{actual}} = \sum_{i=1}^{n} (\mathrm{Vol}_{i,\mathrm{actual}} \times \mathrm{Close}_i,n)
+\end{equation}
+
+5. 每月底汇总过去 \( T \) 天的数据，计算指数加权或波动率加权 \( \mathrm{weight}^t \propto |\mathrm{return}^t| \) 下的平均相对差距，半衰期为 21 天，即为流动性溢价因子：
+\begin{equation}
+    f = \frac{\sum_{t=1}^{T} \mathrm{Cap}_{\mathrm{need}}^t \times \mathrm{weight}^t}{\sum_{t=1}^{T} \mathrm{Cap}_{\mathrm{actual}}^t \times \mathrm{weight}^t} - 1
+\end{equation}
+
+\subsection{说明}
+高频流动性溢价因子借助高频挂单数据和模拟撮合机制衡量了需求方定价下交易股票数量与实际平均交易股票数量的相对差距进而刻画流动性风险溢价；理论上，市场的平均成交价高于买单价格（即 \( \mathrm{Vol}_{\mathrm{actual}} < \mathrm{Vol}_{\mathrm{need}} \)），高出部分即为风险溢价，作为持有资产者收益的补偿；时间加权（时间越近权重越大）后的因子有更强的空头区分能力，波动加权（收益变动越大权重越大）后的因子表现更优。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 黎川桃, 郑超. 2019. 高频因子（一）：流动性溢价因子. 长江证券.
+\end{enumerate}
+
+\section{平均异常日收益率(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ABNRETAVG} = \frac{1}{m} \sum_{t}^{t-m+1} (r_{i,t} - \bar{r}_t)^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{i,t} \) 为股票 \( i \) 在 \( t \) 交易日的收益率；
+    \item ② \( \bar{r}_t \) 为交易日 \( t \) 的全市场收益率；
+    \item ③ \( m \) 为交易日窗口，一般取为月度。
+\end{itemize}
+
+\subsection{说明}
+平均异常日收益率为日频收益与市场中位数差值的均方，属于极端日收益类因子；极端收益（过高收益或过低收益）的股票相较其他股票更能吸引投资者的注意，因子值越高，投资者对该股票的关注度越高；而有限注意力导致投资者更倾向于交易引起他们关注的股票，投资者关注度越高的股票通常意味着越多的投资购买；但 A 股市场的做多与做空不对称，使得投资者非理性买入高于非理性卖出，进而导致关注度高的股票由于投资者净买入而存在溢价，未来也更可能出现反转。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cosemans, M., \& Frehen, R. (2021). \textit{Salience theory and stock prices: Empirical evidence}. Journal of Financial Economics, 140(2), 460-483.
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{基于物理时间交易量加权的知情交易概率(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{VWPIN} = \frac{\alpha\mu}{\alpha\mu + 2\varepsilon} \approx \sum_{i=1}^{n} w_i \frac{|S_i - B_i|}{S_i + B_i}
+\end{equation}
+\begin{equation}
+    w_i = \frac{\mathrm{Volume}_i}{\sum_{k=1}^{n} \mathrm{Volume}_k}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( S_i \) 和 \( B_i \) 分别为第 \( i \) 个交易时段内的卖单数和买单数；
+    \item ② \( w_i \) 为第 \( i \) 个交易时段内成交量占全天成交量的比例，\( \mathrm{Volume}_i \) 为第 \( i \) 个交易时段内的成交量；
+    \item ③ \( n \) 为交易日 \( t \) 内的交易时段的数量，比如 5 分钟的频率，则共有 \( n=48 \) 个交易时段；
+    \item ④ 若想构建日度以上频率的因子，只需在周期内取均值即可。
+\end{itemize}
+
+\subsection{说明}
+VWPIN 是一种同时包含了订单数量不平衡程度（如拆单操作）和交易量不平衡程度的知情交易概率的计算方式，可以动态考察因信息不对称导致的逆向选择风险在日内的变化情况；知情交易概率指在一段时间内，拥有信息优势的知情交易者提交的订单数量占总委托单数量的比例，用以刻画该段时间内的信息不对称程度，通常与未来收益正相关，取值越大，信息不对称程度越大，投资者要求的风险回报越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 李平等. 2020. 知情交易概率与风险定价：基于不同 PIN 测度方法的比较研究. 管理科学学报, 23(1), 33-46.
+\end{enumerate}
+
+\section{日内收益波动比(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+① 对于股票 \( i \)，计算 \( n \) 日内第 \( t \) 分钟的“更优波动率”，即对第 \( t-4, t-3, t-2, t-1, t \) 分钟的开盘价、最高价、最低价和收盘价，共 20 个价格数据求标准差，再除以这 20 个价格数据的均值，最后对该比值取平方：
+
+② 计算 \( t \) 分钟的收益波动比，即 \( t \) 分钟收益率 / \( t \) 分钟“更优波动率”：
+
+
+③ 计算每日收益波动比序列与“更优波动率”序列间的协方差，即为日度“灾后重建”因子：
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算因子需剔除开盘和收盘数据，仅考虑日内分钟频数据；
+    \item ② 每月末可对最近 20 天的上述因子求均值和标准差并将两者等权合并，即得到月度“灾后重建”因子。
+\end{itemize}
+
+\subsection{说明}
+“灾后重建”因子衡量了投资者对波动变化反应不足的程度，与未来收益呈反比关系；当股价波动加剧时，人们期初往往对此反应不足，导致收益波动比下降，引起那些偏爱收益波动比高的投资者抛售股票，造成股价下跌，但未来很有可能会补涨。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 个股波动率的变动及“勇攀高峰”因子构建. 方正证券.
+    \item Moreira, A., \& Muir, T. (2017). \textit{Volatility-managed portfolios}. The Journal of Finance, 72(4), 1611-1644.
+\end{enumerate}
+
+\section{修正的相似业务收益联动因子(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{Linkage}_{i,t} = \frac{\sum_{j=1}^{N} \mathrm{SIM}_{i,j,t} \times \mathrm{VOL}_{j,t} \times \mathrm{EV}_{j,t} \times \mathrm{Ret}_{j,t}}{\sum_{j=1}^{N} (\mathrm{SIM}_{i,j,t} \times \mathrm{VOL}_{j,t} \times \mathrm{EV}_{j,t})} - \mathrm{Ret}_{i,t}
+\end{equation}
+\begin{equation}
+    \mathrm{SIM}_{i,j,t} = \frac{P_{i,t} \cdot P_{j,t}}{\|P_{i,t}\| \cdot \|P_{j,t}\|}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( P_{i,t} \) 为取值只有 0 和 1 的业务关键词向量，通过自然语言技术处理 A 股上市公司年度财务报告附注中关于公司基本情况的描述部分内容得到；
+    \item ② \( \mathrm{SIM}_{i,j,t} \) 为公司 \( i \) 和公司 \( j \) 在 \( t \) 时期的业务相似度；
+    \item ③ \( \mathrm{Ret}_{j,t} \) 为公司 \( j \) 在 \( t \) 月的收益率；
+    \item ④ \( \mathrm{EV}_{j,t} \) 为公司 \( j \) 在 \( t \) 月的总市值；
+    \item ⑤ \( \mathrm{VOL}_{j,t} \) 为公司 \( j \) 在 \( t \) 月的成交额。
+\end{itemize}
+
+\subsection{说明}
+相似业务收益联动因子度量了 \( t \) 期与 \( i \) 公司相似的公司在当月超过 \( i \) 公司的收益率，该值越大，说明 \( i \) 公司越有可能在下一期出现一定的补涨行情；修正后的因子剔除了一些小市值的股票短期受游资炒作拉升的影响。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 叶尔乐. 2023. 财报文本中公司竞争信息刻画与 Alpha 构建. 民生证券.
+\end{enumerate}
+
+\section{超大单涨跌幅(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+计算每笔成交数据对应的对数价格变动：
+\begin{equation}
+    \Delta \ln P_i = \text{当前成交价格的对数}\ln P_i - \text{上一笔成交价格的对数}\ln P_{i-1}
+\end{equation}
+
+对于每笔成交数据中涉及到的买卖双方，将时间上靠后的订单标记为主动订单；计算所有主动订单为超大单的对数价格变动之和即为超大单涨跌幅：
+\begin{equation}
+    \mathrm{SuperBigRet} = \sum_{i \in S} \Delta \ln P_i
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 按照委买单号和委卖单号对 level2 逐笔成交数据中的成交金额（已成交部分）进行汇总求和得到当天股票 \( i \) 所有买单和卖单的成交金额；
+    \item ② 对股票 \( i \)，将订单成交金额占当天总成交额比例超过 1\% 的订单定义为超大单（阈值在 0.5\%~2\% 区间较好）。
+\end{itemize}
+
+\subsection{说明}
+超大单涨跌幅因子刻画了是由超大单主导的已成交订单的涨跌幅，与未来收益负相关；大单是为了找出有信息优势的订单，超大单是为了刻画潜在的过度投机和流动性冲击的负向冲击效应。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱剑涛, 王星星. 超大单冲击对大单因子的影响, 2022, 东方证券.
+\end{enumerate}
+\end{document}

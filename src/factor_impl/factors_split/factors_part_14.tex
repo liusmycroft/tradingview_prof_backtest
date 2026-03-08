@@ -1,0 +1,295 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{单一成交额占比熵(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+单位一成交额占比熵 = \( H\left(\frac{\mathrm{vol}_1close_1 }{\mathrm{VOL} \times \mathrm{CLOSE}}, \frac{\mathrm{vol}_2close_2}{\mathrm{VOL} \times \mathrm{CLOSE}}, \dots, \frac{\mathrm{vol}_Nclose_N}{\mathrm{VOL} \times \mathrm{CLOSE}}\right) \)
+\begin{equation}
+    H(p_1, p_2, \dots, p_n) = -\sum_{i=1}^N p_i \ln(p_i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{close}_t\) 和 \(\mathrm{vol}_t\) 分别为 \(t\) 时间段的收盘价和成交量；
+    \item ② \(\displaystyle \mathrm{VOL} = \sum_{t=1}^T \mathrm{vol}_t\)，为整个时间段总成交量；
+    \item ③ \(\displaystyle \mathrm{CLOSE} = \sum_{t=1}^T \mathrm{close}_t\)，为整个时间段收盘价之和；
+    \item ④ \(T\) 为划分时间段的个数，如日内 5 分钟频率的 \(T=48\)。
+\end{itemize}
+
+\subsection{说明}
+以单位一成交额占比作为每一个时间段状态的发生概率，以熵的定义刻画成交的混乱程度，即得到单一成交额占比熵因子；当因子值越小时，体系越混乱，成交量占比和收盘价占比排序相对一致（单位一成交额占比彼此之间存在较大分歧），成交在价格高位较为密集，易造成股价的高估。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 周小川, 郑超. 2020. 高频因子(八): 高位成交因子——从量价匹配说起. 长江证券.
+\end{enumerate}
+
+\section{开盘后买入意愿强度(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\mathrm{mean}(\text{买入意愿}_{i,j,n})}{\mathrm{std}(\text{买入意愿}_{i,j,n})}
+\end{equation}
+
+\begin{equation}
+    \text{买入意愿}_{i,j,n} = \text{净主买成交额}_{i,j,n} - \text{净委买增额}_{i,j,n}
+\end{equation}
+\begin{equation}
+    \text{净主买成交额}_{i,j,n} = \text{主动买入成交额}_{i,j,n} - \text{主动卖出成交额}_{i,j,n}
+\end{equation}
+\begin{equation}
+    \text{净委买增额}_{i,j,n} = \text{委托买单增加量}_{i,j,n} - \text{委托卖单增加量}_{i,j,n}
+\end{equation}
+
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 净主买成交额由逐笔成交数据计算得到，具体可参考开盘后净主买占比/强度等因子；
+    \item ② 净委买增额由盘口委托快照数据计算得到，具体可参考开盘后净委买增额占比因子；
+    \item ③ \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日内的第 \( j \) 分钟的数据；
+    \item ④ 开盘后的买入意愿占比用的是 9:30-10:00 范围内的数据；
+    \item ⑤ 月度选股下，\( T=20 \) 个交易日；周度选股下，\( T=5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+净委买变化额刻画了投资者还未释放的买入意愿，而净主买成交额则刻画了投资者已经释放的买入意愿，两者结合则得到广义的投资者主动买入意愿；开盘后 30 分钟内的买入意愿强度越高，投资者的买入意愿越稳健。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林需. 2020. 基于直观逻辑和机器学习的高频数据低频化应用. 海通证券.
+\end{enumerate}
+
+\section{特异质换手波动率(量价因子改进)}
+
+\subsection{因子定义}
+每只股票在每个换仓日（如每个月初）取近1个月的日度数据进行如下时序ols回归：
+\begin{equation}
+    \mathrm{turnover}_{i,t} = \alpha_{i,t} + \beta_{1t} \mathrm{TMKT}_t + \beta_{2t} \mathrm{TSMB}_t + \beta_{3t} \mathrm{THML}_t + \beta_{4t} \mathrm{TMOM1}_{m,t} + 
+ 
+     \varepsilon_{i,t}\mathrm{Ivol\_turnover}_{i,t} = \mathrm{std}(\varepsilon_{i,t})
+\end{equation}
+
+取最近一期回归的日度残差序列 \( \varepsilon_{i,t} \) 计算标准差，可得到 \( t \) 时刻近1个月股票的特异质换手波动率因子：
+\begin{equation}
+    \mathrm{Ivol\_turnover}_{i,t} = \mathrm{std}(\varepsilon_{i,t})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{turnover}_{i,t} \)：\( t \) 时刻股票 \( i \) 基于自由流通股换手率的平均值；
+    \item ② \( \mathrm{TMKT}_t \)：\( t \) 时刻全市场截面股票日度自由流通股换手率的平均值；
+    \item ③ \( \mathrm{TSMB}_t \)：基于 \( t-1 \) 日总市值将全市场截面股票排序，分别计算处于前后 \( 1/3 \) 的股票池在 \( t \) 日的自由流通股日度换手率的均值，计算两者均值之差（后 \( 1/3 \) - 前 \( 1/3 \)）；
+    \item ④ \( \mathrm{THML}_t \)：基于 \( t-1 \) 日 PB 值将全市场截面股票排序，分别计算处于前后 \( 1/3 \) 的股票池在 \( t \) 日的自由流通股日度换手率的均值，计算两者均值之差（前 \( 1/3 \) - 后 \( 1/3 \)）；
+    \item ⑤ \( \mathrm{TMOM1}_{m,t} \)：基于 \( t-1 \) 日近一个月动量效应（21个交易日区间收益率）将全市场截面股票排序，分别计算处于前后 \( 1/3 \) 的股票池在 \( t \) 日的自由流通股日度换手率的均值，计算两者均值之差（前 \( 1/3 \) - 后 \( 1/3 \)）。
+\end{itemize}
+
+\subsection{说明}
+借鉴特质波动率的构建理念，特异质换手波动率剥离了市场主流风格（风险因子）对于个股换手率的影响，可以更好的测算市场对错误定价的修正效率。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郭策. 2024. 价值驱动因子. 中银证券.
+\end{enumerate}
+
+\section{日内异常交易量(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ATV}_{t,i} = \frac{\text{实际交易量}}{\text{预期交易量}} = \frac{t \text{日第} i \text{分钟交易量}}{\mathrm{mean}(\text{过去一段时间分钟交易量})}
+\end{equation}
+
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算预期交易量的“过去一段时间”可以为过去1个交易日；
+    \item ② 分钟交易量的频率可以为5分钟频率的成交数据。
+\end{itemize}
+
+\subsection{说明}
+异常交易量通常用于捕捉股票的异常交易活动，与股票未来收益负相关；异常交易量较高时，股票价格会被高涨的非理性情绪化交易不断推高造成错误定价，未来股价会为此出现补跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任瞳. 2023. “持续异常交易量”选股因子 PATV. 招商证券.
+\end{enumerate}
+
+\section{惊恐因子(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+1. 计算各股票的日度“惊恐度”：
+\begin{equation}
+    \text{惊恐度} = \frac{\text{偏离度}}{\text{基准项}} = \frac{\mathrm{abs}(\text{个股收益率} - \text{市场收益率})}{\mathrm{abs}(\text{个股收益率}) + \mathrm{abs}(\text{市场收益率}) + 0.1}
+\end{equation}
+
+2. 对各股票，将每日惊恐度与每日收益率相乘，得到加权调整收益率；
+
+3. 对各股票，每月末计算过去20日加权调整收益率序列的均值和标准差，分别称为“惊恐收益”因子和“惊恐波动”因子，再将二者等权合成为“原始惊恐”因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 选取中证全指 000985 代表市场水平；
+    \item ② “偏离度”衡量了个股收益率对市场收益率的偏离水平；“基准项”衡量了市场总体收益率水平。
+\end{itemize}
+
+\subsection{说明}
+原始惊恐因子以“惊恐度”为权重改进了传统反转因子。“惊恐度”刻画了极端收益对投资决策权重的扭曲程度；即使某股票相邻两天收益率相同，但相对市场水平的偏离程度却是不同的，即投资者的惊恐度（过度反应程度、收益显著性）是不同的，对此也应给出不同的投资决策权重。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 显著效应、极端收益扭曲决策权重和“草木皆兵”因子, 2022, 方正证券.
+    \item Cosemans, M., \& Frehen, R. (2021). \textit{Salience theory and stock prices: Empirical evidence}. Journal of Financial Economics, 140(2), 460-483.
+\end{enumerate}
+
+\section{供应商节点度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+基于供应链图谱网络计算公司节点的出度即为供应商节点度因子：
+\begin{equation}
+    d_i^{(\mathrm{out})} = \sum_{j （\neq i）} w_{ij}^{\mathrm{out}}
+\end{equation}
+
+边无权重：
+\begin{equation}
+    w_{ij}^{\mathrm{out}} = \mathbb{1}_{[j \in N(i)]}
+\end{equation}
+
+边有权重：
+\begin{equation}
+    w_{ij}^{\mathrm{out}} = \frac{\mathrm{sales}_{ij}}{\mathrm{Total\_Sales}_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 供应链图谱网络边的方向为供应商指向客户： \(\mathrm{supplier} \rightarrow \mathrm{customer}\)
+    \item ② \( w_{ij}^{\mathrm{out}} \) 为公司 \( i \) 与其客户 \( j \) 之间的边；若边无权重，取值为 1；若边有权重，取值为公司 \( i \) 对客户 \( j \) 的销售额在公司 \( i \) 总销售额中的占比；
+    \item ③ 因子可能存在板块和市值偏好，建议对其做市值行业中心化处理。
+\end{itemize}
+
+\subsection{说明}
+若公司的客户节点度较高（即公司有较多客户），说明公司的客户较为多样化，有助于减少单一客户带来的风险，增强公司抗风险能力；但对投资者来说，客户节点度较高的公司，因其风险较低，能从中得到的风险补偿也就相对较低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jussa et al. (2015). \textit{The Logistics of Supply Chain Alpha}. Deutsche Bank Markets Research.
+\end{enumerate}
+
+\section{订单失衡率(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{OIR}_t = \frac{V_t^{\mathrm{WB}} - V_t^{\mathrm{WA}}}{V_t^{\mathrm{WB}} + V_t^{\mathrm{WA}}}
+\end{equation}
+\begin{equation}
+    V_t^{\mathrm{WB(WA)}} = \frac{\sum w_i \times V_{i,t}^{\mathrm{B(A)}}}{\sum w_i}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( V_t^{\mathrm{WB(WA)}} \) 为衰减加权委托量；
+    \item ② \( V_{t}^{\mathrm{B}} \) 和 \( V_{t}^{\mathrm{A}} \) 分别是 \( t \) 时刻第 \( i \) 档的买量和卖量；
+    \item ③ \( w_i = 1 - (i-1)/5, \, i = 1, 2, 3, 4, 5 \)。
+\end{itemize}
+
+\subsection{说明}
+订单失衡率因子为买卖委托量差与其和的比值，衡量了潜在买家和卖家在市场上的相对实力；订单失衡率为正，说明市场买压大于卖压，未来价格趋向上涨；订单失衡因子短期与收益率呈正相关，长期会出现反转（存在散户的追涨杀跌和主力的短期市场操纵）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈开锐. 2020. 高频溢价选股因子初探. 中信建投证券.
+\end{enumerate}
+
+\section{已实现波动率(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{RV}_t = \sum_{i=1}^N r_{t,i}^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{t,i} \) 为某股票交易日 \( t \) 内的分钟对数收益率序列，如 5 分钟对数收益率序列；
+    \item ② \( N \) 表示该股票在交易日 \( t \) 中特定频率的分钟级别数据个数，如 5 分钟频率通常有 48 个数据点。
+\end{itemize}
+
+\subsection{说明}
+作者提出的上述方法是利用高频数据估计波动率的重要研究成果；非参数估计，无需构建模型，计算简单，且在一般条件下几乎无测量误差。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Andersen, T. G., Bollerslev, T., Diebold, F. X., \& Labys, P. (2001). \textit{The distribution of exchange rate volatility}. Journal of the American Statistical Association, 96, 42–55.
+\end{enumerate}
+
+\section{改进的客户动量因子（基于锚定偏差）(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+利用供应链的相关数据，计算如下客户动量因子：
+\begin{equation}
+    \mathrm{cmmom}_i^{1M} = \sum_{j=1}^{N_i} w_{ij}^{\mathrm{sales}} \cdot \mathrm{mom}_j^{1M}, \quad i = 1, 2, \ldots, N
+\end{equation}
+
+计算最近 52 周最高价因子作为衡量“锚定偏差”的代理变量：
+\begin{equation}
+    \mathrm{nearness\ to\ 52\_week\ high} = \frac{\text{月末收盘价}}{\text{过去52周内最高价}}
+\end{equation}
+
+先基于客户动量因子（正向）进行分组，在各组内基于 nearness to 52-week high 因子（正向）进行分组，以此构建投资组合。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{mom}_j^{1M} \) 为公司 \( i \) 的客户 \( j \) 过去一个月收益率；
+    \item ② \( w_{ij}^{\mathrm{sales}} \) 为销售占比。
+\end{itemize}
+
+\subsection{说明}
+客户动量因子可以从“投资者有限注意力或信息反应不足”这个维度来解释，投资者对客户信息反应越不足，客户动量效应可能越强；“锚定偏差”会延缓投资者对新信息（包括客户等各种关联公司信息）的反应，将其与客户动量结合使用会提升客户动量因子的表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cohen, L., \& Frazzini, A. (2008). \textit{Economic Links and Predictable Returns}. Journal of Finance, 63(4), 1977-2011.
+    \item Huang, S., Lin, T.-C., \& Xiang, H. (2021). \textit{Psychological barrier and cross-firm return predictability}. Journal of Financial Economics, 142(1), 338-356.
+\end{enumerate}
+
+\section{“夜眠霜路”因子(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+1. 对股票 \( i \)，用每日 1 分钟收盘价计算得到第 \( t \) 分钟收益率序列 \( \mathrm{ret}_t \)；用每日 1 分钟成交量计算得到 1 分钟增量成交量 \( \mathrm{voldiff}_t \)：
+\begin{equation}
+    \mathrm{ret}_t = \frac{\mathrm{close}_t}{\mathrm{close}_{t-1}} - 1
+\end{equation}
+\begin{equation}
+    \mathrm{voldiff}_t = \mathrm{volume}_t - \mathrm{volume}_{t-1}
+\end{equation}
+
+2. 对每天第 6 分钟至第 240 分钟的上述数据进行带截距项的最小二乘回归：
+\begin{equation}
+    \mathrm{ret}_t = \alpha_0 + \alpha_1 \mathrm{voldiff}_t + \alpha_2 \mathrm{voldiff}_{t-1} + \cdots + \alpha_6 \mathrm{voldiff}_{t-5} + \varepsilon_t
+\end{equation}
+
+3. 记上述回归得到的截距项的 \( t \) 值为 \( t-{\mathrm{intercept}} \)，回归方程的 \( F \) 值为 \( F-{\mathrm{all}} \)；
+
+4. 每月末，分别计算每只股票过去 20 天 \( t-{\mathrm{intercept}} \) 序列与当期横截面所有股票过去 20 天的 \( t-{\mathrm{intercept}} \) 序列之间的相关系数的绝对值，并取均值，即为“夜眠霜路”因子。
+
+\subsection{说明}
+“夜眠霜路”因子剥离了 \( t-{\mathrm{intercept}} \) 中的市场层面的信息与个股中长期的基本面信息，与未来收益正相关；因子值越大，表明该股票的其他信息中，与其余所有股票的其他信息共同的部分越多（共同部分即市场信息），即该股票的市场层面的信息占其他信息的比重越大，个股中长期的基本面信息占比就越小（投资者分歧较小），个股未来越容易产生高收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 推动个股价格变化的因素分解与“花旗株间”因子, 2023, 方正证券.
+\end{enumerate}
+\end{document}

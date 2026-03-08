@@ -1,0 +1,265 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{年度搜索比例 (symmetric)(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+\begin{equation}
+    f_{ij}^t = \frac{\sum_{d=1}^{365} (\text{Daily Searches for } j \text{ after or before } i)_d}{\sum_{d=1}^{365} (\text{Daily Searches for } i \text{ and then any firm } j \neq i)_d}
+\end{equation}
+\begin{equation}
+    R_{i,t} = \frac{\sum_{j=1}^N f_{ij}^t \times \mathrm{Ret}_j}{\sum_{j=1}^N f_{ij}^t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( f_{ij}^t \) 为年度搜索比、\( \mathrm{Ret}_j \) 为月度涨跌幅；
+    \item ② 原始数据为从美国证券交易委员会（SEC）的 EDGAR 网站上获取的用户对公司信息的搜索流量；
+    \item ③ 只保留同一天内至少搜索了两个不同公司（基于 CIK 编号识别的不同公司）的用户记录；
+    \item ④ 剔除同一天内，用户对同一公司的连续搜索，对每个公司的搜索只计数一次；
+    \item ⑤ 限制每个用户每天下载的独特公司数量不超过 50 家，以减少批量下载者的影响；
+    \item ⑥ 仅考虑特定类型文件的页面浏览量，如 10-K、10-Q、8-K、14-A、S-1 等报告。
+\end{itemize}
+
+\subsection{说明}
+对称的年度搜索比例反映了投资时间顺序在搜索公司 \( i \) 之后或之前紧接着搜索公司 \( j \) 的频率，借助投资者搜索行为捕捉投资者认为这两家公司之间存在经济关联的关联程度；投资者搜索行为有助于识别出可能未被传统方法发现但具有密切经济联系的企业，而这些联系相比行业分类等传统关联对于解释股票回报、估值倍数等财务指标的变化更加有效。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Lee, Charles M. C., Ma, Paul, \& Wang, Charles C. Y. (2015). \textit{Search-Based Peer Firms: Aggregating Investor Perceptions Through Internet Co-Searches}. Journal of Financial Economics, 116(2), 410-431.
+\end{enumerate}
+
+\section{高频下行波动占比(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{高频下行波动占比} = \frac{\sum_{t} (r_{i}^tI_{\{r_i^t<0\}})^2  }{\sum_{t} (r_{i}^t)^2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{i}^t \) 为分钟频率下的股票收益序列，如1分钟、5分钟、10分钟等；
+    \item ② 在任意选股时刻，因子值为前 \( N \) 日指标的均值，如月度选股，计算因子值时使用的是股票过去20个交易日的均值。
+\end{itemize}
+
+\subsection{说明}
+高频下行波动占比与高频上行波动占比相对，衡量了股票价格下跌的特征，通常与未来收益正相关；日内快速下跌的股票，往往具有更高的下行风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2017. 高频因子之已实现波动分解. 海通证券.
+\end{enumerate}
+
+\section{日内信噪比(高频因子-收益分布类)}
+
+\subsection{因子定义}
+从日内分钟价格序列 \( P \) 中，利用经验模态分解 EMD 算法分解出价格序列中的噪音序列 \( \mathrm{IMF}_i(t) \) 和信号序列 \( r_n(t) \)：
+\begin{equation}
+    P(t) = \sum_{i=1}^n \mathrm{IMF}_i(t) + r(t)
+\end{equation}
+
+计算信号序列的标准差与噪声序列标准差的比值的对数，即为日内信噪比：
+\begin{equation}
+    \mathrm{SNR} = \log \left( \frac{\mathrm{std}(r_n(t))}{\mathrm{std}(P(t) - r_n(t))} \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① EMD 算法分解详细步骤见参考文献；
+    \item ② 通常分解至二或三层时，信号序列的平滑特性较为明显，能够接近地描述原始序列，通常选二层更优。
+\end{itemize}
+
+\subsection{说明}
+日内信噪比因子与股票未来收益正相关，信噪比越大，股票未来收益越高；从行为金融学角度解释，股票存在虚假信息或噪声交易者越多，价格偏离内在价值越频繁或偏离度越高，未来收益越差。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 严佳炜, 朱定豪. 信息提取、寻找高质量反转因子. 华安证券.
+\end{enumerate}
+
+\section{筹码收益（量价因子改进）}
+
+\subsection{因子定义}
+利用过去 250 日的数据，对股票 \( i \) 在 \( T \) 日计算得到 \([T-250, T]\) 之间每日的留存筹码 \( \mathrm{RsdAmt}_{T-k}^T \) 和成交均价 \( \mathrm{Price}_{T-k}^{\mathrm{avg}} \)，即为该股票在 \( T \) 日的筹码分布估计：
+\begin{equation}
+    \mathrm{RsdAmt}_{T-k}^T = \mathrm{Amt}_{T-k} \cdot \prod_{T-k+1}^{T} (1 - \mathrm{Turnover}_t), \quad k \in (0, 250]
+\end{equation}
+
+计算最新日成交均价相对历史筹码的加权成本的相对收益，即为最新日的筹码收益因子：
+\begin{equation}
+    \mathrm{holding\_ret} = \frac{\sum_t \mathrm{Price}_t^{\mathrm{avg}} \times \mathrm{RsdAmt}_t^T}{\sum_t \mathrm{RsdAmt}_t^T}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Amt}_{T-k} \) 为股票在 \( T-k \) 日的成交额；
+    \item ② \( \mathrm{Turnover}_t \) 为股票在 \( t \) 日的换手率。
+\end{itemize}
+
+\subsection{说明}
+筹码收益因子衡量了当前价格相对于全部筹码历史成本的收益，指标越高代表当前赚钱效应越好，未来表现越弱，是一个反转类因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 张翔. 2025. 筹码结构视角下的动量反转融合. 开源证券.
+\end{enumerate}
+
+\section{信噪比增强反转（高频因子-动量反转类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{加强反转}_i = \mathrm{Weight}_i \times \text{反转}_i
+\end{equation}
+\begin{equation}
+    \mathrm{Weight}_i = \frac{\mathrm{SNR}_i - \min(\mathrm{SNR})}{\max(\mathrm{SNR}) - \min(\mathrm{SNR})}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{SNR}_i \) 为股票 \( i \) 的日度信噪比因子，具体计算逻辑见相关日历页；
+    \item ② \( \text{反转}_i \) 为股票 \( i \) 的 20 日反转因子。
+\end{itemize}
+
+\subsection{说明}
+对于高信号趋势、低噪声扰动的股票的反转因子值可以给予更高的信噪比乘数，因为日内信号含量高的股票更有可能反转，而日内买卖力量博弈程度高的股票，未来方向相对更不确定；信噪比带来的增量 Alpha 信息可以修正传统反转因子多头失效的部分。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 严佳炜, 朱定豪. 信息提纯，寻找高质量反转因子. 华安证券.
+\end{enumerate}
+
+\section{价量相关性波动性因子（高频因子-量价相关性类）}
+
+\subsection{因子定义}
+
+1. 每月月底，回溯每只股票过去 20 个交易日的价量信息，每日计算该股票分钟收盘价 \( p_t \) 与分钟成交量 \( v_t \) 的相关系数：
+\begin{equation}
+    \mathrm{PV\_corr} = \mathrm{corr}(p_t, v_t)
+\end{equation}
+
+2. 每只股票取 20 日相关系数的标准差，做横截面市值中性化处理，得到的结果即为价量相关性波动性因子 \( \mathrm{PV\_corr\_std} \)。
+
+\subsection{说明}
+\( \mathrm{PV\_corr\_std} \) 从价量形态稳定性的角度，对反转因子进行了改进，即无论股票价格过去的涨跌，只要每日价量关系维持某种稳定形态，下个月就更有可能上涨；而价量关系在多种形态间频繁切换的股票，下个月更有可能下跌。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高子剑. 2020. 高频价量相关性：意想不到的选股因子. 东吴证券.
+\end{enumerate}
+
+\section{百分比实现价差（高频因子-流动性类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{PRS}_{i,t} = 2D_{i,k} \left( \ln(P_{i,t}) - \ln\left(\frac{\mathrm{Ask}_{i,t+5} + \mathrm{Bid}_{i,t+5}}{2}\right) \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Ask}_{i,t+5}, \mathrm{Bid}_{i,t+5} \) 分别为股票 \( i \) 在 \( t+5 \) 时刻的卖 \( 1 \) 价、买 \( 1 \) 价；
+    \item ② \( P_{i,t} \) 为股票 \( i \) 在 \( t+5 \) 时刻的收盘价；
+    \item ③ \( D_{i,k} \) 为买卖标识，买单记为 \( 1 \)，卖单记为 \( -1 \)；
+    \item ④ \( D_{i,k} \) 买卖单判断标准：若当前收盘价高于（低于）最优买卖报价平均值，则认为是买（卖）单；当前收盘价等于最优买卖报价平均值时，若收盘价高于（低于）上一笔价格，则认为是买（卖）单。
+\end{itemize}
+
+\subsection{说明}
+百分比实现价差属于“百分比 percent-cost”形式的流动性，代表执行交易所需要的交易成本；股票的交易成本越高，流动性越差，未来会有正向的流动性风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升悦. 2024. 流动性高频因子构建与投资者注意力因子分析报告. 中信建投.
+\end{enumerate}
+
+\section{卖出反弹占比小单因子（行为金融因子-遗憾规避）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{LCVOLS} = \frac{\sum_{i}^{N} \mathrm{volume}_{\mathrm{sell},i} \cdot \mathbf{I}_{\{P_{\mathrm{sell},i} < \mathrm{close}\}} \cdot \mathbf{I}_{\{\mathrm{vol} < \mathrm{vol}_{\mathrm{mean}}\}}}{\mathrm{total\_volume}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{volume}_{\mathrm{sell},i} \) 为主卖成交量；
+    \item ② \( P_{\mathrm{sell},i} \) 为主卖成交价；
+    \item ③ \( \mathrm{vol}_{\mathrm{mean}} \) 为当日所有实际成交量均值；
+    \item ④ 逐笔中每笔成交买卖方向确定方式：若该笔成交为买单被拆分为多个卖单成交，则记为买方交易，反之为卖方交易；
+    \item ⑤ 大小单划分方式：以当日所有实际成交量均值作为区分大小单的阈值，即
+        \begin{equation*}
+            \mathrm{vol} < \mathrm{vol}_{\mathrm{mean}}
+        \end{equation*}
+        为小单，反之为大单；
+    \item ⑥ 此外，还可只统计尾盘期间 \([14:30,14:57)\) 的成交量，计算得到卖出反弹占比尾盘因子。
+\end{itemize}
+
+\subsection{说明}
+遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自满感，避免承认之前的决策失误；对于卖出后价格反弹（当天卖出的股票收盘价高于卖出的成本价）的投资者会倾向于继续坚持卖出判断，即使后续价格回升也不会考虑再次买回；卖出反弹占比因子值越高，低于收盘价卖出的成交量占比越高，股票未来买入动力越小，预期收益越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{早尾盘复合交易占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{早尾盘复合交易占比} = \frac{\text{非早尾盘买单\&非早尾盘卖单的成交量} - \text{早盘买单\&早盘卖单的成交量}}{\text{总成交量}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 早尾盘订单划分方式为：第一笔成交时间在 10:00 之前的订单为早盘订单，第一笔成交时间在 14:30 之后的订单为尾盘订单，其余时刻成交的订单为非早尾盘订单。
+\end{itemize}
+
+\subsection{说明}
+早尾盘复合交易占比因子从订单早尾盘维度对逐笔订单进行划分和归整，意在追踪投资者早尾盘操纵行为。测试发现，“早盘买+早盘卖”成交量占比和“尾盘买+尾盘卖”成交量占比越高，其未来反转效应越明显，且前者比后者更有效；“非早尾盘买+非早尾盘卖”成交量占比越高，其未来的动量效应越强；早尾盘复合交易占比因子为两者的复合，与未来收益正相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣慰, 张宇. 2024. 高频订单成交数据蕴含的 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{股价最低时刻-主卖笔均成交金额(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 将日内 240 个 1 分钟数据集集合标记为 \( T = \{t_1, t_2, \dots, t_{240}\} \)，将分钟收盘价最低的 10\% 时刻标记为集合 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \)；
+
+2. 利用逐笔成交数据，进一步对 \( P \) 中时刻的所有成交记录划分为主动买入成交 \( P\_Buy \) 和主动卖出成交 \( P\_Sell \) 两类；
+
+3. 对股价最低时刻下的主动卖出成交额和成交笔数进行汇总，根据其成交额 \( \mathrm{Amt}_t \) 之和除以成交笔数 \( \mathrm{DealNum}_t \) 之和，构造股价最低时刻且主卖的笔均成交金额 \( \mathrm{ATD}_{\mathrm{PriceLowest10\%\_Sell}} \)：
+\begin{equation}
+    \mathrm{ATD}_{\mathrm{PriceLowest10\%\_Sell}} = \frac{\sum_{t \in P\_\mathrm{Sell}} \mathrm{Amt}_t}{\sum_{t \in P\_\mathrm{Sell}} \mathrm{DealNum}_t}
+\end{equation}
+
+4. 同理，将全天的成交金额除以全天的成交笔数，得到全天的笔均成交金额 \( \mathrm{ATD}_T \)：
+\begin{equation}
+    \mathrm{ATD}_T = \frac{\sum_{t \in T} \mathrm{Amt}_t}{\sum_{t \in T} \mathrm{DealNum}_t}
+\end{equation}
+
+5. 将股价最低时刻且主卖的笔均成交金额除以全天的笔均成交金额，即得到去量纲化后的标准化因子 \( \mathrm{SATD}_{\mathrm{PriceLowest10\%\_Sell}} \)：
+\begin{equation}
+    \mathrm{SATD}_{\mathrm{PriceLowest10\%\_Sell}} = \frac{\mathrm{ATD}_{\mathrm{PriceLowest10\%\_Sell}}}{\mathrm{ATD}_T}
+\end{equation}
+
+\subsection{说明}
+笔均成交额类因子通过汇总“特殊的、具有较多信息含量”时刻的成交金额情况来刻画主力资金的行为动向；笔均成交金额越大，说明该特殊时间内资金优势越明显，其属于主力资金的可能性越大。“股价最低时刻”从股价高低角度追踪主力资金抄底意愿，叠加逐笔订单主卖意愿做更细切分能进一步提升因子表现（卖方主导下，股价越低，主力抄底意愿越强，未来收益越高）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣慰, 张宇. 2024. 高频订单成交数据蕴含的 Alpha 信息. 国信证券.
+\end{enumerate}
+\end{document}

@@ -1,0 +1,306 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{基于 PCA 的特质波动率(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+截面上对所有股票过去 20 天的日度收益率序列进行主成分分析 PCA，提取第一主成分 \( F_1 \) 为隐式因子溢价；
+
+对每只股票 \( i \)，以过去 20 天的日度收益率序列为 \( y \)，以隐式因子 \( F_1 \) 序列为 \( x \)，进行时序回归：
+\begin{equation}
+    r_{i,t} = \alpha_{i,t} + \beta_1^{F_1} \times F_1 + \cdots + \varepsilon_i
+\end{equation}
+
+时序回归返回的残差序列的标准差即为隐式因子框架下的特质波动因子：
+\begin{equation}
+    \mathrm{IV} = \mathrm{std}(\varepsilon_i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 在进行截面主成分分析时，若第一主成分的解释力度低于 20\%，则选取解释力最大的前两个主成分进行回归；
+    \item ② 还可进一步计算特质因子：
+        \begin{equation*}
+            \mathrm{IVR} = 1 - R^2
+        \end{equation*}
+        上述回归模型拟合优度；
+    \item ③ 还可进一步计算特质偏度因子：
+        \begin{equation*}
+            \mathrm{IS} = \frac{\sum \varepsilon_{it}^3}{\mathrm{IV}^3}
+        \end{equation*}
+\end{itemize}
+
+\subsection{说明}
+计算隐式因子框架下的特质波动率时，直接通过主成分分析对资产收益序列降维来提取共同波动，而无需显式的借助多因子模型估计共同风险，系统性的解决传统多因子模型遗漏变量、估计误差的问题，计算简单。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣旭, 杨怡玲, 刘璐. 2022. 隐式框架下的特质类因子改进. 国信证券.
+\end{enumerate}
+
+\section{委托成交相关性(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+使用盘口前1档委托挂单数据计算股票 \( i \) 在 \( T \) 日的净委买变化率：
+\begin{equation}
+    \text{净委买变化率}_{k,t}^T = \frac{\text{净委买变化量}_{k,t}^T}{\text{流通股本}_T}
+\end{equation}
+\begin{equation}
+    \text{净委买变化量}_{k,t}^T = \sum_{j=1}^{k} \text{委买变化量}_{j,t}^T - \sum_{j=1}^{k} \text{委卖变化量}_{j,t}^T
+\end{equation}
+
+进一步计算 \( T \) 日高频收益序列与净委买变化率序列的相关系数：
+\begin{equation}
+    \text{委托成交相关性}^t_T = \mathrm{corr}(r_{T,t}^i, \mathrm{netBid}_{T,t}^i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \text{委买变化量}_{j,t}^T \) 和 \( \text{委卖变化量}_{j,t}^T \) 分别为 \( T \) 日内 \( t \) 至 \( t+1 \) 时刻的第 \( j \) 档委买的变化量和第 \( j \) 档委卖的变化量；
+    \item ② \( \text{流通股本}_T \) 为 \( T \) 日股票的流通股本；
+    \item ③ 可过去5日、20日上述因子的均值作为周度和月度的因子值。
+\end{itemize}
+
+\subsection{说明}
+委托成交相关性刻画了投资者买入意愿与股价走势间的关系，与未来收益负相关，前期委托成交相关性越低的股票，未来收益表现越好。其中“股价下跌，净委买上升”的股票在未来的超额收益最强（投资者托底意愿较强），而“股价下跌，净委买下降”的股票在未来的超额收益最弱（投资者托底意愿较弱）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳奇, 袁林青. 2019. 当下跌遇到托底. 海通证券.
+\end{enumerate}
+
+\section{剔除超大单后的普通大单买入占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{剔除超大单后的普通大单买入占比}_{i,t} = \frac{\mathrm{NormalBigBuy}_{i,t}}{\mathrm{NormalBigBuy}_{i,t} + \mathrm{NormalBigSell}_{i,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 按照委买单号和委卖单号对 level2 逐笔成交数据中的成交金额（已成交部分）进行汇总求和得到当天股票 \( i \) 所有买单和卖单的成交金额；
+    \item ② 对股票 \( i \)，将订单成交金额占当天总成交额比例超过 1\% 的订单定义为超大单（阈值在 0.5\%~2\% 区间较好），将所有订单成交金额的前 30\% 分位数的订单定义为大单；
+    \item ③ \( \mathrm{NormalBigBuy}_{i,t} \) 和 \( \mathrm{NormalBigSell}_{i,t} \) 分别为股票 \( i \) 在交易日 \( t \) 的剔除超大单后大买单和大卖单成交金额。
+\end{itemize}
+
+\subsection{说明}
+超大单买入因子具有负向 Alpha，剔除超大单后的普通大单买入占比的正向 Alpha 会在原始大单占比基础上得到加强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱剑涛, 王星星. 超大单冲击对大单因子的影响, 2022, 东方证券.
+\end{enumerate}
+
+\section{基于沪深总成交额的注意力捕捉(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+
+统计每日沪深两市的总成交额作为市场关注代理指标：
+\begin{equation}
+    \mathrm{mkt\_vol}_d = \text{沪市总成交额}_d + \text{深市总成交额}_d
+\end{equation}
+
+将市场关注代理指标与股票日收益进行月度时序回归，代理指标前的系数绝对值 \( |\beta_{i,t}| \) 即为股票对市场关注的敏感程度：
+\begin{equation}
+    r_{i,d} = \mu_{i,t} + \beta_{i,t} \mathrm{mkt\_vol}_d + \rho_{1,i,t} \mathrm{Mkt}_d + \rho_{2,i,t} \mathrm{SMB}_d + \rho_{3,i,t} \mathrm{HML}_d + \rho_{4,i,t} \mathrm{UMD}_d + \varepsilon_{i,t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item  \( n_{upper,d}、n_{lower,d}、N_d\)分别为d日涨停股票数量、跌停股票数量、当日交易股票总数
+    \item  \( r_{i,d} \) 为个股日度收益；
+    \item  \( \mathrm{Mkt}_d, \mathrm{SMB}_d, \mathrm{HML}_d \) 为经典的 Fama-French 三因子；
+    \item  \( \mathrm{UMD}_d \) 为动量因子收益，即全市场过去 11 个月累积收益前后 30\% 的组合在 \( d \) 日的收益差。
+\end{itemize}
+
+\subsection{说明}
+不同股票对同一市场关注度事件的反映程度往往是不同的，可借助个股收益对市场关注度事件的敏感程度来衡量股票对该事件的注意力捕捉效应；捕捉能力越强（敏感程度越高），表明个股更能吸引市场注意，从而导致买盘压力增大，股价高估；上述因子以两市成交额为市场关注度事件，成交额越高表明关注度越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Lin, F., Qiu, Z., \& Zheng, W. (2023). \textit{Cranes among chickens: The general-attention-grabbing effect of daily price limits in China's stock market}. Journal of Banking \& Finance, 150, 106818.
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{b 型成交量分布（高频因子-成交分布类）}
+
+\subsection{因子定义}
+
+1. 计算同价成交量：将日内相同分钟收盘价的成交量累加至一起，得到在当前价格上的成交量总和；
+
+2. 将成交量累计最大的价格定义为该股当日的成交量支撑点 \( \mathrm{VolumeSopportPrice} \)，包含该支撑点的附近区域定义为成交量支撑区域 \( \mathrm{VolumeSopportArea} \)；
+
+3. 逐步计算 \( \mathrm{VSP} \) 周围的成交量累计值（价格由近及远，成交量由大及小），该累计值与全天成交量总和的比值超 50\% 的最小区域，即为成交量支撑区域 \( \mathrm{VSA} \)，该区域上限价格为 \( \mathrm{VSA\_High} \)，下限价格为 \( \mathrm{VSA\_Low} \)；
+
+4. 计算上限价格 \( \mathrm{VSA\_High} \) 与当日最低价之间的差异即得到 \( \mathrm{vsa\_high2min} \)：
+
+\subsection{说明}
+若上限价格与当日最低价越接近，说明成交量支撑区域越接近日内的低价区域，则该股日内的成交量分布越接近于 b 型成交量分布，预期下跌；当个股价格出现急剧下跌然后盘整，或者短期急剧上涨但整体处于低位时，成交量分布将出现 b 型曲线。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑兆森. 2022. 成交量分布中的 Alpha. 兴业证券.
+\end{enumerate}
+
+\section{凸显性收益(高频因子-动量反转类)}
+
+\subsection{因子定义}
+计算股票日收益率的凸显性系数 \( \sigma \)，\( r_{i,s} \) 为股票日收益率，\( \overline{r_s} \) 可选当日至全市场收益率中位数：
+\begin{equation}
+    \sigma(r_{i,s}, \overline{r_s}) = \frac{|r_{i,s} - \overline{r_s}|}{|r_{i,s}| + |\overline{r_s}| + \theta}
+\end{equation}
+
+根据计算的凸显性系数，在时序上对个股当月的日收益率进行排序，排名记作 \( k_{i,s} \)，令凸显性最强的排名等于 1，计算凸显性权重 \( \omega_{i,s} \)：
+\begin{equation}
+    \omega_{i,s} = \frac{\delta^{k_{i,s}}}{\sum_{s'} \delta^{k_{i,s'}} \times \pi_{s'}}
+\end{equation}
+
+计算股票收益率序列 \( r_{i,s} \) 和权重序列 \( \omega_{i,s} \) 的协方差即得到凸显性收益 \( \mathrm{STR} \)：
+\begin{equation}
+    \mathrm{STR}_i = \mathrm{cov}[\omega_{i,s}, r_{i,s}]
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 参数 \( \theta \) 用于控制零收益的影响，可取 0.1；
+    \item ② 参数 \( \delta \) 用于衡量投资者认知能力，取值范围在 (0,1] 之间，取值越小，投资者越关注凸显收益，可取 0.7；
+    \item ③ \( \pi_{s'} \) 为日收益率发生的客观概率，可取窗口长度的倒数。
+\end{itemize}
+
+\subsection{说明}
+凸显理论认为，投资者的注意力更容易被具有“凸显性”的收益所吸引；当股票 \( \mathrm{STR} \) 值较高时，其历史最高收益具有较高的凸显性，此时投资者过度关注其上升潜力，严重高估股价；\( \mathrm{STR} \) 值较低时，历史最低收益具有明显凸显性时，此时投资者过度强调其下行风险，严重低估股价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Bordalo, P., Gennaioli, N., \& Shleifer, A. (2012). \textit{Salience Theory of Choice under Risk}. Quarterly Journal of Economics, 127(3), 1243-1285.
+    \item 任健, 李元勋, 李世杰. 2022. 行为金融新视角——“凸显性收益”因子 STR. 招商证券.
+\end{enumerate}
+
+\section{修正后的年度搜索比例(图谱网络-动量溢出)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    f_{ij}^t = \frac{\sum_{d=1}^{365} (\text{Daily Searches for } j \text{ after } i)_d}{\sum_{d=1}^{365} (\text{Daily Searches for } i \text{ and then any firm } j \neq i)_d}
+\end{equation}
+\begin{equation}
+    \hat{f}_{ij}^t = \frac{f_{ij}^t \equiv{\frac{ithenj}{i}}}{\frac{!ithenj}{!i}}
+\end{equation}
+\begin{equation}
+    R_{i,t} = \frac{\sum_{j=1}^{N} \hat{f}_{ij}^t \times \mathrm{Ret}_j}{\sum_{j=1}^{N} \hat{f}_{ij}^t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( f_{ij}^t \) 为年度搜索比，\( \mathrm{Ret}_j \) 为月度涨跌幅；
+    \item ② 原始数据为从美国证券交易委员会（SEC）的 EDGAR 网站上获取的用户对公司信息的搜索流量；
+    \item ③ 只保留同一天内至少搜索了两个不同公司（基于 CIK 编号识别的不同公司）的用户记录；
+    \item ④ 剔除同一天内，用户对同一公司的连续搜索，对每个公司的搜索只计数一次；
+    \item ⑤ 限制每个用户每天下载的独特公司数量不超过 50 家，以减少批量下载者的影响；
+    \item ⑥ 仅考虑特定类型文件的页面浏览量，如 10-K、10-Q、8-K、14-A、S-1 等报告。
+\end{itemize}
+
+\subsection{说明}
+修正后的年度搜索比例中的分母表示：在没有搜索基础公司的情况下，紧接着搜索公司 \( j \) 的用户总数与没有搜索基础公司 \( i \) 的用户总数之比（在没有搜索公司 \( i \) 的情况下，公司 \( j \) 出现在其他任何公司的搜索序列中的平均概率）；目的是为了消除由于公司 \( j \) 自身受欢迎程度导致的偏差，从而更准确地反映公司 \( i \) 和 \( j \) 之间的经济相关性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Lee, Charles M. C., Ma, Paul, \& Wang, Charles C. Y. (2015). \textit{Search-Based Peer Firms: Aggregating Investor Perceptions Through Internet Co-Searches}. Journal of Financial Economics, 116(2), 410-431.
+\end{enumerate}
+
+\section{大的上下行跳跃波动不对称性(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{SRVLJ}_t = \mathrm{RVLJP}_{\gamma,t} - \mathrm{RVLJN}_{\gamma,t}
+\end{equation}
+\begin{equation}
+    \mathrm{RVLJN}_{\gamma,t} = \min\left(\mathrm{RVJN}_t, \sum_{i=1}^n r_{i,t}^2 \mathrm{I}_{\{r_{i,t} < -\gamma\}}\right)
+\end{equation}
+\begin{equation}
+    \mathrm{RVLJP}_{\gamma,t} = \min\left(\mathrm{RVJP}_t, \sum_{i=1}^n r_{i,t}^2 \mathrm{I}_{\{r_{i,t} > \gamma\}}\right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{RVLJP}_{\gamma,t} \) 和 \( \mathrm{RVLJN}_{\gamma,t} \) 分别为交易日 \( t \) 的大的上行跳跃波动率和大的下行跳跃波动率，计算细节可参考相关日历页。
+\end{itemize}
+
+\subsection{说明}
+跳跃波动率可以根据阈值进一步分解为大、小两个部分，即用于区分信息冲击导致的大跳跃波动和无法用信息冲击解释的小跳跃波动；大的上下行跳跃波动不对称性主要对应大跳跃波动的不对称性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Duong, D., \& Swanson, N. R. (2015). \textit{Empirical evidence on the importance of aggregation, asymmetry, and jumps for volatility prediction}. Journal of Econometrics, 187, 606-621.
+    \item Bo Yu, Bruce Mizrach, Norman R. Swanson. (2020). \textit{New Evidence of the Marginal Predictive Content of Small and Large Jumps in the Cross-Section}. Econometrics, MDPI, 8(2), 1-52.
+\end{enumerate}
+
+\section{有效深度(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{effective\_depth} = \min(\mathrm{av}_1, \mathrm{bv}_1)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{av}_1 \) 和 \( \mathrm{bv}_1 \) 分别为盘口委托快照数据的卖一量和买一量，若挂单量为0，则令盘口深度为0；
+    \item ② 可对上述因子日内序列求均值得到日度因子值，再进行20个交易日指数移动平均得到月度因子值，也可计算标准差。
+\end{itemize}
+
+\subsection{说明}
+通过取最优买卖单挂单量的最小者可以衡量市场实际的有效深度，因子取值越大，市场有效深度越大，市场流动性越高，与未来收益负相关。也可对日内该因子序列求标准差，衡量其在当日均匀程度，与流动性负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 胡骏聪等. 2021. 高频视角下的微观流动性与波动性. 中金公司.
+\end{enumerate}
+
+\section{CSAD 模型（基于板块中地位）(行为金融因子-羊群效应)}
+
+\subsection{因子定义}
+
+1. 每个月末提取当前可交易股票过去 120 个交易日的涨跌幅数据，计算股票 \( S_* \) 和其他股票（不活跃交易日不超过 20 天）之间日涨跌幅相关系数；
+
+2. 选取相关系数最大的 9 只股票，连同 \( S_* \) 一起构成一个板块：
+   \begin{equation}
+       S_i \ (i = 1, \dots, 10)
+   \end{equation}
+
+3. 以 \( S_* \) 为中心，计算板块过去 120 个交易日的横截面绝对偏差 \( \mathrm{CSAD} \)：
+   \begin{equation}
+       \mathrm{CSAD}_t = \frac{1}{10} \sum_{i=1}^{10} |r_{it} - r_{*t}|
+   \end{equation}
+
+4. 对 CSAD 进行时序标准化，并计算过去 20 个交易日的均值作为羊群效应因子：
+   \begin{equation}
+       Z_{jt} = \frac{\mathrm{CSAD}_{jt} - \mu_{\mathrm{CSAD}_j}}{\sigma_{\mathrm{CSAD}_j}}
+   \end{equation}
+   \begin{equation}
+       f_{jt} = -\frac{1}{20} \sum_{k=1}^{20} Z_{j,t-k+1}
+   \end{equation}
+
+\subsection{说明}
+CSAD 利用股票收益在横截面的分散度来衡量市场羊群效应的强弱；为了让因子对个股有选股能力，将与个股走势相近的股票组成“小型板块”，借助小板块上的羊群效应的强弱程度来近似反映该股票近期关注度的变化。因子值越大，中心股票收益越接近中位数，板块近期的 CSAD 越小（即板块羊群效应越强），所在板块受关注程度提升越明显，未来收益越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Chang, E. C., Cheng, J., \& Khorana, A. (2000). \textit{An Examination of Herd Behavior in Equity Markets: An International Perspective}. Journal of Banking \& Finance, 24(10), 1651-1679.
+    \item 丁鲁明, 陈元鹏. 2019. 基于市场羊群效应的股票 alpha 研究. 中信出版社.
+\end{enumerate}
+\end{document}

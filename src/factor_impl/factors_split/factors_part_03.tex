@@ -1,0 +1,271 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{相似反转（量价因子改进）}
+
+\subsection{因子定义}
+1. 滚动计算历史收盘序列（长度为 120 个交易日）中任意时刻 \( T \) 起连续 \( \mathrm{RW}=6 \) 日序列同当前时刻 \( t \) 的股票收盘价序列的皮尔逊相关系数：
+\begin{equation}
+    \mathrm{Correlation}_{i,T} = \rho_{\mathrm{Sequence}_{i,t}, \mathrm{Temp  History}_{i,T}}
+\end{equation}
+\begin{equation}
+    \mathrm{Sequence}_{i},t = [\mathrm{Close}_{i,t-\mathrm{RW}+1}, \mathrm{Close}_{i,t-\mathrm{RW}+2}, \dots, \mathrm{Close}_{i,t}]
+\end{equation}
+\begin{equation}
+    \mathrm{Temp  History}_{i,T} = [\mathrm{Close}_{i,T}, \mathrm{Close}_{i,T+1}, \dots, \mathrm{Close}_{i,T+\mathrm{RW}-1}]
+\end{equation}
+
+2. 设定相关系数的阈值 \( \mathrm{Threshold}=0.4 \) 筛选出走势相似度较高的时刻：
+\begin{equation}
+    \{ \tau \mid |\mathrm{Correlation}_{i,\tau}| \geq \mathrm{Threshold} \}
+\end{equation}
+
+3. 通过指数衰减法，计算历史出现相似走势后既定持仓时间内股票累计超额收益率的加权平均值即为相似反转因子：
+\begin{equation}
+    \mathrm{SimilarReverse}_{i,t} = -\sum_{k=1}^n \omega_{i,k} * \mathrm{ER}_{i,\tau_k}
+\end{equation}
+\begin{equation}
+    \mathrm{ER}_{i,\tau} = \prod_{k=\tau+\mathrm{RW}}^{\tau+\mathrm{RW}+\mathrm{HoldingTime}-1} (1 + \mathrm{ER}_{i,k}) - 1, \quad 1 \leq \mathrm{HoldingTime} \leq \mathrm{RW}
+\end{equation}
+\begin{equation}
+    \omega_{i,k} = \frac{e^{-\lambda k}}{\sum_{k=1}^n e^{-\lambda k}}, \quad \lambda = \frac{\ln(2)}{H}
+\end{equation}
+
+\subsection{说明}
+相似反转因子即为多次相似走势后在既定持仓时间内股票累计超额收益的平均值，历史中出现相似走势后股票一段时间内的平均超额收益率越高，未来持有同样时间的超额收益率就越低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 郑琳琳, 王天业. 2024. 基于历史相似走势的因子选股研究. 西南证券.
+\end{enumerate}
+
+\section{价格弹性（高频因子-流动性类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{resiliency} = \frac{\mathrm{high} - \mathrm{low}}{\mathrm{turnover}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{high}\)、\(\mathrm{low}\)、\(\mathrm{turnover}\) 分别 tick 数据中的最高价、最低价和成交额；
+    \item ② 可对上述因子日内序列求均值得到日度因子值，并计算近期的变化趋势：（20 个交易日指数移动平均 - 120 个交易日移动平均）/ 120 个交易日的标准差。
+\end{itemize}
+
+\subsection{说明}
+价格弹性反映了单位成交额下股价的波动幅度，与未来收益正相关，弹性越大说明单位成交额对价格冲击越大，市场流动性越弱，而流动性较低的个股未来收益表现相对较好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 胡骥驼等. 2021. 高频视角下的微观流动性与波动性. 中金公司.
+\end{enumerate}
+
+\section{主力波动率（高频因子-波动跳跃类）}
+
+\subsection{因子定义}
+
+1. 按照日内分钟频收益率方向变化的时刻（用前一分钟收盘价与本分钟收盘价判断），将日内收益率序列合并为上涨或下跌趋势段 \([t_i, t_j]\)；
+
+2. 对每一分钟判断当前时刻成交量 \(V_1\) 与上一个趋势段的最后一分钟成交量的相对大小 \(V_0\)：若 \(V_0 < V_1\)，则为成交量放量；\(V_0 \geq V_1\)，则为成交量缩量；结合收益率涨跌情况，可以将日内每分钟行情划分为：放量上涨、缩量上涨、放量下跌、缩量下跌；
+
+3. 对每个趋势段 \([t_i, t_j]\) 内的每一分钟 \(t_k (i < k \leq j)\)，比较其对应成交量 \(V_{t_k}\) 与区间 \([t_i, t_j]\) 内最大成交量 \(V_{\max}\) 和最小成交量 \(V_{\min}\)：若 \(V_{t_k} < V_{\min}\)，则为成交量缩量；若 \(V_{t_k} > V_{\min}\)，则为成交量放量；结合收益率涨跌情况，可以将日内每分钟行情进一步划分为：放量持续上涨、缩量持续上涨、放量持续下跌、缩量持续下跌；
+
+4. 对于“放量上涨”、“放量持续上涨”、“放量下跌”、“放量持续下跌”4种技术形态，计算每种技术形态对应的时段收益率作为该形态下的日内收益率，对过去20个日度收益率先做截面标准化，取其绝对值，再做截面标准化，然后计算绝对值调整后的过去20日收益率的标准差，由此得到4种技术形态下的波动率因子，再将这4个因子等权合成即得到主力波动率因子。
+
+\subsection{说明}
+上述“放量上涨”和“放量持续上涨”状态可捕捉主力拉升行为，“放量下跌”和“放量持续下跌”状态捕捉主力出货行为，由此构建的主力波动率刻画了主力资金行为对股价影响的波动程度，波动程度越大，越有可能导致股价过度反应，未来收益率更低。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 叶尔乐.2024.基于分钟K线的“主力波动率”构造及应用.民生证券
+\end{enumerate}
+
+\section{跌幅最大时刻笔均成交金额（高频因子-成交分布类）}
+
+\subsection{因子定义}
+
+1. 将日内 240 个 1 分钟数据集合标记为 \( T = \{t_1, t_2, \dots, t_{240}\} \)，判断股票 i 的每分钟涨跌幅，将跌幅最大的 10\% 时刻标记为 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \)；
+
+2. 对跌幅最大时刻进行汇总，根据其成交额 \( \mathrm{Amt} \) 之和除以成交笔数 \( \mathrm{DealNum} \) 之和，构造跌幅最大时刻的笔均成交金额 \( \mathrm{ATD}_{\mathrm{DownTop10\%}} \)：
+\begin{equation}
+    \mathrm{ATD}_{\mathrm{DownTop10\%}} = \frac{\sum_{t \in P} \mathrm{Amt}_t}{\sum_{t \in P} \mathrm{DealNum}_t}
+\end{equation}
+
+3. 同理，将全天的成交金额除以全天的成交笔数，得到全天的笔均成交金额 \( \mathrm{ATD}_T \)：
+\begin{equation}
+    \mathrm{ATD}_T = \frac{\sum_{t \in T} \mathrm{Amt}_t}{\sum_{t \in T} \mathrm{DealNum}_t}
+\end{equation}
+
+4. 将跌幅最大时刻的笔均成交金额除以全天的笔均成交金额，即得到去量纲化后的跌幅最大时刻标准化笔均成交金额因子 \( \mathrm{SATD}_{\mathrm{DownTop10\%}} \)：
+\begin{equation}
+    \mathrm{SATD}_{\mathrm{DownTop10\%}} = \frac{\mathrm{ATD}_{\mathrm{DownTop10\%}}}{\mathrm{ATD}_T}
+\end{equation}
+
+\subsection{说明}
+笔均成交额类因子通过汇总“特殊的、具有较多信息含量”时刻的成交金额情况来刻画主力资金的行为动向；笔均成交金额越大，说明该特殊时间内资金优势越明显，其属于主力资金的可能性越大。“跌幅最大时刻”除了考虑股价涨跌方向，还考虑了涨跌程度，能进一步追踪主力资金抄底意愿强度（跌幅越大，抄底意愿越强），比只考虑下跌时刻的相关性因子表现更优。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣鹏, 张宇. 2025. 日内特殊时刻蕴含的主力资金 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{知情主卖占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+使用股票过去 \( T=20 \) 个交易日的分钟逐笔成交数据进行如下时序回归，得到回归残差 \(\varepsilon_{ij}\) 即为股票预期外收益：
+\begin{equation}
+    R_{i,j,n} = \gamma_0 + \sum_{k=1}^4 \gamma_{1,k} D_{k,i,j,n}^{weekday} + \sum_{k=1}^3 \gamma_{2,k} D_{k,i,j,n}^{period} + \gamma_{3,1} R_{i,j-1,n} + \varepsilon_{i,j,n}
+\end{equation}
+
+将预期收益为正的分钟时刻的投资者主动卖出行为定义为知情主卖，对这些分钟时刻的主卖成交额求和得到知情主卖额，计算知情主卖占比：
+\begin{equation}
+    \text{知情主卖占比} = \frac{1}{T} \sum_{n=t}^{n=t-T+1} \frac { \sum_{j=9:30}^{14:56} \text{知情主卖成交额}_{i,j,n} } {\left( \sum_{j=9:30}^{14:56} \text{成交额}_{i,j,n} )}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( R_{i,j,n} \) 为股票 \( i \) 在 \( n \) 日第 \( j \) 分钟的收益率，\( R_{i,j-1,n} \) 为收盘滞后项；
+    \item ② \( D_{i,j,n}^{\mathrm{weekday}} \)，\( k=1,2,3,4 \) 为虚拟变量，表示星期一至星期四；
+    \item ③ \( D_{i,j,n}^{\mathrm{Period}} \)，\( k=1,2,3 \) 为时间段虚拟变量，表示开盘后 30 分钟、盘中时段、收盘前 30 分钟；
+    \item ④ 基于逐笔成交数据中的 BS 标志将逐笔成交数据合成为分钟级别的主动买卖金额，\( B \) 为主动买入，\( S \) 为主动卖出。
+\end{itemize}
+
+\subsection{说明}
+可以利用对知情交易的判断，将主卖进行过滤，得到知情主卖；测试发现，知情主卖占比越高，股票未来收益越差，因为具有信息优势的知情交易者不看好股票未来表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2020. 知情交易与主卖主卖. 海通证券.
+\end{enumerate}
+
+\section{量峰加权价格分位点(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+\begin{enumerate}
+    \item 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划分为“喷发成交量”，低于 1 倍标准差划分为“温和成交量”。
+    \item 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”。
+    \item 将“日内最高价、日内最低价、昨日收盘价”三者的最高值与最低值作为【昨收、今收】区间的价格高低位，并计算每日量峰成交量加权价格的相对分位点，20 日的分位点均值即为量峰加权价格分位点因子；
+    \item 需对量峰加权价格分位点因子做 20 日反转因子的中性化处理。
+\end{enumerate}
+
+\subsection{说明}
+量峰加权价格分位点因子衡量了知情交易价格的相对水平，因子值越高，知情交易者情绪越乐观，未来收益也可能越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 樊建裕, 王志强. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+
+\section{三小将-撤单率（高频因子-流动性类）}
+
+\subsection{因子定义}
+基于逐笔委托数据，将早盘集合竞价阶段（只取9:15至9:20委托订单可撤销的阶段）的撤单数据划分为成交、全撤、部撤和废单四类；只对卖方撤单数据计算全撤、部撤和废单三类撤单率指标，将其等权合成得到三小将-撤单率因子：
+\begin{equation}
+    \text{撤单率} = \frac{\text{撤单量}}{\text{自由流通股本}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item 可对计算的撤单率指标计算20日均值进行低频化处理。
+\end{itemize}
+
+\subsection{说明}
+撤单率因子取值越高，股票当天的撤单越多，交易越不活跃（成交不迅速、买卖价差大），而市场会给予低流动性标的更高的收益补偿，是一个正向因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 苏良. 2024. 订单流系列：撤单行为规律初探. 开源证券.
+\end{enumerate}
+
+\section{跌幅时间重心偏离（高频因子-收益分布类）}
+
+\subsection{因子定义}
+基于个股上涨和下跌的 1 分钟收益率序列，逐日统计幅度和时间信息，记为：
+\begin{itemize}
+    \item \textbf{上涨幅度}: \( R_u = [r_1^u, r_2^u, \cdots, r_n^u] \)
+    \item \textbf{上涨时间}: \( U = [u_1, u_2, \cdots, u_n] \)
+    \item \textbf{下跌幅度}: \( R_d = [r_1^d, r_2^d, \cdots, r_m^d] \)
+    \item \textbf{下跌时间}: \( D = [d_1, d_2, \cdots, d_m] \)
+\end{itemize}
+
+分别计算日频指标：
+\begin{equation}
+    \text{涨幅时间重心}: G_u = \frac{U R_u^T}{\|R_u\|_1}
+\end{equation}
+\begin{equation}
+    \text{跌幅时间重心}: G_d = \frac{D R_d^T}{\|R_d\|_1}
+\end{equation}
+
+通过横截面回归，构造“时间差”指标，并取 \( N=20 \) 日均值作为因子：
+\begin{equation}
+    G_d = \alpha + \beta G_u + \varepsilon
+\end{equation}
+\begin{equation}
+    \mathrm{TGD} = \frac{1}{N} \sum_{i=1}^N \varepsilon
+\end{equation}
+
+\subsection{说明}
+涨、跌时间重心通过分钟涨跌幅对修正的时间截加权平均得到，反映了股价在日内交易中上涨和下跌的位置，捕捉了股票的交易行为特征，两者的相对位置（时间差）是一个有效的 Alpha 因子，与未来收益正相关；“时间差 Alpha”是收益率结构和“低波效应”的综合。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 苏良, 盛少成. 2022. 日内分钟收益率的时序特征：逻辑讨论与因子增强. 开源证券.
+\end{enumerate}
+
+\section{每笔成交量筛选的局部反转（高频因子-动量反转类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{sum}\left( \left\{ \mathrm{ret}_i \middle| q_j(\mathrm{pvol}_i) < \mathrm{pvol}_i < q_{j+1}(\mathrm{pvol}_i) \right\} \right)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \(\mathrm{ret}_i\) 和 \(\mathrm{pvol}_i\) 分别为每个时间段的收益率和每笔成交量=成交量/成交笔数，时间段为分钟频率；
+    \item ② \(q()\) 为分位数函数，将每笔成交量进行排列，取每笔成交量最大组（位于80\%-100\%区间）对应时间段的收益率计算反转因子。
+\end{itemize}
+
+\subsection{说明}
+股价变动在每笔成交量较小的时间段表现出动量效应，而每笔成交量较大的时间段表现出反转效应，所以可以利用每笔成交量对反转因子进行“提纯”，即对于过去20个交易日的所有时间段，将每笔成交量较小、表现出动量效应的时间段提取出来，剩余的每笔成交量最大的时间段内反转效应最为纯净，收益能力也较“提纯”前的传统反转因子大幅增强。每笔成交量实际同时衡量了成交活跃程度以及价格的变动，而成交活跃度和价格的变动共同反映了交易异常活跃的程度，交易异常活跃的程度是市场过度反应导致价格变动产生反转效应的来源。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑起. 2021. 高频因子（十）：量价关系中的反转微观结果. 长江证券.
+\end{enumerate}
+
+\section{量岭间隔偏度（高频因子-成交分布类）}
+
+\subsection{因子定义}
+
+
+① 对过去 20 日同时点成交量按照 1 倍标准差的标准划分，高于 1 倍标准差划分为“喷发成交量”，低于 1 倍标准差划分为“温和成交量”；
+
+② 对“喷发成交量”进一步按照连续与否划分：若当前分钟为“喷发成交量”，且前后 1 分钟均为“温和成交量”，则划为“孤立喷发成交量”，称为“量峰”；若当前分钟为“喷发成交量”，且前后 1 分钟也存在“喷发成交量”，则划为“连续喷发成交量”，称为“量岭”；将“温和成交量”称为“量谷”。
+
+③ 对过去 20 日同日前后两个量岭之间的时间间隔分布，计算其偏度，即为量岭间隔偏度因子。
+
+\subsection{变量定义}
+\begin{itemize}
+    \item 此外，还可统计两个量岭之间的时间间隔分布的标准差、峰度等指标，即可得到量岭间隔标准差因子、量岭间隔峰度因子。
+\end{itemize}
+
+\subsection{说明}
+量岭间隔偏度因子衡量了个人投资者交易的时间间隔的分布情况，个人投资者通常是跟风交易，交易频率高，间隔时间短，易过度交易，所以时间间隔分布的异常值相对较少，且主要集中在左侧的短间隔区域，与未来收益负相关。（报告中测试发现，量岭间隔峰度因子也为负向因子，但量岭间隔标准差因子为正向因子。）
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志强. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+\end{document}

@@ -1,0 +1,238 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{关注事件(行为金融因子-投资者注意力)}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{涨跌停事件数量} = \text{每月个股发生涨停、跌停的次数}
+\end{equation}
+\begin{equation}
+    \text{龙虎榜事件数量} = \text{每月个股登上龙虎榜的次数}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 可以每期买入上述涨跌停事件或龙虎榜事件排名前 50\% 的股票构建组合，检验关注事件的选股能力。
+\end{itemize}
+
+\subsection{说明}
+涨跌停股票、龙虎榜股票通常容易引起市场的广泛关注度，这些关注事件也可以作为投资者关注度的代理指标。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐. 2024. 投资者有限关注及注意力捕捉与溢出. 中信建投.
+\end{enumerate}
+
+\section{成交额占比熵(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{成交额占比熵} = H(\frac{amount_1}{AMOUNT},\frac{amount_2}{AMOUNT},\cdots,\frac{amount_N}{AMOUNT})
+\end{equation}
+\begin{equation}
+    H(p_1, p_2, \dots, p_n) = -\sum_{i=1}^N p_i \ln(p_i)
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{amount}_t \) 为 \( t \) 时间段的成交额；
+    \item ② \(\displaystyle \mathrm{AMOUNT} = \sum_{t=1}^T \mathrm{amount}_t\) 为整个时间段总成交额；
+    \item ③ \( T \) 为划分时间段的个数，如日内 5 分钟频率的 \( T=48 \)。
+\end{itemize}
+
+\subsection{说明}
+以成交额占比作为每一个时间段状态的发生概率，以熵的定义刻画成交的混乱程度，即得到成交额占比熵因子；当因子值越小时，体系越混乱，成交额占比彼此之间存在较大分歧，成交在价格高位较为密集，易造成股价的高估。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 覃川桃, 郑超. 2020. 高频因子（八）：高位成交因子——从量价匹配说起. 长江证券.
+\end{enumerate}
+
+\section{主力交易强度(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{TS} = \mathrm{RankCorr}(A_{\mathrm{order}}, A_{\mathrm{minute}})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( A_{\mathrm{order}} \) 为某只股票某个交易内的分钟单笔成交金额序列；
+    \item ② \( A_{\mathrm{minute}} \) 为某只股票某个交易内的分钟成交金额序列；
+    \item ③ 滚动 20 个交易日计算 \( \mathrm{TS} \) 指标的均值，即主力交易强度因子 \( \mathrm{MTS} \)。
+\end{itemize}
+
+\subsection{说明}
+单笔成交金额与成交额之间的相关性强弱，描述的是代表主力的“相对大单”对分钟成交额的影响。从资金行为学的角度来看，单笔成交金额与成交额的相关性越强，主力资金主导成交节奏的能力也越强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 姚建榕, 苏良. 2022. 高频因子：分钟单笔金额序列中的主力行为刻画. 开源证券.
+\end{enumerate}
+
+\section{复杂公司动量（行为金融因子-筹码分布）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{COMRET}_{i,t} = \frac{\sum_{j \in \mathrm{Ind}_i} W_{i,j,t} \mathrm{RET}_{j,t}}{\sum_{j \in \mathrm{Ind}_i} W_{i,j,t}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( W_{i,j,t} = \frac{\mathrm{Sales}_{i,j,t}}{\mathrm{Sales}_{i,t}} \) 为 \( j \) 行业营业收入在 \( i \) 公司营业收入中的占比；
+    \item ② \( \mathrm{RET}_{j,t} \) 为只从事 \( j \) 行业的关联公司（有相同业务）在 \( t \) 时刻的月度收益。
+\end{itemize}
+
+\subsection{说明}
+多元业务公司的信息处理复杂性相对较高，投资者可能无法及时对这些信息做出反应，这些复杂信息也就不容易及时反映在股价上；可以利用业务单一公司的股价表现来预测复杂公司的股价表现。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Cohen, L., \& Lou, D. (2012). \textit{Complicated firms}. Journal of Financial Economics, 104(2), 383-400.
+\end{enumerate}
+
+\section{高频上行波动占比（高频因子-波动跳跃类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{高频上行波动占比} = \frac{\sum_t(r_i^tI_{\{r_i^t>0\}})^2}{\sum_t(t_i^t)^2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( r_{i}^t \) 为分钟频率下的股票收益序列，如1分钟、5分钟、10分钟等；
+    \item ② 在任意选股时刻，因子值为前 \( N \) 日指标的均值，如月度选股，计算因子值时使用的是股票过去20个交易日的均值。
+\end{itemize}
+
+\subsection{说明}
+股票高频收益的上行波动衡量了股票价格拉升的特征。假设有两只股票在过去一段时间有着相同的涨幅，其中一只股票的涨幅由持续稳定的小幅上涨累计带动，而另一只股票的上涨源自于股票短期的大幅拉升，那么后者更有可能在收益上出现反转，而后者在因子值上也会体现出较高的上行波动率。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿, 袁林青. 2017. 高频因子之已实现波动分解. 海通证券.
+\end{enumerate}
+
+\section{开盘后净委买增额占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \text{开盘后净委买增额占比}=\frac{1}{T} \sum_{n=t}^{t-T+1} \frac{\sum_{j \in 9:30-10:00} \text{净委买增额}_{i,j,n}}{ \text{成交额}_{i,j,n}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 盘口委托快照数据包含买一至买十的委买量、卖一至卖十的委卖量等指标；
+    \item ② 委托买单增加量为日内 \( t \) 至 \( t+1 \) 时刻各档的委买变化量之和，委托卖单增加量同理；
+    \item ③ 一般用前 1 档位数据即可；使用的档位数量越多，因子的选股能力越弱；
+    \item ④ \( i, j, n \) 分别表示第 \( i \) 只股票在第 \( n \) 个交易日内的第 \( j \) 分钟的数据；
+    \item ⑤ 月度选股下，\( T=20 \) 个交易日；周度选股下，\( T=5 \) 个交易日。
+\end{itemize}
+
+\subsection{说明}
+刻画了投资者的买入意愿，委买量的增加代表了投资者买入意愿的增强，委卖量的增加代表了投资者卖出意愿的增强；开盘后 30 分钟的数据更是包含了投资者对于前一天收盘后股票信息的集中反馈，集中反馈越正面，体现出的买入意愿越强，股票未来的超额收益表现越好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 冯佳睿等. 2020. 高频因子的现实与幻想. 海通证券.
+\end{enumerate}
+
+\section{CSAD 模型(行为金融因子-羊群效应)}
+
+\subsection{因子定义}
+利用个股收益 \( r_i \) 和市场收益 \( R_m \)，计算股票收益的横截面绝对偏差：
+\begin{equation}
+    \mathrm{CSAD} = \frac{\sum_{i=1}^N |r_i - R_m|}{N}
+\end{equation}
+
+以 \( \mathrm{CSAD} \) 为 \( y \)，以市场收益绝对值和市场收益平方为 \( x \)，进行如下时序回归：
+\begin{equation}
+    \mathrm{CSAD} = \alpha + \beta_1 |R_{mt}| + \beta_2 |R_{mt}|^2 + \varepsilon
+\end{equation}
+
+\subsection{说明}
+CSAD 模型对羊群效应的检验主要基于时序回归上市场收益平方项前回归系数正负及显著性；当 \( \beta_2 \) 显著小于 0 时，说明市场极端上涨或下跌时，CSAD 取值明显下降，投资者的投资行为越来越一致，市场上羊群效应越明显；当 \( \beta_1 \) 和 \( \beta_2 \) 都显著小于 0 时，说明市场羊群效应非常显著。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Chang, E. C., Cheng, J., \& Khorana, A. (2000). \textit{An Examination of Herd Behavior in Equity Markets: An International Perspective}. Journal of Banking \& Finance, 24(10), 1651-1679.
+\end{enumerate}
+
+\section{买盘深度（高频因子-流动性类）}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{bid\_depth} = \sum \left| \frac{\mathrm{bv}_i \times \mathrm{mid}_{price}}{\mathrm{b}_i - \mathrm{last}_{mid} + \epsilon} \right|
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 使用五档买单与当下时刻中间价的价差的倒数对买单的数量进行加权得到买盘深度；
+    \item ② 当单边所有买单档位为空时，令市场深度为 0；
+    \item ③ 可对上述因子日内序列求均值得到日度因子值，再进行 20 个交易日指数移动平均得到月度因子值。
+\end{itemize}
+
+\subsection{说明}
+买盘深度统计了买单的挂单量情况，反映了买单盘口深度，五档买单中，对报价离中间价越远的买单的买量给予越小的权重；与未来收益负相关，因子取值越大，挂单量越多，盘口深度越大，流动性越高。也可对日内该因子序列求标准差，衡量其在当日均匀程度，与流动性负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 胡骏骅等. 2021. 高频视角下的微观流动性与波动性. 中金公司.
+\end{enumerate}
+
+\section{隔夜跳空(高频因子-动量反转类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{absRet}_{\mathrm{night}} = \sum_{t=1}^{20} \left| ln (\frac{\mathrm{Open}_t}{\mathrm{Close}_{t-1}}  )\right|
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Open}_t \) 和 \( \mathrm{Close}_{t-1} \) 分别为 \( t \) 交易日的开盘价和上一日收盘价。
+\end{itemize}
+
+\subsection{说明}
+隔夜跳空因子是隔夜收益率绝对值的累加（传统隔夜收益有弱动量效应，分组收益呈一定抛物线型），代表过去一段时间内隔夜累计跳空的幅度，与未来收益负相关。隔夜累计跳空幅度越大，未来收益越差，隔夜平开的股票未来收益越好。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 朱定豪. 2020. 昼夜分离：隔夜跳空与日内反转选股因子. 华安证券.
+\end{enumerate}
+
+\section{股票网络中心度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{CC}_{i,t} = \mathrm{SCC}_{i,t} \times 0.5 + \mathrm{TCC}_{i,t} \times 0.5
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{SCC}_{i,t} \) 为空间网络相对中心度，计算逻辑见相关日历页；
+    \item ② \( \mathrm{TCC}_{i,t} \) 为时间网络相对中心度，计算逻辑见相关日历页。
+\end{itemize}
+
+\subsection{说明}
+\( \mathrm{CC} \) 因子同时衡量了股票在网络中所处位置的中心程度和位置随时间推移的稳定程度，因子值越大，股票的网络中心度越高。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张自力, 闫红蕾, 张楠. 2020. 股票网络、系统性风险与股票定价. 经济学, 1, 329-350.
+    \item 曹春晓, 杨国平. 2021. 股票网络与网络中心度因子研究. 华西证券.
+\end{enumerate}
+\end{document}

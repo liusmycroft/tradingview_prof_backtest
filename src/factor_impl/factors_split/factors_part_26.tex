@@ -1,0 +1,298 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{异常高波动下的收益波动比(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+
+1. 对于股票 \( i \)，计算 \( n \) 日内第 \( t \) 分钟的“更优波动率”，即对第 \( t-4, t-3, t-2, t-1, t \) 分钟的开盘价、最高价、最低价和收盘价，共 20 个价格数据求标准差，再除以这 20 个价格数据的均值，最后对该比值取平方：
+\begin{equation}
+    \mathrm{BetterVol}_{i,t} = \left( \frac{\mathrm{std}(P_{t-4}, P_{t-3}, P_{t-2}, P_{t-1}, P_t)}{\mathrm{mean}(P_{t-4}, P_{t-3}, P_{t-2}, P_{t-1}, P_t)} \right)^2
+\end{equation}
+
+2. 计算 \( t \) 分钟的收益波动比，即 \( t \) 分钟收益率 / \( t \) 分钟“更优波动率”：
+\begin{equation}
+    \mathrm{RVR}_{i,t} = \frac{r_{i,t}}{\mathrm{BetterVol}_{i,t}}
+\end{equation}
+
+3. 计算 \( n \) 日“更优波动率”的均值 \( \mu \) 和标准差 \( \sigma \)，将日内“更优波动率”大于等于 \( \mu + \sigma \) 的时刻定义为当日波动率异常高时刻；
+
+4. 对当日波动率异常高时刻的收益波动比序列与“更优波动率”序列求协方差，即为日度“勇攀高峰”因子：
+\begin{equation}
+    \mathrm{PeakClimber}_{i,d} = \mathrm{cov}(\mathrm{RVR}_{i,t}, \mathrm{BetterVol}_{i,t}), \quad t \in \{ \text{波动率异常高时刻} \}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算因子需剔除开盘和收盘数据，仅考虑日内分钟频数据；
+    \item ② 每月末可对最近 20 天的上述因子求均值和标准差并将两者等权合并，即得到月度“勇攀高峰”因子。
+\end{itemize}
+
+\subsection{说明}
+“勇攀高峰”因子衡量了股价对异常高波动提供的风险补偿程度，与未来收益正相关；那些能对异常高波动及时提供风险补偿的股票，往往是持续利好的实力股，此时若能克服对异常高波动的风险厌恶，反倒能获得实力股异常高波动下的充分风险补偿。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 2022. 个股波动率的变动及“勇攀高峰”因子构建. 方正证券.
+    \item Lochstoer, L. A., \& Muir, T. (2022). \textit{Volatility expectations and returns}. The Journal of Finance, 77(2), 1055-1096.
+\end{enumerate}
+
+\section{边际交易成本(高频因子-流动性类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{MCI}_A = \frac{\mathrm{VWAPM}_A }{\mathrm{DolVol}_A}
+\end{equation}
+\begin{equation}
+    \mathrm{VWAPM}_A = \frac{VWAP_A-M}{M}
+\end{equation}
+\begin{equation}
+    \mathrm{VWAP}_A = \frac{\sum_i^nP_{A,i} \times Q_{A,i}}{\sum_i^nQ_{A,i}} = \frac{DolVol_A}{\sum_i^n Q_{A,i}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{VWAPM}_A \) 为市价交易成本，即卖单五档报单的报单量加权平均价格；
+    \item ② \( \mathrm{DolVol}_A \) 为卖单报单总金额，即所有卖单报单价格乘以报单量之和（共 5 档）；
+    \item ③ \( M = (P_{A,1} + P_{B,1})/2 \) 为限价交易成本，即买一价和卖一价的均值；
+    \item ④ \( P_{A,i} \) 为第 \( i \) 个卖单的价格，\( Q_{A,i} \) 为第 \( i \) 个卖单的报单量；
+    \item ⑤ 若要计算买单的 \( \mathrm{MCI}_B \) 需将卖单数据替换成买单数据，并乘上 -1；
+    \item ⑥ MCI 因子的统一单位为 bps/万元。
+\end{itemize}
+
+\subsection{说明}
+MCI 衡量了市场的流动性；买单的 \( \mathrm{MCI}_B \) 衡量了发起市价交易的卖方所付出的交易费用，短期内，\( \mathrm{MCI}_B \) 较大时，卖方要付出较大的费用卖出股票，股票买压更强，较难下跌，与未来短期收益正相关；卖单的 \( \mathrm{MCI}_A \) 衡量了发起市价交易的买方所付出的交易费用，短期内，\( \mathrm{MCI}_A \) 较大时，买方要付出较大的费用买入股票，来衡量买卖报单流动性的不平衡性。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈升锐. 2020. 买卖报单流动性因子构建. 中信建投证券.
+\end{enumerate}
+
+\section{趋势资金净支撑量因子(量价因子改进)}
+
+\subsection{因子定义}
+
+1. 每个交易日 \( t \)，回看过去 \( k \) 个交易日 \( t-k, t-(k-1), \dots, t-1 \)，计算过去 \( k \) 日分钟成交量的 \( m\% \) 分位数，定义为成交量阈值，\( k=5, m=90 \)；将交易日 \( t \) 的每分钟成交量与上述阈值进行对比，若某一分钟的成交量大于上述阈值，则该分钟的交易被定义为趋势资金的交易；
+
+2. 每个交易日，计算所有趋势资金分钟收盘价的均值，筛选趋势资金中收盘价小于该平均值的分钟，将它们的成交量加总，得到趋势资金支撑成交量；同理，将收盘价大于上述平均值的分钟成交量加总，得到趋势资金阻力成交量；
+
+3. 每个交易日，计算如下因子：
+\begin{equation}
+    \text{趋势资金净支撑量} = \frac{\text{趋势资金支撑成交量} - \text{趋势资金阻力成交量}}{\text{当日流通股本}}
+\end{equation}
+
+4. 每月月底回看过去 20 个交易日，计算上述因子的平均值，并做横截面市值、中信一级行业中性化处理。
+
+\subsection{说明}
+趋势资金净支撑成交量因子只考虑趋势资金的净支撑情况，因子表现显著提升；因子值较大，则表明支撑价格不破位的力量较强，后市上涨概率较高；若因子值较小，则表明阻碍价格上涨的力量较强，后市相对偏空。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 沈亚琦, 刘富兵. 2024. 基于趋势资金日内交易行为的选股因子. 国盛证券.
+\end{enumerate}
+
+\section{趋势占比(高频因子-动量反转类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{trend\_ratio}_{D,i} = \frac{P_{T,D,i} - P_{1,D,i}}{\sum_{t=2}^{T} |P_{t,D,i} - P_{t-1,D,i}|}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( P_{t,D,i} \) 为股票 \( i \) 在交易日 \( D \) 内分钟频率下的价格；
+    \item ② \( t = 1,2,3,\ldots,T \) 为交易日内相应分钟频率的第 \( t \) 个时间区间，如 5 分钟频率，\( T=48 \)。
+\end{itemize}
+
+\subsection{说明}
+趋势占比可以看作是日内价格位移与路程之比，衡量了日内股价的趋势强度，取值范围为 \([-1, 1]\)，通常与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 文巧钧, 安宁宁, 罗军. 2021. 高频量化数据因子化方法. 广发证券.
+\end{enumerate}
+
+\section{朴素主动占比(高频因子-资金流类)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \text{主动买入金额}_i = \mathrm{Amount}_i \times t \left( \frac{\mathrm{Close}_i - \mathrm{Close}_{i-1}}{\sigma_{\Delta \mathrm{close}}} ,df\right)
+\end{equation}
+
+\begin{equation}
+    \text{朴素主动占比} =  \frac{\sum_{i=1}^{N}\text{主动买入金额}_i}{\sum_{i=1}^{N} \mathrm{Amount}_i} 
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( t() \) 为 t 分布的累计分布函数，取值范围在 0 到 1 之间；
+    \item ② \( \sigma_{\Delta \mathrm{close}} \) 为整个时间区间内，每段时间末截面收盘价的标准差，保证每段时间价格变动相对可比；
+    \item ③ df 为自由度，针对相同的股价变动，自由度越小，则根据 t 分布得到的主动买入金额占比越小；
+    \item ④ 数据频率可以为 1 分钟、5 分钟等。
+\end{itemize}
+
+\subsection{说明}
+绝大部分时间段的成交几乎均有买卖双方各自驱动成交的部分，在计算主动买入金额时采用连续性值作为成交额所乘系数可以提高主买卖额估计准确度；连续值在划分主动买卖成交时，价格变动方向对应买卖驱动方向（价格正向变动以买方驱动为主，价格负向变动以卖方驱动为主），价格变动幅度对应驱动力量占比情况（价格变动越大，主要驱动力量占比越大，价格变动越小，主要驱动力量占比越小）。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 川栋, 郑超. 2020. 高频因子(七): 分布估计下的主动成交占比. 长江证券.
+\end{enumerate}
+
+\section{供给端中心性变化(图谱网络-网络结构)}
+
+\subsection{因子定义}
+\begin{equation}
+    C(u) = \frac{n-1}{N-1} \cdot \frac{n-1}{\sum_{v=1}^{n-1} D(u, v)}
+\end{equation}
+\begin{equation}
+    C^{\mathrm{st}}(u) = \frac{C(u) - C_{\mathrm{min}}}{C_{\mathrm{max}} - C_{\mathrm{min}}}
+\end{equation}
+\begin{equation}
+    D(u, v) = e^{-s(u, v)}
+\end{equation}
+\begin{equation}
+    s(u, v) = \frac{\mathrm{sales}_{u,v}}{\mathrm{Total\_Procurement}_u}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( s(u, v) \) 为供应关联度，即公司 \( u \) 对供应商 \( v \) 的采购额在公司 \( u \) 总采购额中的占比（边方向为供应商 $\rightarrow$ 客户）；
+    \item ② \( D(u, v) \) 为基于供应关联度计算的公司间的距离；
+    \item ③ \( n \) 为与客户公司 \( u \) 相连的所有供应商公司 \( v \) 的总数；
+    \item ④ \( N \) 为供应链网络节点总数。
+\end{itemize}
+
+\subsection{说明}
+供给端中心性变化为当期标准化后的供应商接近中心性减去上期标准化中心性，衡量了客户公司核心地位的变化程度；横截面分组选股时，供应端中心性变化对头尾组有一定的区分度（中心性变强的组为 top 组，收益更高），但组间单调性较弱；供应端中心性变化的选股效果弱于客户端中性变化。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 任健, 麦元勋, 杨帆. 2022. 供应链中心性初探. 招商证券.
+\end{enumerate}
+
+\section{买入浮亏占比因子(高频因子-成交分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{HCVOL} = \frac{\sum_{i=1}^{N} \mathrm{volume}_{\mathrm{buy},i} \cdot \mathbf{I}_{\{P_{\mathrm{buy},i} > \mathrm{close}\}}}{\mathrm{total\_volume}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{volume}_{\mathrm{buy},i} \) 和 \( P_{\mathrm{buy},i} \) 分别为逐笔成交数据中买单的成交量和成交价；
+    \item ② \( \mathrm{close} \) 和 \( \mathrm{total\_volume} \) 分别为当日收盘价和成交量；
+    \item ③ 可以对该因子进行小单改进和尾盘改进，即只统计小单的占比和只统计 \([14:30,14:57)\) 尾盘区间的占比。
+\end{itemize}
+
+\subsection{说明}
+买入浮亏占比因子统计了高于收盘价买入的成交量占比，与未来收益正相关；因子取值越高，则投资者当天买入情绪较高，浮亏占比较低。根据遗憾规避理论，为了避免产生遗憾和后悔情绪，投资者存在惜售心理，未来抛压较低，有着更高的预期收益；遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自豪感，避免承认之前的决策失误。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{聪明钱因子(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+对选定股票，回溯取其过去10个交易日的分钟行情数据，构造指标：
+\begin{equation}
+    S_t = \frac{|R_t|}{V_t^{0.25}}
+\end{equation}
+其中，\( R_t \) 为第t分钟涨跌幅，\( V_t \) 为第t分钟成交量。
+
+将分钟数据按照指标 \( S_t \) 从大到小进行排序，取成交量累积占比20\%的分钟，视为聪明钱交易；
+
+计算聪明钱交易的成交量加权平均价 \( \mathrm{VWAP}_{\mathrm{smart}} \)；计算所有交易的成交量加权平均价 \( \mathrm{VWAP}_{\mathrm{all}} \)；
+
+计算如下聪明钱因子：
+\begin{equation}
+    \text{聪明钱因子} = \frac{\mathrm{VWAP}_{\mathrm{smart}}}{\mathrm{VWAP}_{\mathrm{all}}}
+\end{equation}
+
+\subsection{说明}
+聪明钱因子是通过在分钟行情数据的价量信息中识别机构参与交易的多寡而构建的跟踪聪明钱交易的选股因子，而聪明钱的交易是基于“单笔订单数量更大、订单报价更为激进”的交易特征来识别的。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕. 2020. 聪明钱因子模型的2.0版本. 开源证券.
+\end{enumerate}
+
+\section{筹码分布峰度（偏度）(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+
+\begin{equation}
+    \mathrm{kurtosis}_t = \sum \left( \frac{\mathrm{price}_{i,t} - \mathrm{mean}_t}{\mathrm{std}_t} \right)^4 \times p_{i,t}
+\end{equation}
+
+\begin{equation}
+    \mathrm{skewness}_t = \sum \left( \frac{\mathrm{price}_{i,t} - \mathrm{mean}_t}{\mathrm{std}_t} \right)^3 \times p_{i,t}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 \( t \) 日的筹码分布共有 \( n \) 个价位 \( (i=1,2,\ldots,n) \)，\( \mathrm{vol}_{i,t} \) 为第 \( t \) 日 \( i \) 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格；
+    \item ② 筹码加权权重为 \( p_{i,t} = \dfrac{\mathrm{vol}_{i,t}}{\sum \mathrm{vol}_{i,t}} \)；
+    \item ③ \( \mathrm{mean}_t = \sum (\mathrm{price}_{i,t} \times p_{i,t}) \) 为筹码分布加权平均成本；
+    \item ④ \( \mathrm{std}_t = \sqrt{\sum (\mathrm{price}_{i,t} - \mathrm{mean}_t)^2 \times p_{i,t}} \) 为筹码成本加权标准差。
+\end{itemize}
+
+\subsection{说明}
+筹码分布偏度因子衡量了筹码分布偏斜程度和偏斜方向；筹码分布峰度因子衡量了筹码分布在平均值处峰值的高低程度；经测试，筹码分布峰度因子有较好的选股能力，与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信建投.
+\end{enumerate}
+
+\section{市价偏离度(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{MPB}_t = \overline{\mathrm{TP}}_t - \frac{M_t + M_{t-1}}{2} = \overline{\mathrm{TP}}_t - \overline{\mathrm{MP}}_t
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ①
+        \begin{equation*}
+            \overline{\mathrm{TP}}_t = 
+            \begin{cases} 
+                \dfrac{T_t}{V_t}, & V_t \neq 0 \\[6pt]
+                \overline{\mathrm{TP}}_{t-1}, & V_t = 0
+            \end{cases}
+        \end{equation*}
+        为平均交易价格；
+    \item ②
+        \begin{equation*}
+            M_t = \frac{P_t^B + P_t^A}{2}
+        \end{equation*}
+        为买一价和卖一价的均值；
+    \item ③ \(P_t^B\) 和 \(P_t^A\) 为 \(t\) 时刻的买一价和卖一价；\(T_t\) 和 \(V_t\) 为 \(t\) 时刻成交额和成交量。
+\end{itemize}
+
+\subsection{说明}
+市场偏离度为平均交易价格和平均委托挂单价格的差值；当市场偏离度为正，交易均价更接近卖一价，为卖方发起的交易，卖压大，未来价格更趋向于下行，即市场交易均价将向市场平均中间价回归，反之亦然。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 丁鲁明, 陈升锐. 2020. 高频量价选股因子初探. 中信建投证券.
+\end{enumerate}
+\end{document}

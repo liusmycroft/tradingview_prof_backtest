@@ -1,0 +1,284 @@
+% This document is compiled using pdfLaTeX
+% You can switch XeLaTeX/pdfLaTeX/LaTeX/LuaLaTeX in Settings
+
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{amsmath} % 确保引入了此宏包以支持 aligned
+
+\title{因子日历2026}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{价量相关性平均数因子(高频因子-量价相关性类)}
+
+\subsection{因子定义}
+
+① 每月月底，回溯每只股票过去 20 个交易日的价量信息，每日计算该股票分钟收盘价 \( p_t \) 与分钟成交量 \( v_t \) 的相关系数：
+\begin{equation}
+    \mathrm{PV\_corr} = \mathrm{corr}(v_t, p_t)
+\end{equation}
+
+② 每只股票取 20 日相关系数的平均值，做横截面市值中性化处理，得到的结果即为价量相关性平均数因子 \( \mathrm{PV\_corr\_avg} \)。
+
+\subsection{说明}
+\( \mathrm{PV\_corr\_avg} \) 利用成交量的信息，修正了传统反转因子对股票价格涨跌的判断，即价格涨跌的反转不完全由价格自己决定，还需看成交量的信息，若有量的确认，则月度行情的反转效应更强；若没有量的确认，则月度行情更容易呈现动量效应。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高子剑. 2020. 高频价量相关性：意想不到的选股因子. 东吴证券.
+\end{enumerate}
+
+\section{活动筹码占比(行为金融因子-筹码分布)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ASR}_t = \frac{\sum \mathrm{vol}_{\mathrm{price}_i \in [\text{低位价格}, \text{高位价格}],t}}{\sum vol_{i,t}}
+\end{equation}
+其中，
+\begin{equation}
+    \text{高位价格} = \mathrm{close}_t \times (1 + \mathrm{volatility})
+\end{equation}
+\begin{equation}
+    \text{低位价格} = \mathrm{close}_t \times (1 - \mathrm{volatility})
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 假设某只股票在 \( t \) 日的筹码分布共有 \( n \) 个价位（\( i = 1, 2, \ldots, n \)），\( \mathrm{vol}_{i,t} \) 为第 \( t \) 日 \( i \) 价位上的筹码峰高度，\( \mathrm{price}_{i,t} \) 为该筹码峰对应的价格；
+    \item ② \( \mathrm{volatility} \) 为股价最大涨跌幅，主板股票的 \( \mathrm{volatility} = 10\% \)，创业板和科创板的 \( \mathrm{volatility} = 20\% \)；
+    \item ③ \( \mathrm{close}_t \) 为 \( t \) 日收盘价。
+\end{itemize}
+
+\subsection{说明}
+活动筹码指的是当天涨跌停范围内的筹码，这部分筹码更可能被主动交易，活动筹码占比即为位于涨跌停价格区间内的筹码占比。可用于衡量交易活跃程度；占比越高，筹码越集中在近期交易区间，流动性高，与未来收益负相关。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升锐, 姚紫薇. 2025. 筹码分布因子系统构建. 中信出版社.
+\end{enumerate}
+
+\section{股价最低时刻笔均成交金额(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+1. 将日内 240 个 1 分钟数据集合标记为 \( T = \{t_1, t_2, \dots, t_{240}\} \)，将分钟收盘价最低的 10\% 时刻标记为集合 \( P = \{t_{i1}, t_{i2}, \dots, t_{ik}\} \)；
+
+2. 对收盘价最低时刻进行汇总，根据其成交额 \( \mathrm{Amt} \) 之和除以成交笔数 \( \mathrm{DealNum} \) 之和，构造股价最低时刻的笔均成交金额 \( \mathrm{ATD}_{\mathrm{PriceLowest10\%}} \)：
+\begin{equation}
+    \mathrm{ATD}_{\mathrm{PriceLowest10\%}} = \frac{\sum_{t \in P} \mathrm{Amt}_t}{\sum_{t \in P} \mathrm{DealNum}_t}
+\end{equation}
+
+3. 同理，将全天的成交金额除以全天的成交笔数，得到全天的笔均成交金额 \( \mathrm{ATD}_T \)：
+\begin{equation}
+    \mathrm{ATD}_T = \frac{\sum_{t \in T} \mathrm{Amt}_t}{\sum_{t \in T} \mathrm{DealNum}_t}
+\end{equation}
+
+4. 将股价最低时刻的笔均成交金额除以全天的笔均成交金额，即得到去量纲化后的标准化因子 \( \mathrm{SATD}_{\mathrm{PriceLowest10\%}} \)：
+\begin{equation}
+    \mathrm{SATD}_{\mathrm{PriceLowest10\%}} = \frac{\mathrm{ATD}_{\mathrm{PriceLowest10\%}}}{\mathrm{ATD}_T}
+\end{equation}
+
+\subsection{说明}
+笔均成交额类因子通过汇总“特殊的、具有较多信息含量”时刻的成交金额情况来刻画主力资金的行为动向；笔均成交金额越大，说明该特殊时间内资金优势越明显，其属于主力资金的可能性越大。“股价最低时刻”从股价高低角度追踪主力资金抄底意愿，股价越低，抄底意愿越强。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣鹏, 张宇. 2025. 日内特殊时刻蕴含的主力资金 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{大成交量已实现偏度(高频因子-收益分布类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{real\_skew}_{D,i} = \frac{1}{T-1}\sum_{t=2}^{T}\frac{  \left( r_{t,D,i} - \bar{r}_{D,i} \right)^3}{\mathrm{real\_var}_{D,i}^{3/2}}
+\end{equation}
+\begin{equation}
+    \mathrm{real\_var}_{D,i} = \frac{1}{T-2} \sum_{t=2}^{T} \left( r_{t,D,i} - \bar{r}_{D,i} \right)^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 将个股在每个交易日的分钟成交量时间序列按照成交量大小排序，将分钟成交量排名前 \(1/3\) 的成交量定为“大成交量”；
+    \item ② \(t=1,2,3,\ldots,T\) 为交易日内相应分钟频率的第 \(t\) 个时间区间，此处 \(T\) 为大成交量对应的那些区间；
+    \item ③ \( r_{t,D,i} \) 为股票 \(i\) 在交易日 \(D\) 内大成交区间下的收益率，\(\bar{r}_{D,i}\) 为收益率均值。
+\end{itemize}
+
+\subsection{说明}
+在传统已实现偏度计算逻辑基础上加入了成交量信息，大单成交更能代表主力行为，蕴含的信息更多。已实现偏度刻画了股价日内快速拉升或下跌的特征，与股票未来收益负相关；短期大幅拉升的股票，未来更有可能出现反转；而日内快速下跌的股票，往往具有更高的下行风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 文巧钧, 安宁宁, 罗军. 2021. 高频量化数据因子化方法. 广发证券.
+\end{enumerate}
+
+\section{客户行业集中度(图谱网络-网络结构)}
+
+\subsection{因子定义}
+
+
+客户行业集中度 \( \mathrm{CH} \) 的计算公式如下：
+\begin{equation}
+    \mathrm{CH}_i = \sum_{i=1}^{I} w_{ij} \times H_j
+\end{equation}
+
+其中 \( H_j \) 为客户公司所属行业的赫芬达尔指数：
+\begin{equation}
+    H_j = \sum_{i=1}^{I} s_{ij}^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( H_j \) 为客户公司所属行业的赫芬达尔指数；
+    \item ② \( s_{ij} \) 为属于行业 \( j \) 的公司在该行业的市场份额，市场份额可以通过营业收入或市值来计算；
+    \item ③ \( w_{ij} \) 为供应商 \( i \) 对客户 \( j \) 的销售额占自身总销售额的占比。
+\end{itemize}
+
+\subsection{说明}
+客户行业集中度为公司所有客户所属行业集中度的加权平均，反映了公司在其客户行业中的竞争地位；若客户行业集中度过高，意味着公司客户处于相对垄断地位，对客户的议价能力小，竞争激烈；若客户行业集中度过低，意味着公司可选客户较为分散，有更多的客户选择空间和议价能力。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item Jing Wu, John R. Birge. (2014). \textit{Supply Chain Network Structure and Firm Returns}. SSRN Electronic Journal.
+\end{enumerate}
+
+\section{日内跳跌度(高频因子-波动跳跃类)}
+
+\subsection{因子定义}
+对股票 \( i \)，计算 \( n \) 日内 \( t \) 分钟的单利收益率、\( t \) 分钟的连续复利收益率：
+\begin{equation}
+    t \text{ 分钟单利收益率} = \frac{t \text{ 分钟收盘价}}{t-1 \text{ 分钟收盘价}} - 1
+\end{equation}
+\begin{equation}
+    t \text{ 分钟连续复利收益率} = \ln\left(\frac{t \text{ 分钟收盘价}}{t-1 \text{ 分钟收盘价}}\right)
+\end{equation}
+
+计算 \( t \) 分钟的“单复利差”，进而计算“跳跌度”因子：
+\begin{equation}
+    t \text{ 分钟单复利差} = t \text{ 分钟单利收益率} - t \text{ 分钟连续复利收益率}
+\end{equation}
+\begin{equation}
+    \text{跳跌度} = (t \text{ 分钟单复利差}) \times 2 - (t \text{ 分钟连续复利收益率})^2
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 计算因子前需剔除开盘和收盘数据，仅使用日内数据；
+    \item ② 日跳跌度为日内所有分钟跳跌度序列的均值；
+    \item ③ 日跳跌度因子本质上为单利收益率 \( x \) 的泰勒残差项：
+        \begin{equation*}
+            e^x = 1 + \frac{1}{1!}x + \frac{1}{2!}x^2 + \frac{1}{3!}x^3 + o(x^3)
+        \end{equation*}
+        \begin{equation*}
+            ((e^x - 1) - \frac{1}{1!}x) \times 2 - x^2 = \left(\frac{1}{2!}x^2 + \frac{1}{3!}x^3 + o(x^3)\right) \times 2 - x^2 = \left(\frac{1}{3!}x^3 + o(x^3)\right) \times 2
+        \end{equation*}
+    \item ④ 每月末可对最近 20 天的上述因子求均值和标准差并将两者等权合并，即得到月度跳跌度。
+\end{itemize}
+
+\subsection{说明}
+跳跌度因子衡量了股价在利好或利空消息冲击下的跳跌程度，与未来收益负相关。正负向好的股票通常是非跳跌的平稳上涨；而那些当前突然跳跌上涨或跳下跌的股票，通常伴随投资者的过度反应，未来会出现补跌或补涨。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 曹春晓. 个股股价跳跃及其对振幅因子的改进, 2022, 方正证券.
+    \item Jiang, G. J., \& Oomen, R. C. A. (2008). \textit{Testing for jumps when asset prices are observed with noise - a "swap variance" approach}. Journal of Econometrics, 144(2), 352-370.
+\end{enumerate}
+
+\section{漫长订单交易占比（高频因子-资金流类）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{VolumeLong} = \frac{\sum_i \mathrm{VolumeLongBuy}_i + \sum_i \mathrm{VolumeLongSell}_i}{\mathrm{Volume}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① 订单成交时长为订单第一次成交到最后一次成交间隔的连续竞价时长：
+        \begin{equation*}
+            \text{订单成交时长} = \text{最后第 } n \text{ 次成交时间 } T_n - \text{首次成交时间 } T_1
+        \end{equation*}
+    \item ② 漫长订单判断标准为：先计算不同委买 ID（或委卖 ID）订单的成交时长，再将全部实际成交的委买 ID（或委卖 ID）成交时长进行降序排列，最后将成交时长大于前 10\% 分位点的委买单（或委卖单）记为“漫长买单”（或“漫长卖单”），要剔除开盘集合竞价的成交记录；
+    \item ③ \( \mathrm{VolumeLongBuy}_i \)、\( \mathrm{VolumeLongSell}_i \)、\( \mathrm{Volume} \) 分别为漫长买单实际成交量、漫长卖单实际成交量、单日总成交量。
+\end{itemize}
+
+\subsection{说明}
+漫长订单交易占比因子从订单成交时长维度对逐笔订单进行划分和归整，与未来收益正相关。订单成交时长通常可以反映投资者分歧程度，分歧较大时，买卖单成交较为迅速，成交时长偏短；分歧较小时，买卖单成交较为缓慢，成交时长偏长。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 张欣慧, 张宇. 2024. 高频订单成交数据蕴含的 Alpha 信息. 国信证券.
+\end{enumerate}
+
+\section{买入浮亏占比小单因子（行为金融因子-遗憾规避）}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{HCVOLS} = \frac{\sum_{i}^{N} \mathrm{volume}_{\mathrm{buy},i} \cdot \mathbf{I}_{P_{\mathrm{sell},i} > \mathrm{close}} \cdot \mathbf{I}_{\mathrm{vol} < \mathrm{vol}_{\mathrm{mean}}}}{\mathrm{total\_volume}}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{volume}_{\mathrm{buy},i} \) 为主买成交量；
+    \item ② \( P_{\mathrm{sell},i} \) 为主卖成交价；
+    \item ③ \( \mathrm{vol}_{\mathrm{mean}} \) 为当日所有实际成交量均值；
+    \item ④ 逐笔中每笔成交买卖方向确定方式：若该笔成交为买单被拆分与多个卖单成交，则记为买方交易，反之为卖方交易；
+    \item ⑤ 大小单划分方式：以当日所有实际成交量均值为区分大小单的阈值，即
+        \begin{equation*}
+            \mathrm{vol} < \mathrm{vol}_{\mathrm{mean}}
+        \end{equation*}
+        为小单，反之为大单；
+    \item ⑥ 此外，还可只统计尾盘期间 \([14:30,14:57)\) 的成交量，计算得到买入浮亏占比尾盘因子。
+\end{itemize}
+
+\subsection{说明}
+遗憾规避理论认为非理性的投资者在做决策时，会倾向于避免产生后悔情绪并追求自满感，避免承认之前的决策失误；对于买入后浮亏（当天买入的股票收盘价低于买入的成本价）的投资者会避免承认决策失误而存在惜售心理，不愿卖出下跌浮亏的股票；买入浮亏占比因子值越高，高于收盘价买入的成交量占比越高，浮亏占比较高，未来抛压较低，会有更高的预期收益。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 高智威. 2023. 基于逐笔成交数据的遗憾规避因子. 国金证券.
+\end{enumerate}
+
+\section{有效价差(高频因子-流动性类)}
+
+\subsection{因子定义}
+\begin{equation}
+    \mathrm{ES}_{i,t} = 2 D_{i,k} \frac{P_{i,t} - \left( \frac{\mathrm{Ask}_{i,t} + \mathrm{Bid}_{i,t}}{2} \right)}{\left( \mathrm{Ask}_{i,t} + \mathrm{Bid}_{i,t} \right)/2}
+\end{equation}
+
+\subsection{变量定义}
+\begin{itemize}
+    \item ① \( \mathrm{Ask}_{i,t}, \mathrm{Bid}_{i,t}, P_{i,t} \) 分别为股票 \( i \) 在 \( t \) 时刻的卖 1 价、买 1 价、收盘价；
+    \item ② \( D_{i,k} \) 为买卖标识，买单记为 1，卖单记为 -1；
+    \item ③ \( D_{i,k} \) 买卖单判断标准：若当前收盘价高于（低于）最优买卖报价平均值，则认为是买（卖）单；当前收盘价等于最优买卖报价平均值时，若收盘价高于（低于）上一笔价格，则认为是买（卖）单。
+\end{itemize}
+
+\subsection{说明}
+有效价差表示成交价相对于市场中间价的相对偏差，反映执行交易所需要的交易成本；股票的交易成本越高，流动性越差，未来会有正向的流动性风险溢价。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 陈升悦. 2024. 流动性高频因子构建与投资者注意力因子分析报告. 中信建投.
+\end{enumerate}
+
+\section{喷发成交额跟随比例(高频因子-成交分布类)}
+
+\subsection{因子定义}
+
+① 对过去20日同时点成交量按照1倍标准差的标准划分，高于1倍标准差划为“喷发成交量”，低于1倍标准差划为“温和成交量”；
+
+② 计算如下喷发成交额跟随比例因子：
+\begin{equation}
+    \text{喷发成交额跟随比例} = \frac{\text{过去20日喷发成交时点的下一分钟总成交额}}{\text{过去20日喷发成交时点的总成交额}}
+\end{equation}
+
+\subsection{说明}
+喷发成交额跟随比例因子衡量了大额成交后的资金跟随程度，资金跟随程度越高，则个股交易中的个人投资者交易占比越高，个股未来表现越弱，是一个负向因子。
+
+\subsection{参考文献}
+\begin{enumerate}
+    \item 魏建榕, 王志豪. 2025. 高频成交量的峰、岭、谷信息. 开源证券.
+\end{enumerate}
+\end{document}
