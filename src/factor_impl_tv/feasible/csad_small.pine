@@ -1,0 +1,57 @@
+//@version=6
+strategy("CSAD Small (CSAD_SMALL)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// NOTE: 原始因子需要截面数据（10只相关股票），Pine Script中无法实现，
+// 此处用个股偏离基准的近似替代。
+// The original CSAD factor requires cross-sectional data from 10 correlated
+// stocks. Pine Script cannot perform cross-sectional calculations. Here we
+// approximate by measuring the individual stock's return deviation from a
+// benchmark index.
+// ============================================================================
+
+// ============================================================================
+// Inputs
+// ============================================================================
+i_benchmark  = input.symbol("SSE:000001", "Benchmark Symbol")
+i_devLen     = input.int(20, "Deviation SMA Length", minval=1)
+i_signalLen  = input.int(20, "Signal MA Length", minval=1)
+i_longThresh = input.float(0.0, "Long Threshold (factor above signal + thresh)", step=0.0001)
+i_shortThresh = input.float(0.0, "Short Threshold (factor below signal - thresh)", step=0.0001)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+daily_return  = close / close[1] - 1.0
+bench_close   = request.security(i_benchmark, timeframe.period, close)
+market_return = bench_close / bench_close[1] - 1.0
+
+deviation  = math.abs(daily_return - market_return)
+csad_proxy = ta.sma(deviation, i_devLen)
+
+// Factor: negative CSAD — low dispersion (herding) signals reversal
+factor    = -csad_proxy
+signal_ma = ta.sma(factor, i_signalLen)
+
+// ============================================================================
+// Signals — factor high (low CSAD = herding) → long (reversal expected)
+// ============================================================================
+if barstate.isconfirmed
+    if factor > signal_ma + i_longThresh
+        if strategy.position_size < 0
+            strategy.close("Short")
+        strategy.entry("Long", strategy.long)
+    else if factor < signal_ma - i_shortThresh
+        if strategy.position_size > 0
+            strategy.close("Long")
+        strategy.entry("Short", strategy.short)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor,    "Factor (-CSAD)", color=color.new(color.orange, 0), display=display.pane)
+plot(signal_ma, "Signal MA",      color=color.new(color.blue, 0),   display=display.pane)
+hline(0, "Zero", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

@@ -1,0 +1,37 @@
+//@version=6
+// NOTE: 原始因子计算高低价位区间的复合交易量比率，此处使用日线收盘价分位数判断高低位并计算成交量差异近似。
+strategy("High Low Price Composite Ratio (HIGH_LOW_PRICE_COMPOSITE_RATIO)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "Length", minval=5)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+high_pct = ta.percentile_linear_interpolation(close, length, 75)
+low_pct = ta.percentile_linear_interpolation(close, length, 25)
+high_zone = close > high_pct
+low_zone = close < low_pct
+high_vol = high_zone ? volume : 0.0
+low_vol = low_zone ? volume : 0.0
+factor = ta.sma(low_vol - high_vol, length) / ta.sma(volume, length)
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "High Low Price Composite Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

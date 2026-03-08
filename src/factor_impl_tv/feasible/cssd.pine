@@ -1,0 +1,54 @@
+//@version=6
+strategy("CSSD (CSSD)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// NOTE: 原始因子需要截面数据（多只股票的收益率标准差），Pine Script中无法实现，
+// 此处用个股收益率偏离基准的标准差作为近似替代。
+// The original CSSD factor requires cross-sectional return dispersion across
+// multiple stocks. Pine Script cannot perform cross-sectional calculations.
+// Here we approximate using the stock's squared deviation from a benchmark.
+// ============================================================================
+
+// ============================================================================
+// Inputs
+// ============================================================================
+i_benchmark   = input.symbol("SSE:000001", "Benchmark Symbol")
+i_devLen      = input.int(20, "Deviation SMA Length", minval=1)
+i_signalLen   = input.int(20, "Signal MA Length", minval=1)
+i_longThresh  = input.float(0.0, "Long Threshold (factor above signal + thresh)", step=0.0001)
+i_shortThresh = input.float(0.0, "Short Threshold (factor below signal - thresh)", step=0.0001)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+daily_return  = close / close[1] - 1.0
+bench_close   = request.security(i_benchmark, timeframe.period, close)
+market_return = bench_close / bench_close[1] - 1.0
+
+deviation_sq = math.pow(daily_return - market_return, 2)
+cssd_proxy   = math.sqrt(ta.sma(deviation_sq, i_devLen))
+
+signal_ma = ta.sma(cssd_proxy, i_signalLen)
+
+// ============================================================================
+// Signals — high dispersion (less herding) → long
+// ============================================================================
+if barstate.isconfirmed
+    if cssd_proxy > signal_ma + i_longThresh
+        if strategy.position_size < 0
+            strategy.close("Short")
+        strategy.entry("Long", strategy.long)
+    else if cssd_proxy < signal_ma - i_shortThresh
+        if strategy.position_size > 0
+            strategy.close("Long")
+        strategy.entry("Short", strategy.short)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(cssd_proxy, "CSSD Proxy",  color=color.new(color.orange, 0), display=display.pane)
+plot(signal_ma,  "Signal MA",   color=color.new(color.blue, 0),   display=display.pane)
+hline(0, "Zero", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

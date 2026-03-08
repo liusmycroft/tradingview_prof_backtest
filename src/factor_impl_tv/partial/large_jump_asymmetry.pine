@@ -1,0 +1,27 @@
+//@version=6
+// NOTE: 原始因子基于分钟级跳跃检测，此处用日线收益率超过阈值近似大跳跃不对称性。
+strategy("Large Jump Asymmetry (LARGE_JUMP_ASYMMETRY)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+
+length = input.int(20, "Factor Length")
+rank_len = input.int(120, "Rank Length")
+long_thresh = input.float(0.8, "Long Threshold")
+short_thresh = input.float(0.2, "Short Threshold")
+
+ret = close / close[1] - 1
+thresh = 2 * ta.stdev(ret, 60)
+up_jump = ret > thresh ? ret * ret : 0.0
+down_jump = ret < -thresh ? ret * ret : 0.0
+factor = ta.sma(up_jump, length) - ta.sma(down_jump, length)
+
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Positive -> more upside jumps -> long
+if barstate.isconfirmed
+    if rank > long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank < short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+plot(factor, "LARGE_JUMP_ASYMMETRY", color=color.new(color.blue, 0))

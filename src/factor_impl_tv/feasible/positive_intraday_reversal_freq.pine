@@ -1,0 +1,45 @@
+//@version=6
+strategy("Positive Intraday Reversal Frequency (POSITIVE_INTRADAY_REVERSAL_FREQ)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// Inputs
+// ============================================================================
+i_prLen       = input.int(20, "PR SMA Length", minval=1)
+i_signalLen   = input.int(20, "Signal MA Length", minval=1)
+i_shortThresh = input.float(0.0, "Short Threshold (PR above signal + thresh)", step=0.01)
+i_longThresh  = input.float(0.0, "Long Threshold (PR below signal - thresh)", step=0.01)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+ret_co = open / close[1] - 1.0   // overnight return
+ret_oc = close / open - 1.0      // intraday return
+
+// Positive intraday reversal: overnight down, intraday up
+indicator = (ret_co < 0 and ret_oc > 0) ? 1.0 : 0.0
+
+PR        = ta.sma(indicator, i_prLen)
+signal_ma = ta.sma(PR, i_signalLen)
+
+// ============================================================================
+// Signals — high PR (excessive correction) → short (future decline expected)
+// ============================================================================
+if barstate.isconfirmed
+    if PR > signal_ma + i_shortThresh
+        if strategy.position_size > 0
+            strategy.close("Long")
+        strategy.entry("Short", strategy.short)
+    else if PR < signal_ma - i_longThresh
+        if strategy.position_size < 0
+            strategy.close("Short")
+        strategy.entry("Long", strategy.long)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(PR,        "PR",        color=color.new(color.orange, 0), display=display.pane)
+plot(signal_ma, "Signal MA", color=color.new(color.blue, 0),   display=display.pane)
+hline(0.5, "Mid", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

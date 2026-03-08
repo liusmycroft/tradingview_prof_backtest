@@ -1,0 +1,23 @@
+//@version=6
+// NOTE: 原始因子使用逐笔成交金额与分钟成交金额秩相关，此处用日线成交量与价格变动绝对值相关性近似。
+strategy("Main Force Activity Strength (MAIN_FORCE_STRENGTH)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+
+length = input.int(20, "Factor Length")
+rank_len = input.int(120, "Rank Length")
+long_thresh = input.float(0.8, "Long Threshold")
+short_thresh = input.float(0.2, "Short Threshold")
+
+factor = ta.correlation(volume, math.abs(close - open), length)
+
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// High -> active main force -> long
+if barstate.isconfirmed
+    if rank > long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank < short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+plot(factor, "MAIN_FORCE_STRENGTH", color=color.new(color.blue, 0))

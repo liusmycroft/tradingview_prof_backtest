@@ -1,0 +1,50 @@
+//@version=6
+strategy("Daily Return Attention (DAILY_RETURN_ATTENTION)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// Inputs
+// ============================================================================
+i_benchmark   = input.symbol("SSE:000001", "Benchmark Symbol")
+i_rawLen      = input.int(250, "Raw Factor SMA Length", minval=1)
+i_histLen     = input.int(500, "Historical Factor SMA Length", minval=1)
+i_signalLen   = input.int(20, "Signal MA Length", minval=1)
+i_shortThresh = input.float(0.0, "Short Threshold (factor above signal + thresh)", step=0.00001)
+i_longThresh  = input.float(0.0, "Long Threshold (factor below signal - thresh)", step=0.00001)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+daily_return  = close / close[1] - 1.0
+bench_close   = request.security(i_benchmark, timeframe.period, close)
+market_return = bench_close / bench_close[1] - 1.0
+
+diff_sq     = math.pow(daily_return - market_return, 2)
+raw_factor  = ta.sma(diff_sq, i_rawLen)
+hist_factor = ta.sma(raw_factor, i_histLen)
+
+// Factor: current attention minus historical baseline
+factor    = raw_factor - hist_factor
+signal_ma = ta.sma(factor, i_signalLen)
+
+// ============================================================================
+// Signals — high attention → short (reversal), low attention → long
+// ============================================================================
+if barstate.isconfirmed
+    if factor > signal_ma + i_shortThresh
+        if strategy.position_size > 0
+            strategy.close("Long")
+        strategy.entry("Short", strategy.short)
+    else if factor < signal_ma - i_longThresh
+        if strategy.position_size < 0
+            strategy.close("Short")
+        strategy.entry("Long", strategy.long)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor,    "Factor (Attention)", color=color.new(color.orange, 0), display=display.pane)
+plot(signal_ma, "Signal MA",          color=color.new(color.blue, 0),   display=display.pane)
+hline(0, "Zero", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

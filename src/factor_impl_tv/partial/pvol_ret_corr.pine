@@ -1,0 +1,13 @@
+//@version=6
+// NOTE: 原始因子使用每笔成交量与收益率的日度相关性，此处用日线成交量与收益率相关性近似。
+strategy("PVol Ret Corr (PVOL_RET_CORR)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+i_T = input.int(20, "Correlation Window", minval=5)
+ret = close / close[1] - 1
+factor = ta.correlation(volume, ret, i_T)
+factor_rank = ta.percentrank(factor, 120) / 100.0
+if barstate.isconfirmed
+    if factor_rank > 0.8 and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank < 0.2 and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+plot(factor, "Factor", color=color.new(color.orange, 0), display=display.pane)

@@ -1,0 +1,15 @@
+//@version=6
+// NOTE: 原始因子结合惊恐度与日内波动率加权调整收益率，此处用日线近似。
+strategy("Vol Panic (VOL_PANIC)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+i_T = input.int(20, "Lookback", minval=5)
+ret = close / close[1] - 1
+vol = ta.stdev(ret, i_T)
+panic = ret < -2 * vol ? math.abs(ret) : 0.0
+factor = ta.sma(panic * vol, i_T)
+factor_rank = ta.percentrank(factor, 120) / 100.0
+if barstate.isconfirmed
+    if factor_rank > 0.8 and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank < 0.2 and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+plot(factor, "Factor", color=color.new(color.orange, 0), display=display.pane)

@@ -1,0 +1,16 @@
+//@version=6
+// NOTE: 原始因子使用分钟级上涨与下跌方向价格冲击系数偏差，此处用日线近似。
+strategy("Price Impact Bias (PRICE_IMPACT_BIAS)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+i_T = input.int(20, "Lookback", minval=5)
+ret = close / close[1] - 1
+amount = volume * close / 1e6
+up_impact = ret > 0 ? ret / (amount + 0.0001) : 0.0
+down_impact = ret < 0 ? math.abs(ret) / (amount + 0.0001) : 0.0
+factor = ta.sma(up_impact, i_T) - ta.sma(down_impact, i_T)
+factor_rank = ta.percentrank(factor, 120) / 100.0
+if barstate.isconfirmed
+    if factor_rank > 0.8 and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+    else if factor_rank < 0.2 and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+plot(factor, "Factor", color=color.new(color.orange, 0), display=display.pane)

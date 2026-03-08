@@ -1,0 +1,37 @@
+//@version=6
+strategy("Attention Abnormal Return (ATTENTION_ABNORMAL_RETURN)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ── Inputs ──────────────────────────────────────────────────────────────────
+i_benchSymbol = input.symbol("SSE:000001", "Market benchmark symbol")
+i_window      = input.int(20,     "Lookback window",          minval=1)
+i_upperThresh = input.float(0.03, "Upper threshold (short)",  step=0.005)
+i_lowerThresh = input.float(0.01, "Lower threshold (long)",   step=0.005)
+
+// ── Market benchmark data ───────────────────────────────────────────────────
+mkt_close = request.security(i_benchSymbol, timeframe.period, close)
+
+// ── Calculations ────────────────────────────────────────────────────────────
+// Daily returns
+daily_return  = close[1]     != 0 ? close / close[1] - 1.0 : 0.0
+market_return = mkt_close[1] != 0 ? mkt_close / mkt_close[1] - 1.0 : 0.0
+
+// Abnormal return
+abnormal = daily_return - market_return
+
+// Attention = average absolute abnormal return over window
+ATTENTION = ta.sma(math.abs(abnormal), i_window)
+
+// ── Signals (confirmed bars only) ───────────────────────────────────────────
+if barstate.isconfirmed
+    if ATTENTION > i_upperThresh
+        strategy.entry("Short", strategy.short)
+    else if ATTENTION < i_lowerThresh
+        strategy.entry("Long", strategy.long)
+
+// ── Visualization ───────────────────────────────────────────────────────────
+plot(ATTENTION,      "ATTENTION",    color=color.new(color.orange, 0), display=display.pane)
+hline(i_upperThresh, "Upper Thresh", color=color.new(color.red, 50),   linestyle=hline.style_dashed)
+hline(i_lowerThresh, "Lower Thresh", color=color.new(color.green, 50), linestyle=hline.style_dashed)

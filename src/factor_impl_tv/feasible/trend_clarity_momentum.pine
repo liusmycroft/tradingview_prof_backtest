@@ -1,0 +1,97 @@
+//@version=6
+strategy("Trend Clarity Momentum (TREND_CLARITY_MOMENTUM)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// NOTE: 原始因子使用截面标准化，Pine Script中用时间序列标准化近似
+
+// ============================================================================
+// Inputs
+// ============================================================================
+T = input.int(20, "Lookback Window", minval=5)
+skip = input.int(1, "Skip Bars", minval=0)
+z_period = input.int(120, "Z-Score Normalization Period", minval=20)
+rank_period = input.int(120, "Ranking Period", minval=20)
+signal_thresh_long = input.float(0.7, "Signal Threshold (Percentile Long)", minval=0.0, maxval=1.0)
+signal_thresh_short = input.float(0.7, "Signal Threshold (Percentile Short)", minval=0.0, maxval=1.0)
+
+// ============================================================================
+// Momentum Calculation
+// ============================================================================
+returns = close / close[1] - 1.0
+momentum = math.sum(returns, T)[skip]  // sum of returns from bar skip to bar skip+T
+
+// ============================================================================
+// Trend Clarity (R²) Calculation
+// ============================================================================
+var float r_squared = na
+if barstate.isconfirmed
+    float sum_x = 0.0
+    float sum_y = 0.0
+    float sum_xy = 0.0
+    float sum_x2 = 0.0
+    float sum_y2 = 0.0
+
+    for i = 0 to T - 1
+        float x = float(T - 1 - i)
+        float y = close[i + skip]
+        sum_x += x
+        sum_y += y
+        sum_xy += x * y
+        sum_x2 += x * x
+        sum_y2 += y * y
+
+    float n = float(T)
+    float denom_x = n * sum_x2 - sum_x * sum_x
+    float denom_y = n * sum_y2 - sum_y * sum_y
+    float denom = denom_x * denom_y
+
+    if denom > 0
+        float numerator = n * sum_xy - sum_x * sum_y
+        float r = numerator / math.sqrt(denom)
+        r_squared := r * r
+    else
+        r_squared := 0.0
+
+// ============================================================================
+// Time-Series Z-Score Standardization (proxy for cross-sectional)
+// ============================================================================
+mom_mean = ta.sma(momentum, z_period)
+mom_std = ta.stdev(momentum, z_period)
+safe_mom_std = math.max(mom_std, 1e-10)
+mom_z = (momentum - mom_mean) / safe_mom_std
+
+tc_mean = ta.sma(r_squared, z_period)
+tc_std = ta.stdev(r_squared, z_period)
+safe_tc_std = math.max(tc_std, 1e-10)
+tc_z = (r_squared - tc_mean) / safe_tc_std
+
+// ============================================================================
+// Combined Factor: TM = -|mom_z - tc_z|
+// High TM (close to 0) means momentum matches trend clarity
+// ============================================================================
+factor = -math.abs(mom_z - tc_z)
+
+// Rolling percentile approximation
+factor_rank = ta.percentrank(factor, rank_period) / 100.0
+
+// ============================================================================
+// Signal Logic
+// Signal: TM close to 0 (high rank) -> momentum matches trend -> continue
+//         TM very negative (low rank) -> mismatch -> reversal
+// ============================================================================
+if barstate.isconfirmed
+    if factor_rank > signal_thresh_long and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+    else if factor_rank < (1.0 - signal_thresh_short) and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor, "TM Factor", color=color.new(color.red, 0), display=display.pane)
+plot(mom_z, "Momentum Z", color=color.new(color.green, 30), display=display.pane)
+plot(tc_z, "Trend Clarity Z", color=color.new(color.blue, 30), display=display.pane)
+plot(factor_rank, "Factor Rank", color=color.new(color.orange, 0), display=display.pane)
+hline(0.5, "Midline", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

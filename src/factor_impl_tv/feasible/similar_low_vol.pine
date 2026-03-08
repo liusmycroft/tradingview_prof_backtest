@@ -1,0 +1,52 @@
+//@version=6
+strategy("Similar Low Vol (SIMILAR_LOW_VOL)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// NOTE: 原始因子通过历史相似走势匹配计算，Pine Script中简化为近期超额收益波动率的倒数
+
+// ============================================================================
+// Inputs
+// ============================================================================
+rw = input.int(6, "Recent Window", minval=2)
+hist_window = input.int(120, "Historical Volatility Window", minval=20)
+market_ticker = input.symbol("INDEX:SPX", "Market Benchmark")
+rank_period = input.int(120, "Ranking Period", minval=20)
+signal_thresh_long = input.float(0.7, "Signal Threshold (Percentile Long)", minval=0.0, maxval=1.0)
+signal_thresh_short = input.float(0.7, "Signal Threshold (Percentile Short)", minval=0.0, maxval=1.0)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+market_close = request.security(market_ticker, timeframe.period, close)
+market_return = market_close / market_close[1] - 1.0
+
+returns = close / close[1] - 1.0
+excess_ret = returns - market_return
+
+recent_vol = ta.stdev(excess_ret, rw)
+
+// Avoid division by zero: clamp recent_vol to a small positive number
+safe_recent_vol = math.max(recent_vol, 1e-10)
+factor = 1.0 / safe_recent_vol
+
+// Rolling percentile approximation
+factor_rank = ta.percentrank(factor, rank_period) / 100.0
+
+// ============================================================================
+// Signal Logic
+// Signal: factor high -> long (low volatility -> stable)
+// ============================================================================
+if barstate.isconfirmed
+    if factor_rank > signal_thresh_long and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+    else if factor_rank < (1.0 - signal_thresh_short) and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor, "Similar Low Vol", color=color.new(color.teal, 0), display=display.pane)
+plot(factor_rank, "Factor Rank", color=color.new(color.blue, 0), display=display.pane)
+hline(0.5, "Midline", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

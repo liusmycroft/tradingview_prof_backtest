@@ -1,0 +1,46 @@
+//@version=6
+strategy("Corrected Amplitude (CORRECTED_AMPLITUDE)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ── Inputs ──────────────────────────────────────────────────────────────────
+i_window      = input.int(20,      "Lookback window",          minval=1)
+i_upperThresh = input.float(0.01,  "Upper threshold (long)",   step=0.005)
+i_lowerThresh = input.float(-0.01, "Lower threshold (short)",  step=0.005)
+
+// ── Calculations ────────────────────────────────────────────────────────────
+prev_close = close[1]
+
+// Daily amplitude: (high - low) / previous close
+amplitude = prev_close != 0 ? (high - low) / prev_close : 0.0
+
+// Overnight gap (jump/drop proxy)
+jump_drop = prev_close != 0 ? open / prev_close - 1.0 : 0.0
+
+// NOTE: The original factor uses cross-sectional mean of jump_drop across all
+// stocks. In Pine Script we cannot access cross-sectional data, so we use the
+// time-series moving average as an approximation. This is a known limitation —
+// the signal quality may differ from the original paper's definition.
+jump_drop_sma = ta.sma(jump_drop, i_window)
+
+// Corrected amplitude: flip sign when gap is below average
+corrected = jump_drop < jump_drop_sma ? -amplitude : amplitude
+
+// Factor value: smoothed corrected amplitude
+FACTOR = ta.sma(corrected, i_window)
+
+// ── Signals (confirmed bars only) ───────────────────────────────────────────
+// This factor is directional: positive = strong upward bias → long,
+// negative = weak / downward bias → short
+if barstate.isconfirmed
+    if FACTOR > i_upperThresh
+        strategy.entry("Long", strategy.long)
+    else if FACTOR < i_lowerThresh
+        strategy.entry("Short", strategy.short)
+
+// ── Visualization ───────────────────────────────────────────────────────────
+plot(FACTOR,         "CORRECTED_AMP", color=color.new(color.orange, 0), display=display.pane)
+hline(i_upperThresh, "Upper Thresh",  color=color.new(color.green, 50), linestyle=hline.style_dashed)
+hline(i_lowerThresh, "Lower Thresh",  color=color.new(color.red, 50),   linestyle=hline.style_dashed)
+hline(0.0,           "Zero",          color=color.new(color.gray, 70),  linestyle=hline.style_dotted)

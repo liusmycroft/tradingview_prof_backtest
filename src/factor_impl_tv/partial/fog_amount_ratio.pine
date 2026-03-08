@@ -1,0 +1,33 @@
+//@version=6
+// NOTE: 原始因子计算模糊K线（实体小、影线长）时的成交额占比，此处使用日线K线模糊度加权成交量近似。
+strategy("Fog Amount Ratio (FOG_AMOUNT_RATIO)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "SMA Length", minval=5)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+ambiguity = 1 - math.abs(close - open) / (high - low + 0.0001)
+fog_vol = ambiguity * volume
+factor = ta.sma(fog_vol, length) / ta.sma(volume, length)
+
+// Signal (High -> uncertainty -> short)
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "Fog Amount Ratio Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

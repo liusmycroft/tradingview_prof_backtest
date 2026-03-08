@@ -1,0 +1,28 @@
+//@version=6
+// NOTE: 原始因子通过回归剥离涨跌幅影响，此处用简化的资金流残差近似。
+strategy("RESIDUAL_FLOW_STRENGTH - Residual Flow Strength", overlay=false,
+     fill_orders_on_standard_ohlc=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+lookback = input.int(20, "Lookback")
+rank_len = input.int(120, "Rank Length")
+long_thresh = input.float(0.8, "Long Threshold")
+short_thresh = input.float(0.2, "Short Threshold")
+
+flow = close > open ? volume : -volume
+ret = close / close[1] - 1
+expected_flow = ret * ta.sma(volume, lookback)
+factor = ta.sma(flow - expected_flow, lookback)
+
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+if barstate.isconfirmed
+    if rank > long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank < short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+plot(factor, "ResidualFlow", color.new(color.yellow, 0))
+plot(rank, "Rank", color.new(color.blue, 0))

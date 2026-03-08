@@ -1,0 +1,40 @@
+//@version=6
+strategy("Abnormal Positive Reversal (AB_PR)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ── Inputs ──────────────────────────────────────────────────────────────────
+i_shortWin    = input.int(20,    "Short-term window",         minval=1)
+i_longWin     = input.int(60,    "Long-term window",          minval=1)
+i_upperThresh = input.float(0.05, "Upper threshold (short)",  step=0.01)
+i_lowerThresh = input.float(-0.05, "Lower threshold (long)",  step=0.01)
+
+// ── Calculations ────────────────────────────────────────────────────────────
+// Overnight return: open vs previous close
+ret_co = close[1] != 0 ? open / close[1] - 1.0 : 0.0
+// Intraday return: close vs open
+ret_oc = open != 0 ? close / open - 1.0 : 0.0
+
+// Positive reversal indicator: gap-down open followed by intraday recovery
+pr_indicator = (ret_co < 0 and ret_oc > 0) ? 1.0 : 0.0
+
+// Short-term and long-term positive-reversal frequency
+PR_short = ta.sma(pr_indicator, i_shortWin)
+PR_long  = ta.sma(pr_indicator, i_longWin)
+
+// Abnormal positive reversal: deviation from longer-term norm
+AB_PR = PR_short - PR_long
+
+// ── Signals (confirmed bars only) ───────────────────────────────────────────
+if barstate.isconfirmed
+    if AB_PR > i_upperThresh
+        strategy.entry("Short", strategy.short)
+    else if AB_PR < i_lowerThresh
+        strategy.entry("Long", strategy.long)
+
+// ── Visualization ───────────────────────────────────────────────────────────
+plot(AB_PR,          "AB_PR",         color=color.new(color.orange, 0), display=display.pane)
+hline(i_upperThresh, "Upper Thresh",  color=color.new(color.red, 50),   linestyle=hline.style_dashed)
+hline(i_lowerThresh, "Lower Thresh",  color=color.new(color.green, 50), linestyle=hline.style_dashed)
+hline(0.0,           "Zero",          color=color.new(color.gray, 70),  linestyle=hline.style_dotted)

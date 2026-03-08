@@ -1,0 +1,15 @@
+//@version=6
+// NOTE: 原始因子衡量单位成交额下股价波动幅度及其变化趋势，此处用日线近似。
+strategy("Price Resiliency (PRICE_RESILIENCY)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+i_T = input.int(20, "Lookback", minval=5)
+amount = volume * close / 1e6
+elasticity = math.abs(close/close[1]-1) / (amount + 0.0001)
+factor_level = ta.sma(elasticity, i_T)
+factor = factor_level - factor_level[i_T]
+factor_rank = ta.percentrank(factor, 120) / 100.0
+if barstate.isconfirmed
+    if factor_rank > 0.8 and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank < 0.2 and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+plot(factor, "Factor", color=color.new(color.orange, 0), display=display.pane)

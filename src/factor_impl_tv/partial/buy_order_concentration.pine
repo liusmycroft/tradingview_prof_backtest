@@ -1,0 +1,35 @@
+//@version=6
+// NOTE: 原始因子基于分钟级数据计算买单集中度（买方成交量的HHI指数），此处使用日线近似，用阳线日成交量平方占比代替。
+strategy("Buy Order Concentration (BUY_ORDER_CONCENTRATION)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "SMA Length", minval=5)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+up_vol_sq = close > open ? volume * volume : 0.0
+total_vol_sq = volume * volume
+avg_up_sq = ta.sma(up_vol_sq, length)
+avg_total_sq = ta.sma(total_vol_sq, length)
+factor = avg_total_sq > 0 ? avg_up_sq / avg_total_sq : 0.0
+
+// Signal - High → concentrated buying → short
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "BUY_ORDER_CONC Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

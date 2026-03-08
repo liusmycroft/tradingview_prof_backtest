@@ -1,0 +1,57 @@
+//@version=6
+strategy("Weighted Upper Shadow Freq (WEIGHTED_UPPER_SHADOW_FREQ)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// Inputs
+// ============================================================================
+M = input.int(40, "Lookback Window", minval=5)
+half_life = input.int(10, "Half Life for Decay", minval=1)
+u = input.float(0.01, "Shadow Threshold", minval=0.0, step=0.001)
+rank_period = input.int(120, "Ranking Period", minval=20)
+signal_thresh_long = input.float(0.7, "Signal Threshold (Percentile Long)", minval=0.0, maxval=1.0)
+signal_thresh_short = input.float(0.7, "Signal Threshold (Percentile Short)", minval=0.0, maxval=1.0)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+var float factor = na
+
+if barstate.isconfirmed
+    float weighted_sum = 0.0
+    float weight_total = 0.0
+
+    for j = 0 to M - 1
+        float prev_close = close[j + 1]
+        float upper_shadow = 0.0
+        if prev_close > 0
+            upper_shadow := (high[j] - math.max(open[j], close[j])) / prev_close
+
+        float indicator = upper_shadow > u ? 1.0 : 0.0
+        float w = math.pow(0.5, float(j) / float(half_life))
+        weighted_sum += indicator * w
+        weight_total += w
+
+    factor := weight_total > 0 ? weighted_sum / float(M) : 0.0
+
+// Rolling percentile approximation
+factor_rank = ta.percentrank(factor, rank_period) / 100.0
+
+// ============================================================================
+// Signal Logic
+// Signal: factor high -> short (frequent upper shadows = selling pressure)
+// ============================================================================
+if barstate.isconfirmed
+    if factor_rank > signal_thresh_short and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank < (1.0 - signal_thresh_long) and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor, "Weighted Upper Shadow Freq", color=color.new(color.red, 0), display=display.pane)
+plot(factor_rank, "Factor Rank", color=color.new(color.blue, 0), display=display.pane)
+hline(0.5, "Midline", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

@@ -1,0 +1,39 @@
+//@version=6
+// NOTE: 原始因子使用分钟级非线性波动率，此处使用日线特质波动率乘以特异性近似代替。
+strategy("Nonlinear HF Volatility (NONLINEAR_HF_VOLATILITY)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length_short = input.int(20, "Short Length", minval=5)
+length_long = input.int(60, "Long Length", minval=20)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+benchmark = input.symbol("SPY", "Benchmark Symbol")
+
+// Calculations
+ret = close / close[1] - 1
+mkt_ret = request.security(benchmark, timeframe.period, close / close[1] - 1)
+idio = ret - mkt_ret
+vol = ta.stdev(idio, length_short)
+corr_val = ta.correlation(ret, mkt_ret, length_long)
+specificity = 1 - math.pow(corr_val, 2)
+factor = math.sqrt(vol * specificity)
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "NONLINEAR_HF_VOLATILITY Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

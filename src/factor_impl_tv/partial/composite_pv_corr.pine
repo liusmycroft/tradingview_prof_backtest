@@ -1,0 +1,39 @@
+//@version=6
+// NOTE: 原始因子基于分钟级数据计算复合价量相关性（相关系数+波动率+趋势），此处使用日线近似，对20日价量相关系数进行多维度分析。
+strategy("Composite Price-Volume Correlation (CPV)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+corr_len = input.int(20, "Correlation Length", minval=5)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+pv_corr = ta.correlation(close, volume, corr_len)
+pv_corr_vol = ta.stdev(pv_corr, corr_len)
+pv_corr_trend = (pv_corr - pv_corr[corr_len]) / corr_len
+
+// Normalize each component using percentrank
+norm_corr = ta.percentrank(pv_corr, rank_len) / 100.0
+norm_vol = ta.percentrank(pv_corr_vol, rank_len) / 100.0
+norm_trend = ta.percentrank(pv_corr_trend, rank_len) / 100.0
+
+factor = norm_corr + norm_vol + norm_trend
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "CPV Factor", color=color.new(color.orange, 0), display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

@@ -1,0 +1,28 @@
+//@version=6
+// NOTE: 原始因子使用成交额加权流动性溢价，此处用日线价差与成交额近似。
+strategy("WEIGHTED_LIQUIDITY_PREMIUM - Amount-Weighted Liquidity Premium", overlay=false,
+     fill_orders_on_standard_ohlc=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+lookback = input.int(20, "Lookback")
+rank_len = input.int(120, "Rank Length")
+long_thresh = input.float(0.2, "Long Threshold")
+short_thresh = input.float(0.8, "Short Threshold")
+
+spread = (high - low) / close
+amount = volume * close
+weighted_spread = spread * amount
+factor = ta.sma(weighted_spread, lookback) / ta.sma(amount, lookback)
+
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+plot(factor, "Weighted Liquidity Premium", color.new(color.yellow, 0))
+plot(rank, "Rank", color.new(color.blue, 0))

@@ -1,0 +1,53 @@
+//@version=6
+strategy("Corrected Intraday Reversal (CORRECTED_INTRADAY_REVERSAL)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// Inputs
+// ============================================================================
+i_corrLen       = input.int(20, "Corrected Return SMA Length", minval=1)
+i_volLen        = input.int(20, "Intraday Vol SMA Length (proxy for cross-sectional mean)", minval=1)
+i_factorLen     = input.int(20, "Factor SMA Length", minval=1)
+i_signalLen     = input.int(20, "Signal MA Length", minval=1)
+i_shortThresh   = input.float(0.0, "Short Threshold (factor above signal + thresh)", step=0.001)
+i_longThresh    = input.float(0.0, "Long Threshold (factor below signal - thresh)", step=0.001)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+// NOTE: 原始因子需要截面数据来计算截面均值，Pine Script中无法实现截面计算，
+// 此处用时间序列SMA作为截面均值的近似替代。
+intraday_return = close / open - 1.0
+intraday_vol    = math.abs(intraday_return)
+
+// Time-series SMA as proxy for cross-sectional mean of intraday volatility
+vol_mean  = ta.sma(intraday_vol, i_volLen)
+
+// Corrected return: flip sign when vol is below average (low-vol regime → reversal)
+corrected = intraday_vol < vol_mean ? -intraday_return : intraday_return
+
+// Factor: smoothed corrected return
+factor    = ta.sma(corrected, i_factorLen)
+signal_ma = ta.sma(factor, i_signalLen)
+
+// ============================================================================
+// Signals — reversal factor: high → short, low → long
+// ============================================================================
+if barstate.isconfirmed
+    if factor > signal_ma + i_shortThresh
+        if strategy.position_size > 0
+            strategy.close("Long")
+        strategy.entry("Short", strategy.short)
+    else if factor < signal_ma - i_longThresh
+        if strategy.position_size < 0
+            strategy.close("Short")
+        strategy.entry("Long", strategy.long)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor,    "Factor",    color=color.new(color.orange, 0), display=display.pane)
+plot(signal_ma, "Signal MA", color=color.new(color.blue, 0),   display=display.pane)
+hline(0, "Zero", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

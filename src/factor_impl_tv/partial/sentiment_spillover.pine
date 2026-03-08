@@ -1,0 +1,27 @@
+//@version=6
+// NOTE: 原始因子使用相邻股票换手率回归残差，此处用个股换手率相对市场均值近似。
+strategy("RNBR_TOV - Neighbor Turnover Regression Residual", overlay=false,
+     fill_orders_on_standard_ohlc=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+lookback = input.int(20, "Lookback")
+rank_len = input.int(120, "Rank Length")
+long_thresh = input.float(0.8, "Long Threshold")
+short_thresh = input.float(0.2, "Short Threshold")
+
+turnover = volume / ta.sma(volume, 252)
+mkt_turnover = ta.sma(turnover, 60)
+factor = turnover - ta.sma(mkt_turnover, lookback)
+
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+if barstate.isconfirmed
+    if rank > long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank < short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+plot(factor, "SentimentSpillover", color.new(color.yellow, 0))
+plot(rank, "Rank", color.new(color.blue, 0))

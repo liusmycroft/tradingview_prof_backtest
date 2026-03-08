@@ -1,0 +1,42 @@
+//@version=6
+strategy("Shadow Close Std (SHADOW_CLOSE_STD)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// Inputs
+// ============================================================================
+lookback = input.int(20, "Lookback Period", minval=2)
+signal_thresh_long = input.float(0.7, "Signal Threshold (Percentile Long)", minval=0.0, maxval=1.0)
+signal_thresh_short = input.float(0.7, "Signal Threshold (Percentile Short)", minval=0.0, maxval=1.0)
+market_ticker = input.symbol("INDEX:SPX", "Market Benchmark")
+
+// ============================================================================
+// Calculations
+// ============================================================================
+upper_shadow = high - math.max(open, close)
+lower_shadow = math.min(open, close) - low
+shadow_ratio = (upper_shadow + lower_shadow) / close
+factor = ta.stdev(shadow_ratio, lookback)
+
+// Rolling percentile approximation using rank over lookback
+rank_period = input.int(120, "Ranking Period", minval=20)
+factor_rank = ta.percentrank(factor, rank_period) / 100.0
+
+// ============================================================================
+// Signal Logic
+// Signal: factor high -> short (unstable battle between bulls/bears -> uncertainty)
+// ============================================================================
+if barstate.isconfirmed
+    if factor_rank > signal_thresh_short and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank < (1.0 - signal_thresh_long) and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor, "Shadow Close Std", color=color.new(color.orange, 0), display=display.pane)
+plot(factor_rank, "Factor Rank", color=color.new(color.blue, 0), display=display.pane)
+hline(0.5, "Midline", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

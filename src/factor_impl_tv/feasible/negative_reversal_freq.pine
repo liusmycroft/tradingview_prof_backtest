@@ -1,0 +1,45 @@
+//@version=6
+strategy("Negative Reversal Frequency (NEGATIVE_REVERSAL_FREQ)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// ============================================================================
+// Inputs
+// ============================================================================
+i_nrLen       = input.int(20, "NR SMA Length", minval=1)
+i_signalLen   = input.int(20, "Signal MA Length", minval=1)
+i_shortThresh = input.float(0.0, "Short Threshold (NR above signal + thresh)", step=0.01)
+i_longThresh  = input.float(0.0, "Long Threshold (NR below signal - thresh)", step=0.01)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+overnight_ret = open / close[1] - 1.0
+intraday_ret  = close / open - 1.0
+
+// Negative reversal: both overnight and intraday returns are negative
+indicator = (overnight_ret < 0 and intraday_ret < 0) ? 1.0 : 0.0
+
+NR        = ta.sma(indicator, i_nrLen)
+signal_ma = ta.sma(NR, i_signalLen)
+
+// ============================================================================
+// Signals — high NR (persistent selling pressure) → short
+// ============================================================================
+if barstate.isconfirmed
+    if NR > signal_ma + i_shortThresh
+        if strategy.position_size > 0
+            strategy.close("Long")
+        strategy.entry("Short", strategy.short)
+    else if NR < signal_ma - i_longThresh
+        if strategy.position_size < 0
+            strategy.close("Short")
+        strategy.entry("Long", strategy.long)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(NR,        "NR",        color=color.new(color.orange, 0), display=display.pane)
+plot(signal_ma, "Signal MA", color=color.new(color.blue, 0),   display=display.pane)
+hline(0.5, "Mid", color=color.gray, linestyle=hline.style_dotted, display=display.pane)

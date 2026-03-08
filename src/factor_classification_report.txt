@@ -1,0 +1,604 @@
+abnormal_negative_reversal.py|AB_NR|FEASIBLE|daily_OHLCV (ret_co, ret_oc computable from OHLC)|反向日内逆转的异常频率，当月频率相对过去 12 个月均值的比值
+abnormal_positive_reversal.py|AB_PR|FEASIBLE|daily_OHLCV (ret_co, ret_oc computable from OHLC)|正向日内逆转的异常频率，即正向逆转频率减去其长期均值，衡量近期逆转行为的异常程度
+abnormal_return_avg.py|ABNRETAVG|FEASIBLE|daily_OHLCV (daily_return, market_return)|平均异常日收益率的平方均值，衡量异常收益引发的投资者注意力
+abnormal_volume_daily.py|ABNVOLD|FEASIBLE|daily_OHLCV (volume)|每日最大异常成交量，日频成交量除以过去一年平均成交量的滚动最大值
+abnretd.py|ABNRETD|FEASIBLE|daily_OHLCV (stock_returns, market_returns)|月内日频收益率与市场收益率绝对差值的最大值，衡量投资者关注度
+abs_ret_amount_corr.py|CORA|PARTIAL|minute_precomputed|corr(|Ret|, Amount)，衡量单位成交额对股价推动的关系，与未来收益负相关
+acma.py|ACMA|PARTIAL|minute_precomputed|日内分钟成交额序列的自相关系数，衡量成交额的持续性与羊群效应
+active_buy_ratio.py|ACTIVE_BUY_RATIO|NOT_FEASIBLE|active_buy_sell|主买占比，主动买入成交额占总成交额的 T 日滚动均值
+active_buy_specificity.py|ACTIVE_BUY_SPECIFICITY|NOT_FEASIBLE|active_buy_sell|修正主买时刻出现次数的截面标准化均值，衡量持续且特异性的主买资金流入
+active_chip_ratio.py|ACTIVE_CHIP_RATIO|NOT_FEASIBLE|chip_data|涨跌停价格区间内的筹码占比，衡量交易活跃程度
+afh_close.py|afh_close|NOT_FEASIBLE|chip_data|买入浮盈系数修正后的积极灵活筹码：Close_t * Σ(Vol_AFH_i/Price_i) / Σ(Volume_t)，T日滚动
+amount_entropy.py|AMOUNT_ENTROPY|PARTIAL|minute_precomputed|成交额占比熵的滚动均值：衡量成交额在时间段内的分布均匀程度
+amt_max.py|AMT_MAX|PARTIAL|minute_precomputed|个股收益最高时的领先成交量异动：收益率最高分钟的前一分钟成交量与日均成交量之比，取T日滚动均值
+analyst_anchoring_bias.py|CAF_EP|NOT_FEASIBLE|analyst_data|基于 PE 的分析师锚效益偏差，衡量分析师预测相对行业中位数的偏离程度
+analyst_co_coverage_indirect_momentum.py|ANALYST_CO_COVERAGE_INDIRECT_MOMENTUM|NOT_FEASIBLE|analyst_data|通过分析师共同覆盖的间接关联强度加权关联股票收益率，捕捉隐蔽的领先滞后效应
+apm.py|APM|PARTIAL|minute_precomputed|上午与下午价格行为差异程度的统计量，剥离动量影响后的残差
+ask_depth.py|ASK_DEPTH|NOT_FEASIBLE|bid_ask_data|卖盘深度因子，基于卖盘挂单量与价差的比值衡量流动性深度
+atd_price_lowest.py|ATD_PRICE_LOWEST|PARTIAL|minute_precomputed|股价最低10%时刻的笔均成交金额与全天笔均成交金额之比
+atd_price_lowest_sell.py|ATD_PRICE_LOWEST_SELL|NOT_FEASIBLE|needs tick-level sell classification at price lows|股价最低10%时刻主卖笔均成交金额与全天笔均成交金额之比
+attention_abnormal_return.py|ATTENTION_ABNORMAL_RETURN|FEASIBLE|daily_OHLCV (abnormal return based attention)|基于异常收益的注意力捕捉，衡量异常收益吸引投资者注意力的程度
+attention_capture_vol.py|ATTENTION_CAPTURE_VOL|PARTIAL|cross_sectional (industry vol sensitivity)|基于市场波动率的注意力捕捉：个股收益对行业截面波动率的敏感程度
+attention_decay_panic.py|ATTENTION_DECAY_PANIC|NOT_FEASIBLE|news_sentiment|注意力衰减-惊恐因子，对惊恐度做时间衰减后加权调整收益率的均值与波动等权合成
+attention_events.py|ATTENTION_EVENTS|FEASIBLE|daily_OHLCV (limit up/down count)|每月涨停、跌停事件次数之和，衡量股票受关注程度
+attention_limit.py|ATTENTION_LIMIT|PARTIAL|cross_sectional (market limit ratio regression)|基于涨跌停的注意力捕捉：个股收益率对市场涨跌停比例回归的绝对beta值
+attention_market_volume.py|ATTENTION_MARKET_VOLUME|PARTIAL|cross_sectional (market volume sensitivity)|个股收益对市场总成交额的敏感程度绝对值，衡量注意力捕捉效应
+attention_spillover.py|SPILL|NOT_FEASIBLE|news_sentiment|相近股票注意力均值与个股注意力之差，衡量注意力溢出程度
+attention_turnover.py|ATTENTION_TURNOVER|NOT_FEASIBLE|news_sentiment|个股收益对行业平均换手率的回归系数绝对值，衡量股票对市场关注的敏感程度
+avg_order_book_depth.py|AVG_ORDER_BOOK_DEPTH|NOT_FEASIBLE|bid_ask_data|买一量与卖一量的均值，反映市场整体挂单深度
+avg_outflow_per_trade_ratio.py|AVG_OUTFLOW_PER_TRADE_RATIO|PARTIAL|minute_precomputed|下跌分钟的笔均成交金额与全天笔均成交金额之比的均值
+avg_positive_jump_return.py|AVG_POSITIVE_JUMP_RETURN|PARTIAL|minute_precomputed (avg positive jump)|日内正向跳跃收益的均值的T日滚动均值，衡量正向跳跃的平均幅度
+b_type_volume_dist.py|B_TYPE_VOLUME_DIST|PARTIAL|minute_precomputed|成交量支撑区域上限与日内最低价的差异，识别b型成交量分布形态
+bid_ask_price_ratio.py|PIR|NOT_FEASIBLE|bid_ask_data (bid/ask prices)|买卖委托价格比率，从价格角度描述买盘压力
+bid_ask_spread.py|BID_ASK_SPREAD|NOT_FEASIBLE|bid_ask_data|卖一价与买一价的相对距离，衡量市场流动性宽度
+bid_depth.py|BID_DEPTH|NOT_FEASIBLE|bid_ask_data|买盘深度的指数移动平均，衡量买方流动性支撑强度
+bottleneck_company.py|BOTTLENECK_COMPANY|NOT_FEASIBLE|network_data, supply_chain|供应链网络中的中介中心性，衡量公司在网络中的桥梁地位
+business_complexity_linkage.py|BIZ_COMPLEXITY_LINKAGE|NOT_FEASIBLE|supply_chain|业务复杂度加权的相似公司超额收益联动，衡量动量溢出效应
+buy_illiquidity.py|BUY_ILLIQUIDITY|PARTIAL|minute_precomputed (buy-side amount regression)|买单金额对收益率的回归系数，衡量买方冲击成本
+buy_order_concentration.py|BUY_ORDER_CONCENTRATION|PARTIAL|minute_precomputed (buy order concentration)|买单成交额平方和与总成交额平方的比值，衡量买单成交的集中程度
+cancel_rate.py|CANCEL_RATE|NOT_FEASIBLE|auction_data|三小将-撤单率因子，基于集合竞价阶段卖方全撤、部撤和废单撤单率等权合成
+capital_loss_realization.py|CPLR|PARTIAL|needs realized loss ratio from trades|已实现亏损比率，衡量投资者实际卖出亏损股票的倾向程度
+cgo.py|CGO|PARTIAL|needs turnover-weighted historical cost basis|资本利得突出量，衡量投资者未实现盈亏相对于当前价格的比例
+chip_concentration.py|CHIP_CONCENTRATION|NOT_FEASIBLE|chip_data|筹码集中度因子，衡量筹码分布的集中程度
+chip_deviation_rate.py|CHIP_DEVIATION_RATE|NOT_FEASIBLE|chip_data|动态加权的盈利筹码占比，刻画股价与筹码持仓成本间的偏离
+chip_disposition_effect.py|CHIP_DISPOSITION_EFFECT|NOT_FEASIBLE|chip_data|基于筹码分布的处置效应，衡量盈利筹码与亏损筹码的卖出倾向差异
+chip_distribution_cv.py|CHIP_DISTRIBUTION_CV|NOT_FEASIBLE|chip_data|筹码分布的变异系数（标准差/均值），衡量筹码分布的离散程度
+chip_distribution_shape.py|CHIP_DISTRIBUTION_KURTOSIS|NOT_FEASIBLE|chip_data|筹码分布的加权峰度，衡量筹码在平均值处峰值的高低程度
+chip_pnl_adjusted_afh.py|CHIP_PNL_ADJUSTED_AFH|NOT_FEASIBLE|chip_data|基于筹码盈亏系数修正积极灵活筹码，捕捉处置效应下的投资者行为
+chip_return_enhance.py|CHIP_RETURN_ENHANCE|NOT_FEASIBLE|chip_data|筹码收益调整因子多头端与反转因子空头端的合成，融合动量与反转效应
+chip_turnover.py|CHIP_TURNOVER|NOT_FEASIBLE|chip_data|筹码换手率：基于筹码分布的换手率，取T日滚动均值
+ckdp.py|ckdp|NOT_FEASIBLE|chip_data|筹码分布成本重心因子：(均价 - 最低筹码价) / (最高筹码价 - 最低筹码价)
+closing_return.py|CLOSING_RETURN|PARTIAL|minute_precomputed|尾盘半小时收益率的滚动累计值，捕捉尾盘交易的动量或反转效应
+closing_volume_ratio.py|CLOSING_VOLUME_RATIO|PARTIAL|minute_precomputed|尾盘成交占比：尾盘30分钟成交量占全天成交量的比例，取T日滚动均值
+co_min.py|CO_MIN|PARTIAL|minute_precomputed|个股收益最低时的价变共振：个股最差分钟对应的市场均值除以市场标准差，取T日滚动均值
+complex_momentum.py|COMPLEX_MOMENTUM|NOT_FEASIBLE|needs business segment revenue data|基于行业营收权重的加权行业收益率，捕捉复杂公司的动量溢出效应
+composite_pv_corr.py|CPV|PARTIAL|minute_precomputed|综合价量相关性均值、波动、趋势，剔除反转因子后的复合因子
+confidence_normal_active_buy.py|CONFIDENCE_NORMAL_ACTIVE_BUY|PARTIAL|minute_precomputed (CDF-estimated active buy)|基于正态分布CDF估计主动买入金额占比，提高主买卖额估计准确度
+consistent_buy_trade.py|CONSISTENT_BUY_TRADE|PARTIAL|approximable from daily OHLCV (up-body volume ratio)|一致买入交易因子，衡量上涨实体K线成交量占比，捕捉集体一致交易行为
+consistent_sell_trade.py|CONSISTENT_SELL_TRADE|PARTIAL|approximable from daily OHLCV (down-body volume ratio)|下跌实体K线成交量占比的移动平均，捕捉集体一致卖出行为
+consistent_trading_volume.py|TCV|PARTIAL|minute_precomputed|一致交易量占比的T日滚动均值，衡量买卖方向一致的成交量占总成交量的比例
+cora_abs.py|CORA_A|PARTIAL|minute_precomputed|日内绝对收益率与滞后一期成交额的相关性，捕捉量在价先的异常交易行为
+cora_r.py|CORA_R|PARTIAL|minute_precomputed|日内滞后一期绝对收益率与成交额的相关性，捕捉价在量先的异常交易行为
+corrected_ambiguity_spread.py|CORRECTED_AMBIGUITY_SPREAD|NOT_FEASIBLE|bid_ask_data|修正模糊价差，对传统买卖价差进行模糊区间修正后取滚动均值
+corrected_amplitude.py|CORRECTED_AMPLITUDE|FEASIBLE|daily_OHLCV (close, high, low + overnight gap)|修正的振幅因子，根据跳空方向修正日内振幅后取滚动均值
+corrected_intraday_reversal.py|CORRECTED_INTRADAY_REVERSAL|FEASIBLE|daily_OHLCV (close, open + intraday vol)|根据日内波动率修正的日内反转因子，低波动时翻转日内收益方向
+corrected_net_inflow.py|CNIR|PARTIAL|minute_precomputed|通过回归剥离涨跌幅影响后的主力资金净流入占比
+corrected_overnight_reversal.py|CORRECTED_OVERNIGHT_REVERSAL|PARTIAL|minute_precomputed|根据隔夜距离波动率修正的隔夜反转因子，低波动时翻转隔夜距离方向
+cpqsi.py|CPQSI|NOT_FEASIBLE|bid_ask_data|收盘委托价差强度，衡量收盘前的交易成本与流动性
+csad.py|CSAD|PARTIAL|cross_sectional (CSAD herding model)|横截面绝对偏差模型的二次项系数，衡量市场羊群效应强度
+csad_small.py|CSAD_SMALL|FEASIBLE|daily_OHLCV|CSAD小型板块因子：构建10只股票的微型板块，计算截面绝对偏差并标准化，取负T日均值
+cssd.py|CSSD|FEASIBLE|daily_OHLCV|截面收益标准差因子，基于CSSD模型检测羊群效应并计算个股贡献度
+customer_centrality_change.py|CUSTOMER_CENTRALITY_CHANGE|NOT_FEASIBLE|network_data, supply_chain|当期与上期标准化客户接近中心性之差，衡量供应商公司核心地位的变化
+customer_closeness.py|CUSTOMER_CLOSENESS|NOT_FEASIBLE|supply_chain|供应链网络中客户节点的接近中心性，衡量信息传播效率
+customer_importance.py|CUSTOMER_IMPORTANCE|NOT_FEASIBLE|supply_chain|利用 PageRank 算法计算客户重要性，考虑供应商本身的重要性
+customer_industry_concentration.py|CUSTOMER_INDUSTRY_CONCENTRATION|NOT_FEASIBLE|supply_chain|客户所属行业赫芬达尔指数的加权平均，反映客户行业竞争格局
+customer_momentum.py|CMOM|NOT_FEASIBLE|supply_chain|最大客户动量，股票最大客户的收益动量，捕捉供应链动量溢出效应
+customer_momentum_id.py|CUSTOMER_MOMENTUM_ID|NOT_FEASIBLE|supply_chain|基于供应链客户动量与信息离散度的改进因子，信息连续时动量效应更强
+daily_return_attention.py|DAILY_RETURN_ATTENTION|FEASIBLE|daily (return-based attention measure)|当前自然年因子值减去历史因子值，基于收益率偏差的注意力度量
+dazzling_return.py|DAZZLING_RETURN|PARTIAL|minute_precomputed|成交量激增时刻的分钟收益率均值，衡量量增引起的价格变动幅度
+dazzling_vol.py|DAZZLING_VOL|PARTIAL|minute_precomputed|耀眼波动率：日度耀眼波动率的T日滚动均值与标准差的等权平均
+downside_rv.py|DOWNSIDE_RV|PARTIAL|minute_precomputed (intraday downside RV)|下行已实现波动率，衡量资产价格的下行波动风险
+dpin.py|DPIN|NOT_FEASIBLE|needs intraday unexpected return direction|基于日内非预期收益方向的知情交易占比，衡量信息不对称程度
+dpin_small.py|DPIN_SMALL|NOT_FEASIBLE|needs small order intraday data|小单条件下的动态知情交易概率，捕捉知情交易者拆单行为
+drop_moment_atd.py|DROP_MOMENT_ATD|PARTIAL|minute_precomputed|下跌时刻笔均成交金额与全天笔均成交金额之比，刻画主力资金抄底行为
+drop_sell_atd.py|DROP_SELL_ATD|NOT_FEASIBLE|needs sell-side per-trade amount during drops|跌幅最大时刻-主卖笔均成交金额因子，衡量下跌时主动卖出的集中度
+drop_time_centroid.py|DROP_TIME_CENTROID|PARTIAL|minute_precomputed|跌幅时间重心偏离因子，基于涨跌时间重心的截面回归残差
+early_late_composite_ratio.py|EARLY_LATE_COMPOSITE_RATIO|PARTIAL|minute_precomputed|非早尾盘双边成交量与早盘双边成交量之差占总成交量的比例
+effective_depth.py|EFFECTIVE_DEPTH|NOT_FEASIBLE|bid_ask_data|买一量与卖一量的最小值，衡量市场实际有效深度
+effective_spread.py|EFFECTIVE_SPREAD|NOT_FEASIBLE|bid_ask_data|成交价相对于中间价的相对偏差，反映交易成本
+els_correlation.py|ELSCorrelation|NOT_FEASIBLE|chip_data|超大单与小单净流入的Spearman秩相关系数，衡量大小资金的同步性
+end_of_day_amount.py|END_OF_DAY_AMOUNT|PARTIAL|minute_precomputed|尾盘成交额占全天成交额的比例，N日均值
+extreme_follow_ratio.py|EXTREME_FOLLOW_RATIO|PARTIAL|minute_precomputed|极端涨跌时跟随交易量与反向交易量的比值，衡量投资者跟风程度
+extreme_return_reversal.py|EXTREME_RETURN_REVERSAL|PARTIAL|minute_precomputed|日内最极端收益bar及其前一分钟收益的截面排序等权合成，捕捉极端收益反转效应
+flow_following.py|FLOW_FOLLOWING|PARTIAL|minute_precomputed|个股高低位成交额差异与其他股票的平均绝对Spearman相关性
+fog_amount_ratio.py|FOG_AMOUNT_RATIO|PARTIAL|minute_precomputed|模糊金额比：起雾时刻成交额均值与总体成交额均值之比
+fog_volume_ratio.py|FOG_VOLUME_RATIO|PARTIAL|minute_precomputed|起雾时刻成交量均值与总体成交量均值之比，衡量投资者对模糊性的厌恶程度
+follow_leader.py|FOLLOW_LEADER|PARTIAL|minute_precomputed|待著而救因子：日跟随系数的均值与标准差等权合成，衡量跟随效应强度
+foreign_ops.py|FOREIGN_OPS|NOT_FEASIBLE|needs overseas revenue breakdown|海外运营信息：基于海外营收占比与对应国家行业收益率的加权求和，衡量海外动量溢出
+fuzzy_corr.py|FUZZY_CORR|PARTIAL|minute_precomputed|分钟模糊性序列与成交额序列的相关系数，衡量投资者对模糊性的厌恶程度
+gain_selling_tendency.py|GAIN_SELLING_TENDENCY|PARTIAL|needs turnover-weighted gain history|换手率加权的历史盈利累积，衡量投资者盈利卖出的倾向
+gaming_factor.py|STREN|NOT_FEASIBLE|chip_data|博弈因子，加权主买量与加权主卖量之比，衡量多空博弈的相对力量
+geo_momentum.py|GEO_MOMENTUM|NOT_FEASIBLE|needs company geographic location data|地理动量溢出效应：同地区其他公司市值加权收益率
+golden_ratio_reversal.py|GOLDEN_RATIO_REVERSAL|PARTIAL|minute_precomputed|日内黄金分割反转，基于10:00价格到收盘价的对数收益率滚动求和
+hcvol.py|HCVOL|PARTIAL|minute_precomputed (above-close volume ratio)|高于收盘价买入的成交量占比，衡量投资者买入情绪与惜售心理
+herding_behavior.py|HERDING_BEHAVIOR|NOT_FEASIBLE|needs intraday buy/sell pressure data|羊群行为因子，衡量日内买卖压力的羊群效应强度
+hf_downside_vol_ratio.py|HF_DOWNSIDE_VOL_RATIO|PARTIAL|minute_precomputed|负收益平方和占总收益平方和的比例，衡量下行波动特征
+hf_idio_vol.py|HF_IDIO_VOL|PARTIAL|minute_precomputed|高频波动率与增强特异率的乘积开方，捕捉个股异常波动信息
+high_low_price_composite.py|HIGH_LOW_PRICE_COMPOSITE_RATIO|PARTIAL|minute_precomputed|高低价复合交易占比：非高低价买卖成交量与高价买卖成交量之差占总成交量比
+high_low_spread_intensity.py|HLI|PARTIAL|minute_precomputed|基于高低价估计的买卖价差除以成交额，衡量流动性强度
+high_low_vol_select.py|HIGH_LOW_VOL_SELECT|PARTIAL|minute_precomputed|高低位放量选股因子：低位与高位波动率占比之差，衡量高低位波动率相对强弱
+id_mag.py|ID_MAG|PARTIAL|cross_sectional (return magnitude dispersion)|基于收益规模的信息离散度因子，考虑日度收益规模对信息离散度的影响
+ideal_amplitude.py|IDEAL_AMPLITUDE|FEASIBLE|daily_OHLCV (close, high, low)|高价日与低价日振幅之差，衡量价格水平对波动率的非对称影响
+ideal_reversal.py|IDEAL_REVERSAL|PARTIAL|minute_precomputed|基于日内成交金额分布高分位值区分大单交易日，计算大单日与小单日涨跌幅之差
+idio_turnover_vol.py|IDIO_TURNOVER_VOL|PARTIAL|minute_precomputed|特异质换手波动率：OLS回归剥离换手率风格因子后残差的标准差
+illiq.py|illiq|PARTIAL|minute_precomputed|非流动性因子：基于日内K线捷径路径与成交额之比的滚动均值
+improved_analyst_coverage_momentum.py|IMPROVED_ANALYST_COVERAGE_MOMENTUM|NOT_FEASIBLE|analyst_data|以直接关联数量改进的间接关联强度加权关联股票收益率
+improved_large_ratio.py|IMPROVED_LARGE_RATIO|PARTIAL|minute_precomputed|改进大单交易占比因子，综合考虑大单与非大单之间的交叉交易
+improved_large_ratio_active.py|IMPROVED_LARGE_RATIO_ACTIVE|NOT_FEASIBLE|needs active buy/sell large order data|引入主动买卖特征的改进大单交易占比，区分主动买入和主动卖出的大单
+industry_momentum.py|INDUSTRY_MOMENTUM|PARTIAL|minute_precomputed|行业内其他股票市值加权收益率，衡量行业动量溢出效应
+informed_buy_ratio.py|INFORMED_BUY_RATIO|NOT_FEASIBLE|active_buy_sell|知情主买占比因子，基于知情交易者主动买入金额占总成交金额的比例
+informed_sell_ratio.py|INFORMED_SELL_RATIO|NOT_FEASIBLE|active_buy_sell|知情主卖占比因子，基于知情交易者主动卖出金额占总成交金额的比例
+inst_trade_heat.py|INST_TRADE_HEAT|NOT_FEASIBLE|needs institutional flow data|机构交易热度：机构资金流入流出占市值的滚动均值
+intraday_amplitude_cut.py|INTRADAY_AMPLITUDE_CUT|PARTIAL|minute_precomputed|日内振幅切割因子，高价与低价分钟振幅之差的标准化合成
+intraday_jump_drop.py|INTRADAY_JUMP_DROP|PARTIAL|minute_precomputed|基于单复利差的日内跳跌度，衡量股价跳跃性涨跌程度
+intraday_max_drawdown.py|INTRADAY_MAX_DRAWDOWN|PARTIAL|minute_precomputed|日内价格从峰值到谷值的最大回撤幅度，衡量日内极端下行风险
+intraday_ret_iv.py|INTRADAY_RET_IV|PARTIAL|needs intraday returns for PCA, not just daily open/close|特质日内收益波动率：PCA剥离日内收益率共同成分后残差的标准差
+intraday_ret_vol_ratio.py|INTRADAY_RET_VOL_RATIO|PARTIAL|minute_precomputed|日内收益波动比，衡量收益率与波动率的比值，用于捕捉灾后重建效应
+intraday_snr.py|INTRADAY_SNR|PARTIAL|minute_precomputed|EMD分解后信号标准差与噪声标准差之比的对数，衡量价格信号质量
+jump_absolute_return.py|JAR|PARTIAL|minute_precomputed (cumulative jump return)|累计跳跃绝对收益的T日滚动求和，衡量跳跃成分对总收益的累计贡献
+jump_arrival.py|JUMP_ARRIVAL|PARTIAL|minute_precomputed (jump frequency)|跳跃强度：观察期内日内价格存在跳跃的天数占比
+jump_degree_centrality.py|JUMP_DEGREE_CENTRALITY|NOT_FEASIBLE|network_data|基于跳跃频率关联构建网络后的点度中心性，衡量股票在跳跃传染网络中的核心程度
+jump_linkage_relative_momentum.py|JUMP_LINKAGE_RELATIVE_MOMENTUM|NOT_FEASIBLE|supply_chain|基于股价跳跃关联度加权关联股票收益率，捕捉领先-滞后联动效应
+jump_non_positive_momentum.py|JUMP_NON_POSITIVE_MOMENTUM|PARTIAL|minute_precomputed (non-positive jump momentum)|以跳跃关联度加权关联股票的负跳跃和非跳跃收益残差之和
+k_line_pattern.py|K_LINE_PATTERN|PARTIAL|needs pre-computed K-line pattern win rates|基于2K形态胜率的时间衰退加权得分，度量K线形态表现
+katz_centrality.py|KATZ_CENTRALITY|NOT_FEASIBLE|network_data, supply_chain|供应链网络中的Katz中心性，衡量节点在供应链中的综合重要性
+lag_abs_ret_adj_amount_corr.py|LAG_ABS_RET_ADJ_AMOUNT_CORR|PARTIAL|minute_precomputed|滞后一期绝对收益率与标准化成交额的相关性，捕捉量价异动
+large_buy_ratio.py|LARGE_BUY_RATIO|NOT_FEASIBLE|active_buy_sell|大单买入占比：大单买入成交额占总成交额的比例，取T日滚动均值
+large_jump_asymmetry.py|LARGE_JUMP_ASYMMETRY|PARTIAL|minute_precomputed (large jump asymmetry)|大的上行跳跃波动率与大的下行跳跃波动率之差
+large_order_dpin.py|LARGE_ORDER_DPIN|NOT_FEASIBLE|needs large order intraday data|大单下的动态知情交易概率，筛选大单区间的知情交易占比
+large_order_return.py|LARGE_ORDER_RETURN|PARTIAL|minute_precomputed|大单推动涨幅因子，衡量大单交易推动的累计收益
+large_vol_price_corr.py|LARGE_VOL_PRICE_CORR|PARTIAL|minute_precomputed|大成交量时段的价量相关性，大单成交更能代表主力行为
+lcps.py|LCPS|PARTIAL|minute_precomputed (small order sell deviation)|卖出反弹偏离小单因子：小单卖出成交价相对收盘价的偏离程度，取T日滚动均值
+lcvol.py|LCVOL|PARTIAL|minute_precomputed (post-sell rebound volume)|卖出后价格反弹时段的成交量占比，衡量卖压释放后的反弹力度
+leading_volume_anomaly_at_min.py|AMT_MIN|PARTIAL|minute_precomputed|个股收益最低分钟的前一分钟成交量占比之和与均值之比，衡量下跌时的成交量异动
+linkage.py|LINKAGE|NOT_FEASIBLE|supply_chain|基于业务相似度加权的关联公司超额收益，捕捉动量溢出效应
+liquidity_premium_ew.py|LIQUIDITY_PREMIUM_EW|PARTIAL|minute_precomputed|流动性溢价因子-等权：需求方定价与实际成交的相对差距，取T日等权滚动均值
+locked_chips_ratio.py|LOCKED_CHIPS_RATIO|NOT_FEASIBLE|chip_data|上方/下方锁定筹码占比因子，衡量涨跌停价格以外的筹码分布
+lone_goose.py|LONE_GOOSE|PARTIAL|minute_precomputed|孤雁出群因子，基于非分化时刻成交量相关性的均值与标准差等权组合
+loss_selling.py|LOSS_SELLING|PARTIAL|needs turnover-weighted loss history|换手率加权的历史亏损累积，衡量投资者亏损卖出的倾向
+lsv_herding.py|LSV_HERDING|NOT_FEASIBLE|needs fund holding data|LSV模型：|p_it - p_t| - E|p_it - p_t|，衡量基金抱团程度
+main_force_strength.py|MAIN_FORCE_STRENGTH|PARTIAL|minute_precomputed (tick-level rank correlation)|逐笔成交金额与分钟成交金额的秩相关系数滚动均值，衡量主力资金活跃度
+main_force_vol.py|MAIN_FORCE_VOL|PARTIAL|minute_precomputed (volume pattern based)|主力波动率因子，基于放量上涨/下跌等技术形态收益率的绝对值调整后波动率等权合成
+max_rise.py|MAX_RISE|PARTIAL|minute_precomputed|当天前百分之十涨幅推动的股票具体涨幅，捕捉彩票型股票特征
+mci.py|MCI|NOT_FEASIBLE|needs tick-level market impact cost|边际交易成本，衡量市价交易的单位金额冲击成本
+mid_price_change.py|MPC|NOT_FEASIBLE|needs mid-price (bid/ask) data|中间价变化率的T日滚动均值，衡量中间价的平均变动幅度
+minute_amount_variance.py|VMA|PARTIAL|minute_precomputed|分钟成交额方差，刻画日内分钟成交额的离散程度
+minute_ideal_amplitude.py|MINUTE_IDEAL_AMPLITUDE|PARTIAL|minute_precomputed|高价分钟振幅均值与低价分钟振幅均值之差，衡量不同价格区间的波动差异
+mlqs.py|MLQS|NOT_FEASIBLE|needs multi-level order book data|多层订单簿对数报价斜率，衡量订单簿深度方向上的价格梯度
+modified_business_linkage.py|MODIFIED_BUSINESS_LINKAGE|NOT_FEASIBLE|supply_chain|修正的相似业务收益联动因子，基于业务相似度加权的关联公司收益
+mofi.py|MOFI|NOT_FEASIBLE|needs 5-level order book data|五档订单失衡的加权平均，权重为档位序号/5，取T日滚动均值
+morning_inflow_stability.py|MORNING_INFLOW_STABILITY|PARTIAL|minute_precomputed|早盘主动净流入率的均值与标准差之比，衡量资金流入的稳定性
+morning_mist.py|MORNING_MIST|PARTIAL|minute_precomputed|滞后成交量差分回归t值的标准差，捕捉量价关系的不稳定性
+mpb.py|MPB|NOT_FEASIBLE|needs mid-price and order book data|平均交易价格与平均委托挂单价格的差值，衡量买卖压力方向
+mrr.py|MRR|NOT_FEASIBLE|needs investor forum mention data|基于投资者交流的关联动量：投资者论坛中被提及最多的5只关联股票收益等权均值，取T日滚动均值
+mte.py|MTE|PARTIAL|minute_precomputed|主力委托金额与价格的秩相关系数，衡量主力资金的交易情绪方向
+multi_layer_snr.py|MULTI_LAYER_SNR|PARTIAL|minute_precomputed|多层加权日内信噪比：以日内波动率为权重对不同层级信噪比加权合成
+naive_active_ratio.py|NAIVE_ACTIVE_RATIO|PARTIAL|minute_precomputed|基于 t 分布 CDF 估计的主动买入金额占比，衡量买方驱动力量
+negative_reversal_freq.py|NEGATIVE_REVERSAL_FREQ|FEASIBLE|daily_OHLCV (ret_co, ret_oc computable from OHLC)|反向日内逆转的频率：隔夜收益为负且日内收益也为负的交易日占比，取T日滚动均值
+net_commission_buy.py|NET_COMMISSION_BUY|NOT_FEASIBLE|bid_ask_data|净委买变化率：委买变化与委卖变化之差占流通股本的滚动均值
+net_support_volume.py|NET_SUPPORT_VOLUME|PARTIAL|minute_precomputed (support volume analysis)|净支撑成交量因子，衡量支撑价格不破位的力量强度
+network_centrality.py|NETWORK_CENTRALITY|NOT_FEASIBLE|network_data|空间网络中心度与时间网络中心度的等权组合，衡量股票在网络中的综合核心程度
+news_network_lead_return.py|NEWS_NETWORK_LEAD_RETURN|NOT_FEASIBLE|network_data|基于新闻共现网络的领先收益复合因子，综合同行业动量与跨行业反转效应
+night_frost.py|NIGHT_FROST|PARTIAL|minute_precomputed|夜眠霜路因子：日内收益率对滞后增量成交量回归截距t值的截面相关性均值
+nonlinear_hf_volatility.py|NONLINEAR_HF_VOLATILITY|PARTIAL|minute_precomputed|非线性化高频波动率与新特异率的乘积，改进特异波动率因子的头部区分能力
+noon_ancient_tree.py|NOON_ANCIENT_TREE|PARTIAL|minute_precomputed|截距项t值绝对值经F值修正后的因子，衡量噪声与信息对价格的影响
+normal_big_ret.py|NORMAL_BIG_RET|NOT_FEASIBLE|needs order-size classified price impact|剔除超大单后的普通大单对数价格变动之和，衡量普通大单推动的涨跌幅
+nrbr_ret.py|NRBR_RET|NOT_FEASIBLE|needs stock neighbor/similarity network|通过相邻股票收益率衡量自信溢出效应，捕捉投资者过度自信导致的动量溢出
+opening_buy_intention.py|OPENING_BUY_INTENTION|NOT_FEASIBLE|needs opening period buy intention data|开盘后买入意愿占比：买入意愿金额占总成交金额的比例，取T日滚动均值
+opening_commission_ratio.py|OPENING_COMMISSION_RATIO|NOT_FEASIBLE|bid_ask_data|开盘后30分钟净委买增额占成交额比例的滚动均值，衡量早盘资金流入强度
+opening_net_buy.py|OPENING_NET_BUY|NOT_FEASIBLE|active_buy_sell|开盘后净主买强度：开盘30分钟内主动买入与卖出之差的信噪比滚动均值
+order_imbalance.py|ORDER_IMBALANCE|NOT_FEASIBLE|needs order book volume changes|订单失衡：基于买卖盘挂单量变化的VOI指标，取T日滚动均值
+order_trade_correlation.py|ORDER_TRADE_CORRELATION|NOT_FEASIBLE|needs order book + trade data|高频收益与净委买变化率的相关系数，刻画买入意愿与股价走势的关系
+overnight_gap.py|OVERNIGHT_GAP|FEASIBLE|daily_OHLCV (open, prev_close)|隔夜对数收益率绝对值的滚动求和，衡量隔夜信息冲击强度
+overnight_ret_iv.py|OvernightRetIV|PARTIAL|cross_sectional PCA on overnight returns|特质隔夜收益波动率：基于PCA提取隐式因子后的残差标准差
+p_type_volume.py|P_TYPE_VOLUME|PARTIAL|minute_precomputed|P型成交量分布：VSA低点在日内价格区间中的相对位置，取T日滚动均值
+patv.py|PATV|PARTIAL|minute_precomputed|持续异常交易量因子，衡量日内异常交易量的持续性
+peak_climber.py|PEAK_CLIMBER|PARTIAL|minute_precomputed|异常高波动下收益波动比与更优波动率的协方差，衡量股价对异常高波动的风险补偿程度
+peak_interval_kurtosis.py|PEAK_INTERVAL_KURTOSIS|PARTIAL|minute_precomputed|量峰之间时间间隔分布的峰度，衡量知情交易者参与交易的时间间隔分布
+peak_price_quantile.py|PEAK_PRICE_QUANTILE|PARTIAL|minute_precomputed|量峰加权价格分位点因子，衡量知情交易价格的相对水平
+peak_ridge_corr.py|PEAK_RIDGE_CORR|PARTIAL|minute_precomputed|同时点峰岭数相关性：过去20日同一时点量峰数与量岭数序列的相关系数
+peak_ridge_ratio.py|PEAK_RIDGE_RATIO|PARTIAL|minute_precomputed|峰岭成交比因子，衡量波峰与波谷成交量的比值
+peak_vol_sell_amt.py|PEAK_VOL_SELL_AMT|NOT_FEASIBLE|needs sell-side per-trade amount at volume peaks|成交量最高时刻的主卖笔均成交金额，取T日滚动均值
+positive_intraday_reversal_freq.py|POSITIVE_INTRADAY_REVERSAL_FREQ|FEASIBLE|daily_OHLCV (ret_co=open/prev_close-1, ret_oc=close/open-1)|隔夜收益为负且日内收益为正的交易日占比，衡量正向日内逆转频率
+post_open_large_buy.py|POST_OPEN_LARGE_BUY|NOT_FEASIBLE|active_buy_sell|开盘后大单净买入强度：开盘后大单净买入金额占总成交金额的比例，取T日滚动均值
+post_open_net_buy.py|POST_OPEN_NET_BUY|NOT_FEASIBLE|active_buy_sell|开盘后一段时间内净主动买入金额占总成交金额的比例，衡量开盘阶段资金方向
+price_impact_bias.py|PRICE_IMPACT_BIAS|PARTIAL|minute_precomputed|上涨与下跌方向价格冲击系数的相对偏差，衡量股票涨跌难易程度
+price_resiliency.py|PRICE_RESILIENCY|PARTIAL|minute_precomputed|价格弹性因子，衡量单位成交额下股价的波动幅度及其近期变化趋势
+prospect_tk.py|PROSPECT_TK|NOT_FEASIBLE|needs PB (price-to-book) ratio data|基于前景理论对PB变化率计算TK值，衡量投资者对损益的非对称感知
+prsi.py|PRSI|PARTIAL|minute_precomputed|单位成交额的百分比实现价差：百分比实现价差除以成交额，取T日滚动均值
+ptr.py|PTR|NOT_FEASIBLE|chip_data|筹码穿透率：新增解套筹码比例除以换手率，取T日滚动均值
+pv_corr_trend.py|PV_CORR_TREND|PARTIAL|minute_precomputed|价量相关性趋势因子，对日度价量相关系数序列回归取斜率
+pvol_ret_corr.py|PVOL_RET_CORR|PARTIAL|minute_precomputed|每笔成交量与收益率的相关性：日度相关性的T日滚动均值
+qua.py|QUA|NOT_FEASIBLE|needs per-trade amount distribution|单笔成交金额分位数：衡量成交金额分布左尾厚度的滚动均值
+realized_bipower_variation.py|RBV|PARTIAL|minute_precomputed (bipower variation)|已实现双幂次变差，估计积分波动率中的连续分量，对跳跃具有鲁棒性
+realized_jump_volatility.py|REALIZED_JUMP_VOLATILITY|PARTIAL|minute_precomputed (jump volatility)|已实现跳跃波动率，刻画股价波动率中跳跃部分的波动水平
+realized_kurtosis.py|REALIZED_KURTOSIS|PARTIAL|minute_precomputed (realized kurtosis)|高频已实现峰度因子，基于日内收益率的四阶矩衡量尾部风险
+realized_skewness.py|REALIZED_SKEWNESS|PARTIAL|minute_precomputed (realized skewness)|高频已实现偏度的滚动均值，衡量日内收益率分布的不对称性
+residual_flow_strength.py|RESIDUAL_FLOW_STRENGTH|PARTIAL|minute_precomputed (net flow after regression)|剥离涨跌幅影响后的资金流强度，衡量同等涨跌幅下资金流的选股能力
+residual_reversal.py|residual_reversal|PARTIAL|cross_sectional (return vs flow regression)|残差反转因子：对20日收益率关于资金流强度做截面回归，取残差
+resiliency.py|RESILIENCY|PARTIAL|minute_precomputed|高频弹性因子：通过频谱分析衡量暂时价格恢复到基本价格的速度
+retail_herd.py|RETAIL_HERD|NOT_FEASIBLE|needs retail investor flow data|收益率与次日小单净流入的秩相关系数，衡量散户跟风行为
+retail_panic.py|RETAIL_PANIC|NOT_FEASIBLE|needs retail investor data|惊恐度×收益率×个人投资者交易比的均值与标准差等权合成
+retail_trade_heat.py|TURN_RETAIL|NOT_FEASIBLE|needs retail investor flow data|个人投资者交易热度：散户资金流入流出占自由流通市值的滚动均值
+reversal_residual_imbalance.py|REVERSAL_RESIDUAL_IMBALANCE|PARTIAL|minute_precomputed|反转残差非孤立成交不平衡因子：剔除孤立成交后的买卖不平衡与反转残差的乘积，取T日滚动均值
+ridge_gap_skew.py|RIDGE_GAP_SKEW|PARTIAL|minute_precomputed|量岭间隔偏度因子，衡量日内量岭之间时间间隔分布的偏度
+rsj.py|RSJ|PARTIAL|minute_precomputed (RV asymmetry)|上下行波动率不对称性，(RV_up - RV_down) / RV
+rtv.py|RTV|PARTIAL|minute_precomputed (tripower variation)|基于日内收益率绝对值三阶乘积的已实现三幂次变差，对跳跃具有稳健性
+rvjn.py|RVJN|PARTIAL|minute_precomputed (negative jump vol)|下行跳跃波动率，捕捉负向跳跃对已实现波动率的贡献
+rvljp.py|RVLJP|PARTIAL|minute_precomputed (large positive jump vol)|大的上行跳跃波动率，捕捉显著正向跳跃对已实现波动率的贡献
+salience_return.py|SALIENCE_RETURN|PARTIAL|minute_precomputed|凸显性权重与收益率的协方差，捕捉投资者对极端收益的过度关注
+satd_price_vol_corr.py|SATD_PRICE_VOL_CORR|NOT_FEASIBLE|needs per-trade amount data|量价背离时刻笔均成交金额与全天笔均成交金额之比，衡量主力资金在量价背离时的交易强度
+satd_volume_high.py|SATD_VolumeHigh|NOT_FEASIBLE|needs per-trade amount at volume peaks|成交量最高时刻笔均成交金额：成交量最高10%时刻的笔均成交金额除以全天笔均成交金额，取T日滚动均值
+scc.py|SCC|NOT_FEASIBLE|network_data|基于收益率相关性的空间网络中心度，衡量股票在网络中的核心程度
+search_ratio_downstream.py|SEARCH_RATIO_DOWNSTREAM|NOT_FEASIBLE|needs search index data + supply chain|基于搜索关联度加权的下游公司收益率，捕捉动量溢出效应
+sell_illiquidity.py|SELL_ILLIQUIDITY|PARTIAL|minute_precomputed (sell-side amount regression)|卖单非流动性：收益率对卖出金额回归的系数，衡量卖方冲击成本
+sentiment_spillover.py|RNBR_TOV|PARTIAL|cross_sectional (neighbor turnover regression)|相邻股票换手率对自身换手率回归的残差，衡量情绪溢出效应
+shadow_close_std.py|SHADOW_CLOSE_STD|FEASIBLE|daily_OHLCV (shadow_ratio computable from OHLC)|每日K线上下影线总长度与收盘价之比的标准差，衡量多空博弈稳定性
+sideways_buy_atd.py|SIDEWAYS_BUY_ATD|NOT_FEASIBLE|needs active buy classification during sideways|横盘时刻主买笔均成交金额：横盘时刻主买笔均成交金额与全天笔均成交金额之比
+similar_low_vol.py|SIMILAR_LOW_VOL|FEASIBLE|daily (close, excess_returns)|相似低波因子，基于历史相似走势后续超额收益波动率的倒数
+similar_reverse.py|SIMILAR_REVERSE|FEASIBLE|daily (close, excess_return)|相似反转因子，基于历史相似走势后的累计超额收益加权均值取反
+similarity_momentum.py|SIM_MOMENTUM|NOT_FEASIBLE|needs multi-dimensional company characteristics|基于公司特征欧氏距离选取最相似股票，市值加权超额收益均值
+single_amount_entropy.py|SINGLE_AMOUNT_ENTROPY|NOT_FEASIBLE|needs per-trade amount data|单一成交额占比熵：以各时段成交额占比为概率计算信息熵，衡量成交集中度
+siphon_effect.py|SIPHON_EFFECT|PARTIAL|minute_precomputed|虹吸回流综合效应与虹吸效应之差的均值与标准差等权合成，衡量资金虹吸与回流
+skewed_momentum_return.py|SKEWED_MOMENTUM_RETURN|PARTIAL|minute_precomputed|偏锋涨跌幅，动量时刻偏离度加总的滚动标准差，衡量日内过度反应程度
+slsv_herding.py|SLSV_HERDING|NOT_FEASIBLE|needs fund holding data|带符号的LSV羊群效应模型，区分买入从众与卖出从众
+small_buy_active.py|SMALL_BUY_ACTIVE|NOT_FEASIBLE|active_buy_sell|小买单主动成交度因子，衡量小买单中主动成交的占比
+small_downward_jump_vol.py|SMALL_DOWNWARD_JUMP_VOL|PARTIAL|minute_precomputed (small downward jump vol)|小的下行跳跃波动率，捕捉非信息冲击导致的小幅负向跳跃波动
+small_order_lag_corr.py|SMALL_ORDER_LAG_CORR|NOT_FEASIBLE|needs small order flow data|小单净流入与其滞后一期的Spearman秩相关系数滚动值
+smart_money.py|SMART_MONEY|PARTIAL|minute_precomputed (smart money VWAP)|聪明钱 VWAP 与全市场 VWAP 之比，跟踪机构交易行为
+smm.py|SMM|NOT_FEASIBLE|supply_chain|最大供应商过去一段时间的收益率动量，捕捉供应链上游的动量溢出效应
+snr_enhanced_reversal.py|SNR_ENHANCED_REVERSAL|PARTIAL|minute_precomputed|以信噪比归一化权重乘以反转因子，增强高信号股票的反转信号
+soir.py|SOIR|NOT_FEASIBLE|needs multi-level order book data|逐档订单失衡率因子，加权衡量盘口各档买卖委托量的不均衡程度
+srvj.py|SRVJ|PARTIAL|minute_precomputed (jump vol asymmetry)|上下行跳跃波动不对称性：上行跳跃波动减去下行跳跃波动
+structured_reversal.py|STRUCTURED_REVERSAL|PARTIAL|minute_precomputed (volume threshold segmentation)|结构化反转因子：以成交量阈值区分动量/反转时段，分别加权后合成
+super_big_ret.py|SUPER_BIG_RET|NOT_FEASIBLE|needs super-large order price impact|超大单涨跌幅，衡量超大单成交推动的价格变动幅度
+super_large_buy.py|SUPER_LARGE_BUY|NOT_FEASIBLE|needs super-large order classification|超大单买入占比：超大单买入金额占超大单总成交金额的比例，取T日滚动均值
+supplier_concentration.py|SUPPLIER_CONCENTRATION|NOT_FEASIBLE|supply_chain|供应商行业集中度：基于采购权重与行业赫芬达尔指数的加权求和
+supply_centrality_change.py|SUPPLY_CENTRALITY_CHANGE|NOT_FEASIBLE|network_data|当期标准化供应商接近中心性减去上期值，衡量客户公司核心地位的变化程度
+supply_chain_degree.py|SUPPLY_CHAIN_DEGREE|NOT_FEASIBLE|supply_chain|供应链节点度因子，衡量公司供应链关系的复杂程度
+supply_chain_position.py|SUPPLY_CHAIN_POSITION|NOT_FEASIBLE|supply_chain|产业链关联权重之和，衡量公司在供应链网络中的地位优势
+t_dist_active_buy.py|T_DIST_ACTIVE_BUY|NOT_FEASIBLE|active_buy_sell|基于收益率 t 分布拟合的主动买入占比，区分知情与噪声交易
+tcc.py|TCC|NOT_FEASIBLE|network_data|时间网络相对中心度，基于个股收益率偏离市场均值的标准化程度衡量网络中心性
+tidal_price_velocity.py|TIDAL_PRICE_VELOCITY|PARTIAL|minute_precomputed|成交量潮汐过程中的价格变动速率，衡量投资者出售或购买意愿的强烈程度
+time_centroid.py|TIME_CENTROID|PARTIAL|minute_precomputed|时间重心偏离因子，通过截面回归分离上涨与下跌时间重心的关系
+time_weighted_rpp.py|TIME_WEIGHTED_RPP|PARTIAL|minute_precomputed|股票在价格相对高位停留的时间长短，TWAP相对区间最高最低价的分数
+tl_ratio.py|TLRatio|NOT_FEASIBLE|chip_data|当日新增筹码亏损额占账面总亏损额的比例，衡量短期筹码亏损压力
+toxic_liquidity.py|TOXIC_LIQUIDITY|NOT_FEASIBLE|needs 5s/30s cancel rate data|毒流动性因子，衡量5秒撤单与30秒撤单的比值
+trend_capital_net_support.py|TREND_CAPITAL_NET_SUPPORT|PARTIAL|minute_precomputed|趋势资金支撑成交量与阻力成交量之差除以流通股本，衡量趋势资金的净支撑力度
+trend_capital_vwap.py|TREND_CAPITAL_VWAP|PARTIAL|minute_precomputed|趋势资金VWAP与全量VWAP的比值减1，取T日滚动均值
+trend_clarity.py|TREND_CLARITY|FEASIBLE|daily_OHLCV (close)|趋势清晰度：价格对时间回归的R²，衡量价格趋势的线性程度
+trend_clarity_momentum.py|TREND_CLARITY_MOMENTUM|FEASIBLE|daily_OHLCV|动量与趋势清晰度标准化后差值的负绝对值，衡量动量与趋势的匹配程度
+trend_ratio.py|TREND_RATIO|PARTIAL|minute_precomputed|日内价格位移与路程之比，衡量日内股价的趋势强度
+tsrjv.py|TSRJV|PARTIAL|minute_precomputed (truncated signed jump vol)|跳跃显著程度加权的上下行跳跃波动不对称性，提升SRVJ因子表现
+turnover_iv.py|TURNOVER_IV|PARTIAL|cross_sectional PCA on turnover|特质换手波动率：通过PCA剥离换手率共同成分后，残差的滚动标准差
+uniform_active_ratio.py|UNIFORM_ACTIVE_RATIO|PARTIAL|minute_precomputed|基于均匀分布映射的主动买入金额占比，提高主买卖额估计准确度
+upside_realized_vol.py|RS_PLUS|PARTIAL|minute_precomputed (intraday upside RV)|上行已实现波动率：正收益率平方和，取T日滚动均值
+upside_vol_ratio.py|UPSIDE_VOL_RATIO|PARTIAL|minute_precomputed (up/total vol ratio)|上行波动占总波动的比例滚动均值，衡量波动的方向性特征
+upstream_momentum.py|UpstreamMomentum|NOT_FEASIBLE|supply_chain|下游传导动量，基于供应链关联权重计算上游公司的下游加权收益
+upstream_transmission.py|UPSTREAM_TRANSMISSION|NOT_FEASIBLE|supply_chain|上游传导动量，从下游公司视角计算上游公司收益率的加权平均
+utd.py|UTD|NOT_FEASIBLE|chip_data|换手率分布均匀度，衡量日内换手率波动在时间序列上的稳定性
+v_shaped_disposition.py|VNSP|PARTIAL|needs pre-computed gain/loss measures|V型处置效应因子：VNSP = Gain + sigma * |Loss|，衡量投资者V型处置效应的强度
+valley_ridge_ratio.py|VALLEY_RIDGE_RATIO|PARTIAL|minute_precomputed|谷岭加权价格比因子，衡量波谷与波峰成交量加权价格的比值
+valley_weighted_price_quantile.py|VALLEY_WEIGHTED_PRICE_QUANTILE|PARTIAL|minute_precomputed|量谷成交量加权价格的相对分位点，衡量交易低迷时点的价格水平
+vcde.py|VCDE|NOT_FEASIBLE|chip_data|基于筹码分布的V型处置效应，同时刻画盈利和亏损下投资者的卖出意愿
+vcvar.py|VCVaR|PARTIAL|minute_precomputed|日内条件在险价值：基于成交量加权收益率的CVaR，取T日EMA
+vol_panic.py|VOL_PANIC|PARTIAL|minute_precomputed|波动率加剧-惊恐因子，结合惊恐度与日内波动率加权调整收益率
+volume_coeff_variation.py|VOLUME_COEFF_VARIATION|PARTIAL|minute_precomputed|成交额序列的标准差与均值之比，衡量市场信息不对称性
+volume_entropy.py|VOLUME_ENTROPY|PARTIAL|minute_precomputed|成交量分桶熵的滚动标准差：衡量成交量分布不确定性的波动
+volume_kurtosis.py|VOLUME_KURTOSIS|PARTIAL|minute_precomputed|分钟成交量占比的峰度滚动均值，衡量日内成交分布的尖峰程度
+volume_long_big_select.py|VOLUME_LONG_BIG_SELECT|NOT_FEASIBLE|needs order-size and duration classification|基于大小单和成交时长的精选复合交易占比，衡量知情交易者的交易行为
+volume_peak_count.py|VOLUME_PEAK_COUNT|PARTIAL|minute_precomputed|成交量波峰计数，统计日内放量现象的次数，衡量趋势或知情交易者参与度
+volume_peak_minutes.py|VOLUME_PEAK_MINUTES|PARTIAL|minute_precomputed|量峰分钟数，统计孤立喷发成交量的分钟数量，衡量知情交易者参与频率
+volume_proportion_composite.py|OBCVP|NOT_FEASIBLE|needs auction volume data|开盘与收盘集合竞价成交量占比的加权复合因子
+volume_ratio.py|VR|PARTIAL|minute_precomputed|成交量比值，上午与下午开盘前 30 分钟成交量比值的指数加权移动平均
+volume_ridge_relative_vwap.py|VOLUME_RIDGE_RELATIVE_VWAP|PARTIAL|minute_precomputed|量岭的成交量加权价格相对于总VWAP的比值，衡量个人投资者交易的价格水平
+volume_ridge_return.py|VOLUME_RIDGE_RETURN|PARTIAL|minute_precomputed|量岭分钟收益，连续喷发成交量时点的累计收益滚动均值
+volume_surge_vol.py|VOLUME_SURGE_VOL|PARTIAL|minute_precomputed|量涌波动率因子，基于量涌分段收益率标准差的滚动标准差
+volume_valley_price.py|VOLUME_VALLEY_PRICE|PARTIAL|minute_precomputed|量谷时段成交量加权价格相对于全天VWAP的比值，衡量低成交量时段的价格水平
+vpin.py|VPIN|NOT_FEASIBLE|needs volume-bucketed trade data|交易量同步的知情交易概率，衡量等交易量时间段内的交易量不平衡性
+vsa_close_diff.py|VSA_CLOSE_DIFF|PARTIAL|minute_precomputed|成交量支撑区域下限与收盘价的差异，差异越大反弹概率越高
+vwpin.py|VWPIN|NOT_FEASIBLE|needs volume-weighted trade direction data|基于物理时间交易量加权的知情交易概率，衡量知情交易者的活跃程度
+weighted_close_ratio.py|WEIGHTED_CLOSE_RATIO|PARTIAL|minute_precomputed|成交量加权收盘价与简单均价之比的滚动均值，捕捉量价关系
+weighted_liquidity_premium.py|WEIGHTED_LIQUIDITY_PREMIUM|PARTIAL|minute_precomputed|成交额加权的流动性溢价因子，衡量需求方定价与实际成交的相对差距
+weighted_lower_shadow_freq.py|WEIGHTED_LOWER_SHADOW_FREQ|FEASIBLE|daily_OHLCV (open, close, low, prev_close)|过去一段时间下影线长度大于阈值的天数加权之和，衡量下影线出现频率
+weighted_profit_freq.py|WEIGHTED_PROFIT_FREQ|FEASIBLE|daily (excess_return computable from daily returns)|衰退指数加权的超额收益超过阈值的天数占比，衡量投资者关注度与投机性需求
+weighted_skewness.py|WEIGHTED_SKEWNESS|PARTIAL|minute_precomputed|成交量加权偏度，刻画日内收益分布的非对称性
+weighted_upper_shadow_freq.py|WEIGHTED_UPPER_SHADOW_FREQ|FEASIBLE|daily_OHLCV (high, open, close, prev_close)|加权上影线频率，衡量过去一段时间上影线长度大于阈值的天数加权之和
+
+=== SUMMARY ===
+Total: 296
+  FEASIBLE: 24
+  NOT_FEASIBLE: 115
+  PARTIAL: 157
+
+=== FEASIBLE (24) ===
+  abnormal_negative_reversal.py: AB_NR | daily_OHLCV (ret_co, ret_oc computable from OHLC) | 反向日内逆转的异常频率，当月频率相对过去 12 个月均值的比值
+  abnormal_positive_reversal.py: AB_PR | daily_OHLCV (ret_co, ret_oc computable from OHLC) | 正向日内逆转的异常频率，即正向逆转频率减去其长期均值，衡量近期逆转行为的异常程度
+  abnormal_return_avg.py: ABNRETAVG | daily_OHLCV (daily_return, market_return) | 平均异常日收益率的平方均值，衡量异常收益引发的投资者注意力
+  abnormal_volume_daily.py: ABNVOLD | daily_OHLCV (volume) | 每日最大异常成交量，日频成交量除以过去一年平均成交量的滚动最大值
+  abnretd.py: ABNRETD | daily_OHLCV (stock_returns, market_returns) | 月内日频收益率与市场收益率绝对差值的最大值，衡量投资者关注度
+  attention_abnormal_return.py: ATTENTION_ABNORMAL_RETURN | daily_OHLCV (abnormal return based attention) | 基于异常收益的注意力捕捉，衡量异常收益吸引投资者注意力的程度
+  attention_events.py: ATTENTION_EVENTS | daily_OHLCV (limit up/down count) | 每月涨停、跌停事件次数之和，衡量股票受关注程度
+  corrected_amplitude.py: CORRECTED_AMPLITUDE | daily_OHLCV (close, high, low + overnight gap) | 修正的振幅因子，根据跳空方向修正日内振幅后取滚动均值
+  corrected_intraday_reversal.py: CORRECTED_INTRADAY_REVERSAL | daily_OHLCV (close, open + intraday vol) | 根据日内波动率修正的日内反转因子，低波动时翻转日内收益方向
+  csad_small.py: CSAD_SMALL | daily_OHLCV | CSAD小型板块因子：构建10只股票的微型板块，计算截面绝对偏差并标准化，取负T日均值
+  cssd.py: CSSD | daily_OHLCV | 截面收益标准差因子，基于CSSD模型检测羊群效应并计算个股贡献度
+  daily_return_attention.py: DAILY_RETURN_ATTENTION | daily (return-based attention measure) | 当前自然年因子值减去历史因子值，基于收益率偏差的注意力度量
+  ideal_amplitude.py: IDEAL_AMPLITUDE | daily_OHLCV (close, high, low) | 高价日与低价日振幅之差，衡量价格水平对波动率的非对称影响
+  negative_reversal_freq.py: NEGATIVE_REVERSAL_FREQ | daily_OHLCV (ret_co, ret_oc computable from OHLC) | 反向日内逆转的频率：隔夜收益为负且日内收益也为负的交易日占比，取T日滚动均值
+  overnight_gap.py: OVERNIGHT_GAP | daily_OHLCV (open, prev_close) | 隔夜对数收益率绝对值的滚动求和，衡量隔夜信息冲击强度
+  positive_intraday_reversal_freq.py: POSITIVE_INTRADAY_REVERSAL_FREQ | daily_OHLCV (ret_co=open/prev_close-1, ret_oc=close/open-1) | 隔夜收益为负且日内收益为正的交易日占比，衡量正向日内逆转频率
+  shadow_close_std.py: SHADOW_CLOSE_STD | daily_OHLCV (shadow_ratio computable from OHLC) | 每日K线上下影线总长度与收盘价之比的标准差，衡量多空博弈稳定性
+  similar_low_vol.py: SIMILAR_LOW_VOL | daily (close, excess_returns) | 相似低波因子，基于历史相似走势后续超额收益波动率的倒数
+  similar_reverse.py: SIMILAR_REVERSE | daily (close, excess_return) | 相似反转因子，基于历史相似走势后的累计超额收益加权均值取反
+  trend_clarity.py: TREND_CLARITY | daily_OHLCV (close) | 趋势清晰度：价格对时间回归的R²，衡量价格趋势的线性程度
+  trend_clarity_momentum.py: TREND_CLARITY_MOMENTUM | daily_OHLCV | 动量与趋势清晰度标准化后差值的负绝对值，衡量动量与趋势的匹配程度
+  weighted_lower_shadow_freq.py: WEIGHTED_LOWER_SHADOW_FREQ | daily_OHLCV (open, close, low, prev_close) | 过去一段时间下影线长度大于阈值的天数加权之和，衡量下影线出现频率
+  weighted_profit_freq.py: WEIGHTED_PROFIT_FREQ | daily (excess_return computable from daily returns) | 衰退指数加权的超额收益超过阈值的天数占比，衡量投资者关注度与投机性需求
+  weighted_upper_shadow_freq.py: WEIGHTED_UPPER_SHADOW_FREQ | daily_OHLCV (high, open, close, prev_close) | 加权上影线频率，衡量过去一段时间上影线长度大于阈值的天数加权之和
+
+=== PARTIAL (157) ===
+  abs_ret_amount_corr.py: CORA | minute_precomputed | corr(|Ret|, Amount)，衡量单位成交额对股价推动的关系，与未来收益负相关
+  acma.py: ACMA | minute_precomputed | 日内分钟成交额序列的自相关系数，衡量成交额的持续性与羊群效应
+  amount_entropy.py: AMOUNT_ENTROPY | minute_precomputed | 成交额占比熵的滚动均值：衡量成交额在时间段内的分布均匀程度
+  amt_max.py: AMT_MAX | minute_precomputed | 个股收益最高时的领先成交量异动：收益率最高分钟的前一分钟成交量与日均成交量之比，取T日滚动均值
+  apm.py: APM | minute_precomputed | 上午与下午价格行为差异程度的统计量，剥离动量影响后的残差
+  atd_price_lowest.py: ATD_PRICE_LOWEST | minute_precomputed | 股价最低10%时刻的笔均成交金额与全天笔均成交金额之比
+  attention_capture_vol.py: ATTENTION_CAPTURE_VOL | cross_sectional (industry vol sensitivity) | 基于市场波动率的注意力捕捉：个股收益对行业截面波动率的敏感程度
+  attention_limit.py: ATTENTION_LIMIT | cross_sectional (market limit ratio regression) | 基于涨跌停的注意力捕捉：个股收益率对市场涨跌停比例回归的绝对beta值
+  attention_market_volume.py: ATTENTION_MARKET_VOLUME | cross_sectional (market volume sensitivity) | 个股收益对市场总成交额的敏感程度绝对值，衡量注意力捕捉效应
+  avg_outflow_per_trade_ratio.py: AVG_OUTFLOW_PER_TRADE_RATIO | minute_precomputed | 下跌分钟的笔均成交金额与全天笔均成交金额之比的均值
+  avg_positive_jump_return.py: AVG_POSITIVE_JUMP_RETURN | minute_precomputed (avg positive jump) | 日内正向跳跃收益的均值的T日滚动均值，衡量正向跳跃的平均幅度
+  b_type_volume_dist.py: B_TYPE_VOLUME_DIST | minute_precomputed | 成交量支撑区域上限与日内最低价的差异，识别b型成交量分布形态
+  buy_illiquidity.py: BUY_ILLIQUIDITY | minute_precomputed (buy-side amount regression) | 买单金额对收益率的回归系数，衡量买方冲击成本
+  buy_order_concentration.py: BUY_ORDER_CONCENTRATION | minute_precomputed (buy order concentration) | 买单成交额平方和与总成交额平方的比值，衡量买单成交的集中程度
+  capital_loss_realization.py: CPLR | needs realized loss ratio from trades | 已实现亏损比率，衡量投资者实际卖出亏损股票的倾向程度
+  cgo.py: CGO | needs turnover-weighted historical cost basis | 资本利得突出量，衡量投资者未实现盈亏相对于当前价格的比例
+  closing_return.py: CLOSING_RETURN | minute_precomputed | 尾盘半小时收益率的滚动累计值，捕捉尾盘交易的动量或反转效应
+  closing_volume_ratio.py: CLOSING_VOLUME_RATIO | minute_precomputed | 尾盘成交占比：尾盘30分钟成交量占全天成交量的比例，取T日滚动均值
+  co_min.py: CO_MIN | minute_precomputed | 个股收益最低时的价变共振：个股最差分钟对应的市场均值除以市场标准差，取T日滚动均值
+  composite_pv_corr.py: CPV | minute_precomputed | 综合价量相关性均值、波动、趋势，剔除反转因子后的复合因子
+  confidence_normal_active_buy.py: CONFIDENCE_NORMAL_ACTIVE_BUY | minute_precomputed (CDF-estimated active buy) | 基于正态分布CDF估计主动买入金额占比，提高主买卖额估计准确度
+  consistent_buy_trade.py: CONSISTENT_BUY_TRADE | approximable from daily OHLCV (up-body volume ratio) | 一致买入交易因子，衡量上涨实体K线成交量占比，捕捉集体一致交易行为
+  consistent_sell_trade.py: CONSISTENT_SELL_TRADE | approximable from daily OHLCV (down-body volume ratio) | 下跌实体K线成交量占比的移动平均，捕捉集体一致卖出行为
+  consistent_trading_volume.py: TCV | minute_precomputed | 一致交易量占比的T日滚动均值，衡量买卖方向一致的成交量占总成交量的比例
+  cora_abs.py: CORA_A | minute_precomputed | 日内绝对收益率与滞后一期成交额的相关性，捕捉量在价先的异常交易行为
+  cora_r.py: CORA_R | minute_precomputed | 日内滞后一期绝对收益率与成交额的相关性，捕捉价在量先的异常交易行为
+  corrected_net_inflow.py: CNIR | minute_precomputed | 通过回归剥离涨跌幅影响后的主力资金净流入占比
+  corrected_overnight_reversal.py: CORRECTED_OVERNIGHT_REVERSAL | minute_precomputed | 根据隔夜距离波动率修正的隔夜反转因子，低波动时翻转隔夜距离方向
+  csad.py: CSAD | cross_sectional (CSAD herding model) | 横截面绝对偏差模型的二次项系数，衡量市场羊群效应强度
+  dazzling_return.py: DAZZLING_RETURN | minute_precomputed | 成交量激增时刻的分钟收益率均值，衡量量增引起的价格变动幅度
+  dazzling_vol.py: DAZZLING_VOL | minute_precomputed | 耀眼波动率：日度耀眼波动率的T日滚动均值与标准差的等权平均
+  downside_rv.py: DOWNSIDE_RV | minute_precomputed (intraday downside RV) | 下行已实现波动率，衡量资产价格的下行波动风险
+  drop_moment_atd.py: DROP_MOMENT_ATD | minute_precomputed | 下跌时刻笔均成交金额与全天笔均成交金额之比，刻画主力资金抄底行为
+  drop_time_centroid.py: DROP_TIME_CENTROID | minute_precomputed | 跌幅时间重心偏离因子，基于涨跌时间重心的截面回归残差
+  early_late_composite_ratio.py: EARLY_LATE_COMPOSITE_RATIO | minute_precomputed | 非早尾盘双边成交量与早盘双边成交量之差占总成交量的比例
+  end_of_day_amount.py: END_OF_DAY_AMOUNT | minute_precomputed | 尾盘成交额占全天成交额的比例，N日均值
+  extreme_follow_ratio.py: EXTREME_FOLLOW_RATIO | minute_precomputed | 极端涨跌时跟随交易量与反向交易量的比值，衡量投资者跟风程度
+  extreme_return_reversal.py: EXTREME_RETURN_REVERSAL | minute_precomputed | 日内最极端收益bar及其前一分钟收益的截面排序等权合成，捕捉极端收益反转效应
+  flow_following.py: FLOW_FOLLOWING | minute_precomputed | 个股高低位成交额差异与其他股票的平均绝对Spearman相关性
+  fog_amount_ratio.py: FOG_AMOUNT_RATIO | minute_precomputed | 模糊金额比：起雾时刻成交额均值与总体成交额均值之比
+  fog_volume_ratio.py: FOG_VOLUME_RATIO | minute_precomputed | 起雾时刻成交量均值与总体成交量均值之比，衡量投资者对模糊性的厌恶程度
+  follow_leader.py: FOLLOW_LEADER | minute_precomputed | 待著而救因子：日跟随系数的均值与标准差等权合成，衡量跟随效应强度
+  fuzzy_corr.py: FUZZY_CORR | minute_precomputed | 分钟模糊性序列与成交额序列的相关系数，衡量投资者对模糊性的厌恶程度
+  gain_selling_tendency.py: GAIN_SELLING_TENDENCY | needs turnover-weighted gain history | 换手率加权的历史盈利累积，衡量投资者盈利卖出的倾向
+  golden_ratio_reversal.py: GOLDEN_RATIO_REVERSAL | minute_precomputed | 日内黄金分割反转，基于10:00价格到收盘价的对数收益率滚动求和
+  hcvol.py: HCVOL | minute_precomputed (above-close volume ratio) | 高于收盘价买入的成交量占比，衡量投资者买入情绪与惜售心理
+  hf_downside_vol_ratio.py: HF_DOWNSIDE_VOL_RATIO | minute_precomputed | 负收益平方和占总收益平方和的比例，衡量下行波动特征
+  hf_idio_vol.py: HF_IDIO_VOL | minute_precomputed | 高频波动率与增强特异率的乘积开方，捕捉个股异常波动信息
+  high_low_price_composite.py: HIGH_LOW_PRICE_COMPOSITE_RATIO | minute_precomputed | 高低价复合交易占比：非高低价买卖成交量与高价买卖成交量之差占总成交量比
+  high_low_spread_intensity.py: HLI | minute_precomputed | 基于高低价估计的买卖价差除以成交额，衡量流动性强度
+  high_low_vol_select.py: HIGH_LOW_VOL_SELECT | minute_precomputed | 高低位放量选股因子：低位与高位波动率占比之差，衡量高低位波动率相对强弱
+  id_mag.py: ID_MAG | cross_sectional (return magnitude dispersion) | 基于收益规模的信息离散度因子，考虑日度收益规模对信息离散度的影响
+  ideal_reversal.py: IDEAL_REVERSAL | minute_precomputed | 基于日内成交金额分布高分位值区分大单交易日，计算大单日与小单日涨跌幅之差
+  idio_turnover_vol.py: IDIO_TURNOVER_VOL | minute_precomputed | 特异质换手波动率：OLS回归剥离换手率风格因子后残差的标准差
+  illiq.py: illiq | minute_precomputed | 非流动性因子：基于日内K线捷径路径与成交额之比的滚动均值
+  improved_large_ratio.py: IMPROVED_LARGE_RATIO | minute_precomputed | 改进大单交易占比因子，综合考虑大单与非大单之间的交叉交易
+  industry_momentum.py: INDUSTRY_MOMENTUM | minute_precomputed | 行业内其他股票市值加权收益率，衡量行业动量溢出效应
+  intraday_amplitude_cut.py: INTRADAY_AMPLITUDE_CUT | minute_precomputed | 日内振幅切割因子，高价与低价分钟振幅之差的标准化合成
+  intraday_jump_drop.py: INTRADAY_JUMP_DROP | minute_precomputed | 基于单复利差的日内跳跌度，衡量股价跳跃性涨跌程度
+  intraday_max_drawdown.py: INTRADAY_MAX_DRAWDOWN | minute_precomputed | 日内价格从峰值到谷值的最大回撤幅度，衡量日内极端下行风险
+  intraday_ret_iv.py: INTRADAY_RET_IV | needs intraday returns for PCA, not just daily open/close | 特质日内收益波动率：PCA剥离日内收益率共同成分后残差的标准差
+  intraday_ret_vol_ratio.py: INTRADAY_RET_VOL_RATIO | minute_precomputed | 日内收益波动比，衡量收益率与波动率的比值，用于捕捉灾后重建效应
+  intraday_snr.py: INTRADAY_SNR | minute_precomputed | EMD分解后信号标准差与噪声标准差之比的对数，衡量价格信号质量
+  jump_absolute_return.py: JAR | minute_precomputed (cumulative jump return) | 累计跳跃绝对收益的T日滚动求和，衡量跳跃成分对总收益的累计贡献
+  jump_arrival.py: JUMP_ARRIVAL | minute_precomputed (jump frequency) | 跳跃强度：观察期内日内价格存在跳跃的天数占比
+  jump_non_positive_momentum.py: JUMP_NON_POSITIVE_MOMENTUM | minute_precomputed (non-positive jump momentum) | 以跳跃关联度加权关联股票的负跳跃和非跳跃收益残差之和
+  k_line_pattern.py: K_LINE_PATTERN | needs pre-computed K-line pattern win rates | 基于2K形态胜率的时间衰退加权得分，度量K线形态表现
+  lag_abs_ret_adj_amount_corr.py: LAG_ABS_RET_ADJ_AMOUNT_CORR | minute_precomputed | 滞后一期绝对收益率与标准化成交额的相关性，捕捉量价异动
+  large_jump_asymmetry.py: LARGE_JUMP_ASYMMETRY | minute_precomputed (large jump asymmetry) | 大的上行跳跃波动率与大的下行跳跃波动率之差
+  large_order_return.py: LARGE_ORDER_RETURN | minute_precomputed | 大单推动涨幅因子，衡量大单交易推动的累计收益
+  large_vol_price_corr.py: LARGE_VOL_PRICE_CORR | minute_precomputed | 大成交量时段的价量相关性，大单成交更能代表主力行为
+  lcps.py: LCPS | minute_precomputed (small order sell deviation) | 卖出反弹偏离小单因子：小单卖出成交价相对收盘价的偏离程度，取T日滚动均值
+  lcvol.py: LCVOL | minute_precomputed (post-sell rebound volume) | 卖出后价格反弹时段的成交量占比，衡量卖压释放后的反弹力度
+  leading_volume_anomaly_at_min.py: AMT_MIN | minute_precomputed | 个股收益最低分钟的前一分钟成交量占比之和与均值之比，衡量下跌时的成交量异动
+  liquidity_premium_ew.py: LIQUIDITY_PREMIUM_EW | minute_precomputed | 流动性溢价因子-等权：需求方定价与实际成交的相对差距，取T日等权滚动均值
+  lone_goose.py: LONE_GOOSE | minute_precomputed | 孤雁出群因子，基于非分化时刻成交量相关性的均值与标准差等权组合
+  loss_selling.py: LOSS_SELLING | needs turnover-weighted loss history | 换手率加权的历史亏损累积，衡量投资者亏损卖出的倾向
+  main_force_strength.py: MAIN_FORCE_STRENGTH | minute_precomputed (tick-level rank correlation) | 逐笔成交金额与分钟成交金额的秩相关系数滚动均值，衡量主力资金活跃度
+  main_force_vol.py: MAIN_FORCE_VOL | minute_precomputed (volume pattern based) | 主力波动率因子，基于放量上涨/下跌等技术形态收益率的绝对值调整后波动率等权合成
+  max_rise.py: MAX_RISE | minute_precomputed | 当天前百分之十涨幅推动的股票具体涨幅，捕捉彩票型股票特征
+  minute_amount_variance.py: VMA | minute_precomputed | 分钟成交额方差，刻画日内分钟成交额的离散程度
+  minute_ideal_amplitude.py: MINUTE_IDEAL_AMPLITUDE | minute_precomputed | 高价分钟振幅均值与低价分钟振幅均值之差，衡量不同价格区间的波动差异
+  morning_inflow_stability.py: MORNING_INFLOW_STABILITY | minute_precomputed | 早盘主动净流入率的均值与标准差之比，衡量资金流入的稳定性
+  morning_mist.py: MORNING_MIST | minute_precomputed | 滞后成交量差分回归t值的标准差，捕捉量价关系的不稳定性
+  mte.py: MTE | minute_precomputed | 主力委托金额与价格的秩相关系数，衡量主力资金的交易情绪方向
+  multi_layer_snr.py: MULTI_LAYER_SNR | minute_precomputed | 多层加权日内信噪比：以日内波动率为权重对不同层级信噪比加权合成
+  naive_active_ratio.py: NAIVE_ACTIVE_RATIO | minute_precomputed | 基于 t 分布 CDF 估计的主动买入金额占比，衡量买方驱动力量
+  net_support_volume.py: NET_SUPPORT_VOLUME | minute_precomputed (support volume analysis) | 净支撑成交量因子，衡量支撑价格不破位的力量强度
+  night_frost.py: NIGHT_FROST | minute_precomputed | 夜眠霜路因子：日内收益率对滞后增量成交量回归截距t值的截面相关性均值
+  nonlinear_hf_volatility.py: NONLINEAR_HF_VOLATILITY | minute_precomputed | 非线性化高频波动率与新特异率的乘积，改进特异波动率因子的头部区分能力
+  noon_ancient_tree.py: NOON_ANCIENT_TREE | minute_precomputed | 截距项t值绝对值经F值修正后的因子，衡量噪声与信息对价格的影响
+  overnight_ret_iv.py: OvernightRetIV | cross_sectional PCA on overnight returns | 特质隔夜收益波动率：基于PCA提取隐式因子后的残差标准差
+  p_type_volume.py: P_TYPE_VOLUME | minute_precomputed | P型成交量分布：VSA低点在日内价格区间中的相对位置，取T日滚动均值
+  patv.py: PATV | minute_precomputed | 持续异常交易量因子，衡量日内异常交易量的持续性
+  peak_climber.py: PEAK_CLIMBER | minute_precomputed | 异常高波动下收益波动比与更优波动率的协方差，衡量股价对异常高波动的风险补偿程度
+  peak_interval_kurtosis.py: PEAK_INTERVAL_KURTOSIS | minute_precomputed | 量峰之间时间间隔分布的峰度，衡量知情交易者参与交易的时间间隔分布
+  peak_price_quantile.py: PEAK_PRICE_QUANTILE | minute_precomputed | 量峰加权价格分位点因子，衡量知情交易价格的相对水平
+  peak_ridge_corr.py: PEAK_RIDGE_CORR | minute_precomputed | 同时点峰岭数相关性：过去20日同一时点量峰数与量岭数序列的相关系数
+  peak_ridge_ratio.py: PEAK_RIDGE_RATIO | minute_precomputed | 峰岭成交比因子，衡量波峰与波谷成交量的比值
+  price_impact_bias.py: PRICE_IMPACT_BIAS | minute_precomputed | 上涨与下跌方向价格冲击系数的相对偏差，衡量股票涨跌难易程度
+  price_resiliency.py: PRICE_RESILIENCY | minute_precomputed | 价格弹性因子，衡量单位成交额下股价的波动幅度及其近期变化趋势
+  prsi.py: PRSI | minute_precomputed | 单位成交额的百分比实现价差：百分比实现价差除以成交额，取T日滚动均值
+  pv_corr_trend.py: PV_CORR_TREND | minute_precomputed | 价量相关性趋势因子，对日度价量相关系数序列回归取斜率
+  pvol_ret_corr.py: PVOL_RET_CORR | minute_precomputed | 每笔成交量与收益率的相关性：日度相关性的T日滚动均值
+  realized_bipower_variation.py: RBV | minute_precomputed (bipower variation) | 已实现双幂次变差，估计积分波动率中的连续分量，对跳跃具有鲁棒性
+  realized_jump_volatility.py: REALIZED_JUMP_VOLATILITY | minute_precomputed (jump volatility) | 已实现跳跃波动率，刻画股价波动率中跳跃部分的波动水平
+  realized_kurtosis.py: REALIZED_KURTOSIS | minute_precomputed (realized kurtosis) | 高频已实现峰度因子，基于日内收益率的四阶矩衡量尾部风险
+  realized_skewness.py: REALIZED_SKEWNESS | minute_precomputed (realized skewness) | 高频已实现偏度的滚动均值，衡量日内收益率分布的不对称性
+  residual_flow_strength.py: RESIDUAL_FLOW_STRENGTH | minute_precomputed (net flow after regression) | 剥离涨跌幅影响后的资金流强度，衡量同等涨跌幅下资金流的选股能力
+  residual_reversal.py: residual_reversal | cross_sectional (return vs flow regression) | 残差反转因子：对20日收益率关于资金流强度做截面回归，取残差
+  resiliency.py: RESILIENCY | minute_precomputed | 高频弹性因子：通过频谱分析衡量暂时价格恢复到基本价格的速度
+  reversal_residual_imbalance.py: REVERSAL_RESIDUAL_IMBALANCE | minute_precomputed | 反转残差非孤立成交不平衡因子：剔除孤立成交后的买卖不平衡与反转残差的乘积，取T日滚动均值
+  ridge_gap_skew.py: RIDGE_GAP_SKEW | minute_precomputed | 量岭间隔偏度因子，衡量日内量岭之间时间间隔分布的偏度
+  rsj.py: RSJ | minute_precomputed (RV asymmetry) | 上下行波动率不对称性，(RV_up - RV_down) / RV
+  rtv.py: RTV | minute_precomputed (tripower variation) | 基于日内收益率绝对值三阶乘积的已实现三幂次变差，对跳跃具有稳健性
+  rvjn.py: RVJN | minute_precomputed (negative jump vol) | 下行跳跃波动率，捕捉负向跳跃对已实现波动率的贡献
+  rvljp.py: RVLJP | minute_precomputed (large positive jump vol) | 大的上行跳跃波动率，捕捉显著正向跳跃对已实现波动率的贡献
+  salience_return.py: SALIENCE_RETURN | minute_precomputed | 凸显性权重与收益率的协方差，捕捉投资者对极端收益的过度关注
+  sell_illiquidity.py: SELL_ILLIQUIDITY | minute_precomputed (sell-side amount regression) | 卖单非流动性：收益率对卖出金额回归的系数，衡量卖方冲击成本
+  sentiment_spillover.py: RNBR_TOV | cross_sectional (neighbor turnover regression) | 相邻股票换手率对自身换手率回归的残差，衡量情绪溢出效应
+  siphon_effect.py: SIPHON_EFFECT | minute_precomputed | 虹吸回流综合效应与虹吸效应之差的均值与标准差等权合成，衡量资金虹吸与回流
+  skewed_momentum_return.py: SKEWED_MOMENTUM_RETURN | minute_precomputed | 偏锋涨跌幅，动量时刻偏离度加总的滚动标准差，衡量日内过度反应程度
+  small_downward_jump_vol.py: SMALL_DOWNWARD_JUMP_VOL | minute_precomputed (small downward jump vol) | 小的下行跳跃波动率，捕捉非信息冲击导致的小幅负向跳跃波动
+  smart_money.py: SMART_MONEY | minute_precomputed (smart money VWAP) | 聪明钱 VWAP 与全市场 VWAP 之比，跟踪机构交易行为
+  snr_enhanced_reversal.py: SNR_ENHANCED_REVERSAL | minute_precomputed | 以信噪比归一化权重乘以反转因子，增强高信号股票的反转信号
+  srvj.py: SRVJ | minute_precomputed (jump vol asymmetry) | 上下行跳跃波动不对称性：上行跳跃波动减去下行跳跃波动
+  structured_reversal.py: STRUCTURED_REVERSAL | minute_precomputed (volume threshold segmentation) | 结构化反转因子：以成交量阈值区分动量/反转时段，分别加权后合成
+  tidal_price_velocity.py: TIDAL_PRICE_VELOCITY | minute_precomputed | 成交量潮汐过程中的价格变动速率，衡量投资者出售或购买意愿的强烈程度
+  time_centroid.py: TIME_CENTROID | minute_precomputed | 时间重心偏离因子，通过截面回归分离上涨与下跌时间重心的关系
+  time_weighted_rpp.py: TIME_WEIGHTED_RPP | minute_precomputed | 股票在价格相对高位停留的时间长短，TWAP相对区间最高最低价的分数
+  trend_capital_net_support.py: TREND_CAPITAL_NET_SUPPORT | minute_precomputed | 趋势资金支撑成交量与阻力成交量之差除以流通股本，衡量趋势资金的净支撑力度
+  trend_capital_vwap.py: TREND_CAPITAL_VWAP | minute_precomputed | 趋势资金VWAP与全量VWAP的比值减1，取T日滚动均值
+  trend_ratio.py: TREND_RATIO | minute_precomputed | 日内价格位移与路程之比，衡量日内股价的趋势强度
+  tsrjv.py: TSRJV | minute_precomputed (truncated signed jump vol) | 跳跃显著程度加权的上下行跳跃波动不对称性，提升SRVJ因子表现
+  turnover_iv.py: TURNOVER_IV | cross_sectional PCA on turnover | 特质换手波动率：通过PCA剥离换手率共同成分后，残差的滚动标准差
+  uniform_active_ratio.py: UNIFORM_ACTIVE_RATIO | minute_precomputed | 基于均匀分布映射的主动买入金额占比，提高主买卖额估计准确度
+  upside_realized_vol.py: RS_PLUS | minute_precomputed (intraday upside RV) | 上行已实现波动率：正收益率平方和，取T日滚动均值
+  upside_vol_ratio.py: UPSIDE_VOL_RATIO | minute_precomputed (up/total vol ratio) | 上行波动占总波动的比例滚动均值，衡量波动的方向性特征
+  v_shaped_disposition.py: VNSP | needs pre-computed gain/loss measures | V型处置效应因子：VNSP = Gain + sigma * |Loss|，衡量投资者V型处置效应的强度
+  valley_ridge_ratio.py: VALLEY_RIDGE_RATIO | minute_precomputed | 谷岭加权价格比因子，衡量波谷与波峰成交量加权价格的比值
+  valley_weighted_price_quantile.py: VALLEY_WEIGHTED_PRICE_QUANTILE | minute_precomputed | 量谷成交量加权价格的相对分位点，衡量交易低迷时点的价格水平
+  vcvar.py: VCVaR | minute_precomputed | 日内条件在险价值：基于成交量加权收益率的CVaR，取T日EMA
+  vol_panic.py: VOL_PANIC | minute_precomputed | 波动率加剧-惊恐因子，结合惊恐度与日内波动率加权调整收益率
+  volume_coeff_variation.py: VOLUME_COEFF_VARIATION | minute_precomputed | 成交额序列的标准差与均值之比，衡量市场信息不对称性
+  volume_entropy.py: VOLUME_ENTROPY | minute_precomputed | 成交量分桶熵的滚动标准差：衡量成交量分布不确定性的波动
+  volume_kurtosis.py: VOLUME_KURTOSIS | minute_precomputed | 分钟成交量占比的峰度滚动均值，衡量日内成交分布的尖峰程度
+  volume_peak_count.py: VOLUME_PEAK_COUNT | minute_precomputed | 成交量波峰计数，统计日内放量现象的次数，衡量趋势或知情交易者参与度
+  volume_peak_minutes.py: VOLUME_PEAK_MINUTES | minute_precomputed | 量峰分钟数，统计孤立喷发成交量的分钟数量，衡量知情交易者参与频率
+  volume_ratio.py: VR | minute_precomputed | 成交量比值，上午与下午开盘前 30 分钟成交量比值的指数加权移动平均
+  volume_ridge_relative_vwap.py: VOLUME_RIDGE_RELATIVE_VWAP | minute_precomputed | 量岭的成交量加权价格相对于总VWAP的比值，衡量个人投资者交易的价格水平
+  volume_ridge_return.py: VOLUME_RIDGE_RETURN | minute_precomputed | 量岭分钟收益，连续喷发成交量时点的累计收益滚动均值
+  volume_surge_vol.py: VOLUME_SURGE_VOL | minute_precomputed | 量涌波动率因子，基于量涌分段收益率标准差的滚动标准差
+  volume_valley_price.py: VOLUME_VALLEY_PRICE | minute_precomputed | 量谷时段成交量加权价格相对于全天VWAP的比值，衡量低成交量时段的价格水平
+  vsa_close_diff.py: VSA_CLOSE_DIFF | minute_precomputed | 成交量支撑区域下限与收盘价的差异，差异越大反弹概率越高
+  weighted_close_ratio.py: WEIGHTED_CLOSE_RATIO | minute_precomputed | 成交量加权收盘价与简单均价之比的滚动均值，捕捉量价关系
+  weighted_liquidity_premium.py: WEIGHTED_LIQUIDITY_PREMIUM | minute_precomputed | 成交额加权的流动性溢价因子，衡量需求方定价与实际成交的相对差距
+  weighted_skewness.py: WEIGHTED_SKEWNESS | minute_precomputed | 成交量加权偏度，刻画日内收益分布的非对称性
+
+=== NOT_FEASIBLE (115) ===
+  active_buy_ratio.py: ACTIVE_BUY_RATIO | active_buy_sell | 主买占比，主动买入成交额占总成交额的 T 日滚动均值
+  active_buy_specificity.py: ACTIVE_BUY_SPECIFICITY | active_buy_sell | 修正主买时刻出现次数的截面标准化均值，衡量持续且特异性的主买资金流入
+  active_chip_ratio.py: ACTIVE_CHIP_RATIO | chip_data | 涨跌停价格区间内的筹码占比，衡量交易活跃程度
+  afh_close.py: afh_close | chip_data | 买入浮盈系数修正后的积极灵活筹码：Close_t * Σ(Vol_AFH_i/Price_i) / Σ(Volume_t)，T日滚动
+  analyst_anchoring_bias.py: CAF_EP | analyst_data | 基于 PE 的分析师锚效益偏差，衡量分析师预测相对行业中位数的偏离程度
+  analyst_co_coverage_indirect_momentum.py: ANALYST_CO_COVERAGE_INDIRECT_MOMENTUM | analyst_data | 通过分析师共同覆盖的间接关联强度加权关联股票收益率，捕捉隐蔽的领先滞后效应
+  ask_depth.py: ASK_DEPTH | bid_ask_data | 卖盘深度因子，基于卖盘挂单量与价差的比值衡量流动性深度
+  atd_price_lowest_sell.py: ATD_PRICE_LOWEST_SELL | needs tick-level sell classification at price lows | 股价最低10%时刻主卖笔均成交金额与全天笔均成交金额之比
+  attention_decay_panic.py: ATTENTION_DECAY_PANIC | news_sentiment | 注意力衰减-惊恐因子，对惊恐度做时间衰减后加权调整收益率的均值与波动等权合成
+  attention_spillover.py: SPILL | news_sentiment | 相近股票注意力均值与个股注意力之差，衡量注意力溢出程度
+  attention_turnover.py: ATTENTION_TURNOVER | news_sentiment | 个股收益对行业平均换手率的回归系数绝对值，衡量股票对市场关注的敏感程度
+  avg_order_book_depth.py: AVG_ORDER_BOOK_DEPTH | bid_ask_data | 买一量与卖一量的均值，反映市场整体挂单深度
+  bid_ask_price_ratio.py: PIR | bid_ask_data (bid/ask prices) | 买卖委托价格比率，从价格角度描述买盘压力
+  bid_ask_spread.py: BID_ASK_SPREAD | bid_ask_data | 卖一价与买一价的相对距离，衡量市场流动性宽度
+  bid_depth.py: BID_DEPTH | bid_ask_data | 买盘深度的指数移动平均，衡量买方流动性支撑强度
+  bottleneck_company.py: BOTTLENECK_COMPANY | network_data, supply_chain | 供应链网络中的中介中心性，衡量公司在网络中的桥梁地位
+  business_complexity_linkage.py: BIZ_COMPLEXITY_LINKAGE | supply_chain | 业务复杂度加权的相似公司超额收益联动，衡量动量溢出效应
+  cancel_rate.py: CANCEL_RATE | auction_data | 三小将-撤单率因子，基于集合竞价阶段卖方全撤、部撤和废单撤单率等权合成
+  chip_concentration.py: CHIP_CONCENTRATION | chip_data | 筹码集中度因子，衡量筹码分布的集中程度
+  chip_deviation_rate.py: CHIP_DEVIATION_RATE | chip_data | 动态加权的盈利筹码占比，刻画股价与筹码持仓成本间的偏离
+  chip_disposition_effect.py: CHIP_DISPOSITION_EFFECT | chip_data | 基于筹码分布的处置效应，衡量盈利筹码与亏损筹码的卖出倾向差异
+  chip_distribution_cv.py: CHIP_DISTRIBUTION_CV | chip_data | 筹码分布的变异系数（标准差/均值），衡量筹码分布的离散程度
+  chip_distribution_shape.py: CHIP_DISTRIBUTION_KURTOSIS | chip_data | 筹码分布的加权峰度，衡量筹码在平均值处峰值的高低程度
+  chip_pnl_adjusted_afh.py: CHIP_PNL_ADJUSTED_AFH | chip_data | 基于筹码盈亏系数修正积极灵活筹码，捕捉处置效应下的投资者行为
+  chip_return_enhance.py: CHIP_RETURN_ENHANCE | chip_data | 筹码收益调整因子多头端与反转因子空头端的合成，融合动量与反转效应
+  chip_turnover.py: CHIP_TURNOVER | chip_data | 筹码换手率：基于筹码分布的换手率，取T日滚动均值
+  ckdp.py: ckdp | chip_data | 筹码分布成本重心因子：(均价 - 最低筹码价) / (最高筹码价 - 最低筹码价)
+  complex_momentum.py: COMPLEX_MOMENTUM | needs business segment revenue data | 基于行业营收权重的加权行业收益率，捕捉复杂公司的动量溢出效应
+  corrected_ambiguity_spread.py: CORRECTED_AMBIGUITY_SPREAD | bid_ask_data | 修正模糊价差，对传统买卖价差进行模糊区间修正后取滚动均值
+  cpqsi.py: CPQSI | bid_ask_data | 收盘委托价差强度，衡量收盘前的交易成本与流动性
+  customer_centrality_change.py: CUSTOMER_CENTRALITY_CHANGE | network_data, supply_chain | 当期与上期标准化客户接近中心性之差，衡量供应商公司核心地位的变化
+  customer_closeness.py: CUSTOMER_CLOSENESS | supply_chain | 供应链网络中客户节点的接近中心性，衡量信息传播效率
+  customer_importance.py: CUSTOMER_IMPORTANCE | supply_chain | 利用 PageRank 算法计算客户重要性，考虑供应商本身的重要性
+  customer_industry_concentration.py: CUSTOMER_INDUSTRY_CONCENTRATION | supply_chain | 客户所属行业赫芬达尔指数的加权平均，反映客户行业竞争格局
+  customer_momentum.py: CMOM | supply_chain | 最大客户动量，股票最大客户的收益动量，捕捉供应链动量溢出效应
+  customer_momentum_id.py: CUSTOMER_MOMENTUM_ID | supply_chain | 基于供应链客户动量与信息离散度的改进因子，信息连续时动量效应更强
+  dpin.py: DPIN | needs intraday unexpected return direction | 基于日内非预期收益方向的知情交易占比，衡量信息不对称程度
+  dpin_small.py: DPIN_SMALL | needs small order intraday data | 小单条件下的动态知情交易概率，捕捉知情交易者拆单行为
+  drop_sell_atd.py: DROP_SELL_ATD | needs sell-side per-trade amount during drops | 跌幅最大时刻-主卖笔均成交金额因子，衡量下跌时主动卖出的集中度
+  effective_depth.py: EFFECTIVE_DEPTH | bid_ask_data | 买一量与卖一量的最小值，衡量市场实际有效深度
+  effective_spread.py: EFFECTIVE_SPREAD | bid_ask_data | 成交价相对于中间价的相对偏差，反映交易成本
+  els_correlation.py: ELSCorrelation | chip_data | 超大单与小单净流入的Spearman秩相关系数，衡量大小资金的同步性
+  foreign_ops.py: FOREIGN_OPS | needs overseas revenue breakdown | 海外运营信息：基于海外营收占比与对应国家行业收益率的加权求和，衡量海外动量溢出
+  gaming_factor.py: STREN | chip_data | 博弈因子，加权主买量与加权主卖量之比，衡量多空博弈的相对力量
+  geo_momentum.py: GEO_MOMENTUM | needs company geographic location data | 地理动量溢出效应：同地区其他公司市值加权收益率
+  herding_behavior.py: HERDING_BEHAVIOR | needs intraday buy/sell pressure data | 羊群行为因子，衡量日内买卖压力的羊群效应强度
+  improved_analyst_coverage_momentum.py: IMPROVED_ANALYST_COVERAGE_MOMENTUM | analyst_data | 以直接关联数量改进的间接关联强度加权关联股票收益率
+  improved_large_ratio_active.py: IMPROVED_LARGE_RATIO_ACTIVE | needs active buy/sell large order data | 引入主动买卖特征的改进大单交易占比，区分主动买入和主动卖出的大单
+  informed_buy_ratio.py: INFORMED_BUY_RATIO | active_buy_sell | 知情主买占比因子，基于知情交易者主动买入金额占总成交金额的比例
+  informed_sell_ratio.py: INFORMED_SELL_RATIO | active_buy_sell | 知情主卖占比因子，基于知情交易者主动卖出金额占总成交金额的比例
+  inst_trade_heat.py: INST_TRADE_HEAT | needs institutional flow data | 机构交易热度：机构资金流入流出占市值的滚动均值
+  jump_degree_centrality.py: JUMP_DEGREE_CENTRALITY | network_data | 基于跳跃频率关联构建网络后的点度中心性，衡量股票在跳跃传染网络中的核心程度
+  jump_linkage_relative_momentum.py: JUMP_LINKAGE_RELATIVE_MOMENTUM | supply_chain | 基于股价跳跃关联度加权关联股票收益率，捕捉领先-滞后联动效应
+  katz_centrality.py: KATZ_CENTRALITY | network_data, supply_chain | 供应链网络中的Katz中心性，衡量节点在供应链中的综合重要性
+  large_buy_ratio.py: LARGE_BUY_RATIO | active_buy_sell | 大单买入占比：大单买入成交额占总成交额的比例，取T日滚动均值
+  large_order_dpin.py: LARGE_ORDER_DPIN | needs large order intraday data | 大单下的动态知情交易概率，筛选大单区间的知情交易占比
+  linkage.py: LINKAGE | supply_chain | 基于业务相似度加权的关联公司超额收益，捕捉动量溢出效应
+  locked_chips_ratio.py: LOCKED_CHIPS_RATIO | chip_data | 上方/下方锁定筹码占比因子，衡量涨跌停价格以外的筹码分布
+  lsv_herding.py: LSV_HERDING | needs fund holding data | LSV模型：|p_it - p_t| - E|p_it - p_t|，衡量基金抱团程度
+  mci.py: MCI | needs tick-level market impact cost | 边际交易成本，衡量市价交易的单位金额冲击成本
+  mid_price_change.py: MPC | needs mid-price (bid/ask) data | 中间价变化率的T日滚动均值，衡量中间价的平均变动幅度
+  mlqs.py: MLQS | needs multi-level order book data | 多层订单簿对数报价斜率，衡量订单簿深度方向上的价格梯度
+  modified_business_linkage.py: MODIFIED_BUSINESS_LINKAGE | supply_chain | 修正的相似业务收益联动因子，基于业务相似度加权的关联公司收益
+  mofi.py: MOFI | needs 5-level order book data | 五档订单失衡的加权平均，权重为档位序号/5，取T日滚动均值
+  mpb.py: MPB | needs mid-price and order book data | 平均交易价格与平均委托挂单价格的差值，衡量买卖压力方向
+  mrr.py: MRR | needs investor forum mention data | 基于投资者交流的关联动量：投资者论坛中被提及最多的5只关联股票收益等权均值，取T日滚动均值
+  net_commission_buy.py: NET_COMMISSION_BUY | bid_ask_data | 净委买变化率：委买变化与委卖变化之差占流通股本的滚动均值
+  network_centrality.py: NETWORK_CENTRALITY | network_data | 空间网络中心度与时间网络中心度的等权组合，衡量股票在网络中的综合核心程度
+  news_network_lead_return.py: NEWS_NETWORK_LEAD_RETURN | network_data | 基于新闻共现网络的领先收益复合因子，综合同行业动量与跨行业反转效应
+  normal_big_ret.py: NORMAL_BIG_RET | needs order-size classified price impact | 剔除超大单后的普通大单对数价格变动之和，衡量普通大单推动的涨跌幅
+  nrbr_ret.py: NRBR_RET | needs stock neighbor/similarity network | 通过相邻股票收益率衡量自信溢出效应，捕捉投资者过度自信导致的动量溢出
+  opening_buy_intention.py: OPENING_BUY_INTENTION | needs opening period buy intention data | 开盘后买入意愿占比：买入意愿金额占总成交金额的比例，取T日滚动均值
+  opening_commission_ratio.py: OPENING_COMMISSION_RATIO | bid_ask_data | 开盘后30分钟净委买增额占成交额比例的滚动均值，衡量早盘资金流入强度
+  opening_net_buy.py: OPENING_NET_BUY | active_buy_sell | 开盘后净主买强度：开盘30分钟内主动买入与卖出之差的信噪比滚动均值
+  order_imbalance.py: ORDER_IMBALANCE | needs order book volume changes | 订单失衡：基于买卖盘挂单量变化的VOI指标，取T日滚动均值
+  order_trade_correlation.py: ORDER_TRADE_CORRELATION | needs order book + trade data | 高频收益与净委买变化率的相关系数，刻画买入意愿与股价走势的关系
+  peak_vol_sell_amt.py: PEAK_VOL_SELL_AMT | needs sell-side per-trade amount at volume peaks | 成交量最高时刻的主卖笔均成交金额，取T日滚动均值
+  post_open_large_buy.py: POST_OPEN_LARGE_BUY | active_buy_sell | 开盘后大单净买入强度：开盘后大单净买入金额占总成交金额的比例，取T日滚动均值
+  post_open_net_buy.py: POST_OPEN_NET_BUY | active_buy_sell | 开盘后一段时间内净主动买入金额占总成交金额的比例，衡量开盘阶段资金方向
+  prospect_tk.py: PROSPECT_TK | needs PB (price-to-book) ratio data | 基于前景理论对PB变化率计算TK值，衡量投资者对损益的非对称感知
+  ptr.py: PTR | chip_data | 筹码穿透率：新增解套筹码比例除以换手率，取T日滚动均值
+  qua.py: QUA | needs per-trade amount distribution | 单笔成交金额分位数：衡量成交金额分布左尾厚度的滚动均值
+  retail_herd.py: RETAIL_HERD | needs retail investor flow data | 收益率与次日小单净流入的秩相关系数，衡量散户跟风行为
+  retail_panic.py: RETAIL_PANIC | needs retail investor data | 惊恐度×收益率×个人投资者交易比的均值与标准差等权合成
+  retail_trade_heat.py: TURN_RETAIL | needs retail investor flow data | 个人投资者交易热度：散户资金流入流出占自由流通市值的滚动均值
+  satd_price_vol_corr.py: SATD_PRICE_VOL_CORR | needs per-trade amount data | 量价背离时刻笔均成交金额与全天笔均成交金额之比，衡量主力资金在量价背离时的交易强度
+  satd_volume_high.py: SATD_VolumeHigh | needs per-trade amount at volume peaks | 成交量最高时刻笔均成交金额：成交量最高10%时刻的笔均成交金额除以全天笔均成交金额，取T日滚动均值
+  scc.py: SCC | network_data | 基于收益率相关性的空间网络中心度，衡量股票在网络中的核心程度
+  search_ratio_downstream.py: SEARCH_RATIO_DOWNSTREAM | needs search index data + supply chain | 基于搜索关联度加权的下游公司收益率，捕捉动量溢出效应
+  sideways_buy_atd.py: SIDEWAYS_BUY_ATD | needs active buy classification during sideways | 横盘时刻主买笔均成交金额：横盘时刻主买笔均成交金额与全天笔均成交金额之比
+  similarity_momentum.py: SIM_MOMENTUM | needs multi-dimensional company characteristics | 基于公司特征欧氏距离选取最相似股票，市值加权超额收益均值
+  single_amount_entropy.py: SINGLE_AMOUNT_ENTROPY | needs per-trade amount data | 单一成交额占比熵：以各时段成交额占比为概率计算信息熵，衡量成交集中度
+  slsv_herding.py: SLSV_HERDING | needs fund holding data | 带符号的LSV羊群效应模型，区分买入从众与卖出从众
+  small_buy_active.py: SMALL_BUY_ACTIVE | active_buy_sell | 小买单主动成交度因子，衡量小买单中主动成交的占比
+  small_order_lag_corr.py: SMALL_ORDER_LAG_CORR | needs small order flow data | 小单净流入与其滞后一期的Spearman秩相关系数滚动值
+  smm.py: SMM | supply_chain | 最大供应商过去一段时间的收益率动量，捕捉供应链上游的动量溢出效应
+  soir.py: SOIR | needs multi-level order book data | 逐档订单失衡率因子，加权衡量盘口各档买卖委托量的不均衡程度
+  super_big_ret.py: SUPER_BIG_RET | needs super-large order price impact | 超大单涨跌幅，衡量超大单成交推动的价格变动幅度
+  super_large_buy.py: SUPER_LARGE_BUY | needs super-large order classification | 超大单买入占比：超大单买入金额占超大单总成交金额的比例，取T日滚动均值
+  supplier_concentration.py: SUPPLIER_CONCENTRATION | supply_chain | 供应商行业集中度：基于采购权重与行业赫芬达尔指数的加权求和
+  supply_centrality_change.py: SUPPLY_CENTRALITY_CHANGE | network_data | 当期标准化供应商接近中心性减去上期值，衡量客户公司核心地位的变化程度
+  supply_chain_degree.py: SUPPLY_CHAIN_DEGREE | supply_chain | 供应链节点度因子，衡量公司供应链关系的复杂程度
+  supply_chain_position.py: SUPPLY_CHAIN_POSITION | supply_chain | 产业链关联权重之和，衡量公司在供应链网络中的地位优势
+  t_dist_active_buy.py: T_DIST_ACTIVE_BUY | active_buy_sell | 基于收益率 t 分布拟合的主动买入占比，区分知情与噪声交易
+  tcc.py: TCC | network_data | 时间网络相对中心度，基于个股收益率偏离市场均值的标准化程度衡量网络中心性
+  tl_ratio.py: TLRatio | chip_data | 当日新增筹码亏损额占账面总亏损额的比例，衡量短期筹码亏损压力
+  toxic_liquidity.py: TOXIC_LIQUIDITY | needs 5s/30s cancel rate data | 毒流动性因子，衡量5秒撤单与30秒撤单的比值
+  upstream_momentum.py: UpstreamMomentum | supply_chain | 下游传导动量，基于供应链关联权重计算上游公司的下游加权收益
+  upstream_transmission.py: UPSTREAM_TRANSMISSION | supply_chain | 上游传导动量，从下游公司视角计算上游公司收益率的加权平均
+  utd.py: UTD | chip_data | 换手率分布均匀度，衡量日内换手率波动在时间序列上的稳定性
+  vcde.py: VCDE | chip_data | 基于筹码分布的V型处置效应，同时刻画盈利和亏损下投资者的卖出意愿
+  volume_long_big_select.py: VOLUME_LONG_BIG_SELECT | needs order-size and duration classification | 基于大小单和成交时长的精选复合交易占比，衡量知情交易者的交易行为
+  volume_proportion_composite.py: OBCVP | needs auction volume data | 开盘与收盘集合竞价成交量占比的加权复合因子
+  vpin.py: VPIN | needs volume-bucketed trade data | 交易量同步的知情交易概率，衡量等交易量时间段内的交易量不平衡性
+  vwpin.py: VWPIN | needs volume-weighted trade direction data | 基于物理时间交易量加权的知情交易概率，衡量知情交易者的活跃程度

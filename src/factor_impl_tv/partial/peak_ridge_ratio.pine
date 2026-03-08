@@ -1,0 +1,15 @@
+//@version=6
+// NOTE: 原始因子使用日内峰岭成交比，此处用日线成交量峰谷比近似。
+strategy("Peak Ridge Ratio (PEAK_RIDGE_RATIO)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+i_T = input.int(20, "Lookback", minval=5)
+i_mult = input.float(1.5, "Peak Multiplier", minval=1.0)
+peak_vol = volume > i_mult * ta.sma(volume, i_T) ? volume : 0.0
+ridge_vol = volume < (1.0/i_mult) * ta.sma(volume, i_T) ? volume : 0.0
+factor = ta.sma(peak_vol, i_T) / (ta.sma(ridge_vol, i_T) + 1)
+factor_rank = ta.percentrank(factor, 120) / 100.0
+if barstate.isconfirmed
+    if factor_rank > 0.8 and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank < 0.2 and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+plot(factor, "Factor", color=color.new(color.orange, 0), display=display.pane)

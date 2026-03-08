@@ -1,0 +1,26 @@
+//@version=6
+// NOTE: 原始因子使用均匀分布映射估计主动买入，此处用日线阳线成交量占比近似。
+strategy("UNIFORM_ACTIVE_RATIO - Active Buy Ratio", overlay=false,
+     fill_orders_on_standard_ohlc=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+lookback = input.int(20, "Lookback")
+rank_len = input.int(120, "Rank Length")
+long_thresh = input.float(0.8, "Long Threshold")
+short_thresh = input.float(0.2, "Short Threshold")
+
+active = close > open ? volume : 0.0
+factor = ta.sma(active, lookback) / ta.sma(volume, lookback)
+
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+if barstate.isconfirmed
+    if rank > long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank < short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+plot(factor, "Uniform Active Ratio", color.new(color.yellow, 0))
+plot(rank, "Rank", color.new(color.blue, 0))

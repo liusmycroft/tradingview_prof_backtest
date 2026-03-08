@@ -1,0 +1,36 @@
+//@version=6
+// NOTE: 原始因子使用隔夜收益率与波动率修正，此处使用日线开盘价与前收盘价近似隔夜收益。
+strategy("Corrected Overnight Reversal (CORRECTED_OVERNIGHT_REVERSAL)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "SMA Length", minval=5)
+vol_len = input.int(60, "Volatility Length", minval=10)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+overnight = open / close[1] - 1
+ov_vol = ta.stdev(overnight, vol_len)
+ov_sma = ta.sma(math.abs(overnight), length)
+corrected = ov_vol < ov_sma ? -overnight : overnight
+factor = ta.sma(corrected, length)
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "Corrected Overnight Reversal Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

@@ -1,0 +1,38 @@
+//@version=6
+// NOTE: 原始因子基于分钟级数据检测市场涨跌停事件并回归个股收益率，此处使用日线近似，用市场极端收益日作为代理变量。
+strategy("Attention Limit (ATTENTION_LIMIT)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+mkt_sym = input.symbol("SSE:000300", "Market Benchmark")
+corr_len = input.int(60, "Correlation Length", minval=10)
+vol_len = input.int(60, "Volatility Lookback", minval=10)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+mkt_close = request.security(mkt_sym, timeframe.period, close)
+mkt_ret = mkt_close / mkt_close[1] - 1
+mkt_std = ta.stdev(mkt_ret, vol_len)
+mkt_extreme = math.abs(mkt_ret) > 2 * mkt_std ? 1.0 : 0.0
+daily_ret = close / close[1] - 1
+factor = ta.correlation(math.abs(daily_ret), mkt_extreme, corr_len)
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "ATTENTION_LIMIT Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

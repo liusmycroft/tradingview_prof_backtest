@@ -1,0 +1,17 @@
+//@version=6
+// NOTE: 原始因子使用日内成交量加权收益率的CVaR，此处用日线近似。
+strategy("VCVaR (VCVaR)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100, fill_orders_on_standard_ohlc=true)
+i_T = input.int(20, "Lookback", minval=5)
+ret = close / close[1] - 1
+vol_weight = volume / ta.sma(volume, i_T)
+weighted_ret = ret * vol_weight
+threshold = ta.percentile_linear_interpolation(weighted_ret, 60, 5)
+tail_ret = weighted_ret < threshold ? weighted_ret : 0.0
+factor = ta.ema(tail_ret, i_T)
+factor_rank = ta.percentrank(factor, 120) / 100.0
+if barstate.isconfirmed
+    if factor_rank < 0.2 and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+    else if factor_rank > 0.8 and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+plot(factor, "Factor", color=color.new(color.orange, 0), display=display.pane)

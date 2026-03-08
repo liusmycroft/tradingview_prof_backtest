@@ -1,0 +1,37 @@
+//@version=6
+// NOTE: 原始因子使用分钟级数据计算放量时段的收益率波动，此处使用日线成交量突增时的收益率平方近似。
+strategy("Dazzling Volatility (DAZZLING_VOL)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "SMA Length", minval=5)
+surge_mult = input.float(2.0, "Volume Surge Multiplier", minval=1.0)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+ret = close / close[1] - 1
+vol_surge = volume > surge_mult * ta.sma(volume, length)
+surge_ret_sq = vol_surge ? math.pow(ret, 2) : 0.0
+dv_mean = ta.sma(surge_ret_sq, length)
+dv_std = ta.stdev(surge_ret_sq, length)
+factor = (dv_mean + dv_std) / 2
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "Dazzling Vol Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

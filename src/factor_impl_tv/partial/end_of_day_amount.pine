@@ -1,0 +1,32 @@
+//@version=6
+// NOTE: 原始因子使用尾盘成交额占比，此处使用收盘价在日内区间的位置加权成交量近似尾盘资金集中度。
+strategy("End of Day Amount (END_OF_DAY_AMOUNT)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "SMA Length", minval=5)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+close_pos = (close - low) / (high - low + 0.0001)
+factor = ta.sma(close_pos * volume, length) / ta.sma(volume, length)
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "End of Day Amount Factor", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

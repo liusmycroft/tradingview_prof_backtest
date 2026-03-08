@@ -1,0 +1,36 @@
+//@version=6
+// NOTE: 原始因子基于分钟级成交量分布计算信息熵，此处使用日线成交量的变异系数(CV)近似，低CV表示成交量集中（低熵）。
+strategy("Amount Entropy (AMOUNT_ENTROPY)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// Inputs
+length = input.int(20, "CV Length", minval=5)
+rank_len = input.int(120, "Percentile Rank Length", minval=20)
+long_thresh = input.float(0.2, "Long Threshold", step=0.05)
+short_thresh = input.float(0.8, "Short Threshold", step=0.05)
+
+// Calculations
+vol_std = ta.stdev(volume, length)
+vol_mean = ta.sma(volume, length)
+cv = vol_mean > 0 ? vol_std / vol_mean : 0.0
+// Low CV = concentrated volume (low entropy) → short
+// Invert so high factor → short (consistent with other factors)
+factor = -cv
+
+// Signal
+rank = ta.percentrank(factor, rank_len) / 100.0
+
+// Entry/Exit
+if barstate.isconfirmed
+    if rank < long_thresh
+        strategy.entry("Long", strategy.long)
+    else if rank > short_thresh
+        strategy.entry("Short", strategy.short)
+    else
+        strategy.close_all()
+
+// Visualization
+plot(factor, "Entropy Factor (neg CV)", color=color.new(color.orange, 0), display=display.pane)
+hline(0, "Zero", color=color.gray, display=display.pane)
+plot(rank, "Rank", color=color.new(color.blue, 0), display=display.pane)

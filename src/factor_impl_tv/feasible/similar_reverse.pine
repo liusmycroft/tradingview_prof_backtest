@@ -1,0 +1,48 @@
+//@version=6
+strategy("Similar Reverse (SIMILAR_REVERSE)", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     fill_orders_on_standard_ohlc=true)
+
+// NOTE: 原始因子通过历史相似走势匹配后计算超额收益加权均值取反，Pine Script中简化为短期累计超额收益取反
+
+// ============================================================================
+// Inputs
+// ============================================================================
+rw = input.int(6, "Recent Window", minval=2)
+market_ticker = input.symbol("INDEX:SPX", "Market Benchmark")
+rank_period = input.int(120, "Ranking Period", minval=20)
+signal_thresh_long = input.float(0.7, "Signal Threshold (Percentile Long)", minval=0.0, maxval=1.0)
+signal_thresh_short = input.float(0.7, "Signal Threshold (Percentile Short)", minval=0.0, maxval=1.0)
+
+// ============================================================================
+// Calculations
+// ============================================================================
+market_close = request.security(market_ticker, timeframe.period, close)
+market_return = market_close / market_close[1] - 1.0
+
+returns = close / close[1] - 1.0
+excess_ret = returns - market_return
+
+cum_excess = math.sum(excess_ret, rw)
+factor = -cum_excess
+
+// Rolling percentile approximation
+factor_rank = ta.percentrank(factor, rank_period) / 100.0
+
+// ============================================================================
+// Signal Logic
+// Signal: factor high -> long (reversal of recent underperformance)
+// ============================================================================
+if barstate.isconfirmed
+    if factor_rank > signal_thresh_long and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+    else if factor_rank < (1.0 - signal_thresh_short) and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+
+// ============================================================================
+// Visualization
+// ============================================================================
+plot(factor, "Similar Reverse", color=color.new(color.purple, 0), display=display.pane)
+plot(factor_rank, "Factor Rank", color=color.new(color.blue, 0), display=display.pane)
+hline(0.5, "Midline", color=color.gray, linestyle=hline.style_dotted, display=display.pane)
