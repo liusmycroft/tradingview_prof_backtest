@@ -152,7 +152,8 @@ async function loadList() {
             <td>${formatDate(bt.created_at)}</td>
             <td>
                 ${bt.status === 'running'
-                    ? `<button class="btn btn-sm btn-ghost" onclick="finishBacktest('${esc(bt.id)}')">结束</button>`
+                    ? `<button class="btn btn-sm btn-ghost" onclick="finishBacktest('${esc(bt.id)}')">结束</button>
+                       <a class="btn btn-sm btn-ghost" href="/backtest/${esc(bt.id)}/report/view">报告</a>`
                     : `<a class="btn btn-sm btn-ghost" href="/backtest/${esc(bt.id)}/report/view">报告</a>`}
                 <button class="btn btn-sm btn-danger" onclick="deleteBacktest('${esc(bt.id)}')">删除</button>
             </td>

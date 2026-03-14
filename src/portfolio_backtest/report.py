@@ -55,7 +55,8 @@ def _fallback_report(returns: pd.Series, title: str) -> str:
         return "<html><body><h1>No data available</h1></body></html>"
 
     total_return = ((1 + returns).prod() - 1) * 100
-    max_dd = ((1 + returns).cumprod().cummax() - (1 + returns).cumprod()).max()
+    cum = (1 + returns).cumprod()
+    max_dd = ((cum / cum.cummax()) - 1).min() * 100
 
     return f"""<!DOCTYPE html>
 <html>

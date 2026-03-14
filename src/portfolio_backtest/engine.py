@@ -26,6 +26,7 @@ class EngineConfig:
     commission_min: float = 0.0
     commission_per_share: float = 0.0
     short_enabled: bool = True
+    max_position_pct: float = 1.0  # 0..1, fraction of portfolio
 
 
 @dataclass
@@ -74,6 +75,19 @@ class Engine:
         action_enum = Action(action.lower())
         is_buy = action_enum in (Action.BUY, Action.COVER)
         actual_price = self._apply_slippage(price, is_buy)
+
+        # enforce max_position_pct for new buys / shorts
+        if action_enum in (Action.BUY, Action.SHORT) and self.config.max_position_pct < 1.0:
+            portfolio_value = self._portfolio_value()
+            max_notional = portfolio_value * self.config.max_position_pct
+            current_notional = abs(self.positions.get(ticker, Position(ticker=ticker)).quantity) * actual_price
+            allowed = max(0.0, max_notional - current_notional)
+            max_qty = allowed / actual_price if actual_price > 0 else 0.0
+            if quantity > max_qty:
+                quantity = max_qty
+            if quantity <= 0:
+                return
+
         commission = self._calc_commission(quantity, actual_price)
         pos = self.positions.get(ticker, Position(ticker=ticker))
 
@@ -262,6 +276,7 @@ def build_engine_from_db(backtest) -> Engine:
         commission_min=backtest.commission_min,
         commission_per_share=backtest.commission_per_share,
         short_enabled=backtest.short_enabled,
+        max_position_pct=backtest.max_position_pct,
     )
     engine = Engine(config)
 

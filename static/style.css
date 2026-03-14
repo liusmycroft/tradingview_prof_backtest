@@ -259,7 +259,7 @@ tr:hover td { background: var(--surface); }
     align-items: center;
 }
 
-.trade-time { color: var(--text-muted); width: 60px; }
+.trade-time { color: var(--text-muted); width: 160px; white-space: nowrap; }
 .trade-strategy { color: var(--text-muted); width: 100px; }
 .trade-action { font-weight: 600; width: 50px; }
 .trade-action.buy, .trade-action.cover { color: var(--success); }

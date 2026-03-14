@@ -73,7 +73,8 @@ async function loadDetail() {
             </div>
 
             ${bt.status === 'running' ? `
-                <div style="text-align:right">
+                <div style="text-align:right; display:flex; gap:8px; justify-content:flex-end;">
+                    <a class="btn btn-ghost" href="/backtest/${esc(bt.id)}/report/view">查看实时报告</a>
                     <button class="btn btn-primary" onclick="finishBacktest()">结束回测</button>
                 </div>
             ` : `
@@ -91,7 +92,7 @@ async function loadDetail() {
                 ${trades.length === 0 ? '<div class="empty">暂无订单</div>' :
                     trades.slice(0, 50).map(t => `
                         <div class="trade-item">
-                            <span class="trade-time">${esc(new Date(t.timestamp).toLocaleTimeString())}</span>
+                            <span class="trade-time">${esc(new Date(t.timestamp).toLocaleDateString() + ' ' + new Date(t.timestamp).toLocaleTimeString())}</span>
                             <span class="trade-strategy">${esc(t.strategy)}</span>
                             <span class="trade-action ${esc(t.action)}">${esc(t.action.toUpperCase())}</span>
                             <span>${esc(t.ticker)}</span>

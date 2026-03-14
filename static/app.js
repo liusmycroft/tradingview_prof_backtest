@@ -46,5 +46,5 @@ function getBacktestId() {
 }
 
 function webhookUrl(id) {
-    return `${window.location.origin}/webhook/${esc(id)}`;
+    return `${window.location.origin}/webhook/${encodeURIComponent(id)}`;
 }

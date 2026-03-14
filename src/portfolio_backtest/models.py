@@ -55,8 +55,8 @@ class Backtest(Base):
         DateTime, default=lambda: datetime.datetime.now(datetime.UTC)
     )
 
-    trades: Mapped[list["Trade"]] = relationship(back_populates="backtest")
-    bars: Mapped[list["Bar"]] = relationship(back_populates="backtest")
+    trades: Mapped[list["Trade"]] = relationship(back_populates="backtest", cascade="all, delete-orphan")
+    bars: Mapped[list["Bar"]] = relationship(back_populates="backtest", cascade="all, delete-orphan")
 
 
 class Trade(Base):
